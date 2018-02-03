@@ -10,6 +10,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.DynamicInsert;
 
@@ -44,6 +45,7 @@ public class Ejercicio extends BaseEntity implements Serializable {
     @ManyToMany(mappedBy = "listaEjercicio")
     private List<Concepto> listaConceptos;
 
+    
 	public Long getId() {
 		return id;
 	}
@@ -84,6 +86,7 @@ public class Ejercicio extends BaseEntity implements Serializable {
 		this.descuido = descuido;
 	}
 
+	@Transient
 	public List<Concepto> getListaConceptos() {
 		return listaConceptos;
 	}

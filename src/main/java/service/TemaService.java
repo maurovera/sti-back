@@ -1,9 +1,13 @@
 package service;
 
+import java.util.Date;
+
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
 
 import model.Tema;
+import utils.AppException;
 import base.BaseServiceImpl;
 import dao.TemaDAO;
 
@@ -18,4 +22,6 @@ public class TemaService extends BaseServiceImpl<Tema, TemaDAO>{
 		// TODO Auto-generated method stub
 		return dao;
 	}
+	
+	
 }

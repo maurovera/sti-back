@@ -16,22 +16,22 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
 import org.hibernate.annotations.DynamicInsert;
 
 import base.BaseEntity;
 
-
 @Entity
 @Table(name = "tema")
 @DynamicInsert
-public class Tema extends BaseEntity implements Serializable  {
-	
+public class Tema extends BaseEntity implements Serializable {
+
 	private static final long serialVersionUID = 1L;
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id_tema")
 	private Long id;
-	
+
 	@Column(name = "nombre")
 	private String nombre;
 
@@ -45,72 +45,56 @@ public class Tema extends BaseEntity implements Serializable  {
 	@ManyToOne
 	private Asignatura asignatura;
 
-	
 	@OneToMany(mappedBy = "tema", cascade = CascadeType.ALL)
 	private List<Concepto> listaConceptos = new ArrayList<Concepto>();
-
 
 	public Long getId() {
 		return id;
 	}
 
-
 	public void setId(Long id) {
 		this.id = id;
 	}
-
 
 	public String getNombre() {
 		return nombre;
 	}
 
-
 	public void setNombre(String nombre) {
 		this.nombre = nombre;
 	}
-
 
 	public String getDescripcion() {
 		return descripcion;
 	}
 
-
 	public void setDescripcion(String descripcion) {
 		this.descripcion = descripcion;
 	}
-
 
 	public Integer getPeso() {
 		return peso;
 	}
 
-
 	public void setPeso(Integer peso) {
 		this.peso = peso;
 	}
 
-
 	public Asignatura getAsignatura() {
-		return asignatura;
+		return null;
 	}
-
 
 	public void setAsignatura(Asignatura asignatura) {
 		this.asignatura = asignatura;
 	}
 
-
-	@Transient
+	@JsonIgnore
 	public List<Concepto> getListaConceptos() {
 		return listaConceptos;
 	}
 
-
 	public void setListaConceptos(List<Concepto> listaConceptos) {
 		this.listaConceptos = listaConceptos;
 	}
-
-	
-	
 
 }

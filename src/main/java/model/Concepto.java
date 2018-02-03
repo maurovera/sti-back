@@ -14,10 +14,10 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
 import org.hibernate.annotations.DynamicInsert;
 
 import base.BaseEntity;
-
 
 @Entity
 @Table(name = "concepto")
@@ -29,7 +29,7 @@ public class Concepto extends BaseEntity implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id_concepto")
 	private Long id;
-	
+
 	@Column(name = "nombre")
 	private String nombre;
 
@@ -87,6 +87,7 @@ public class Concepto extends BaseEntity implements Serializable {
 		this.tema = tema;
 	}
 
+	@JsonIgnore
 	public List<Ejercicio> getListaEjercicio() {
 		return listaEjercicio;
 	}
@@ -94,5 +95,5 @@ public class Concepto extends BaseEntity implements Serializable {
 	public void setListaEjercicio(List<Ejercicio> listaEjercicio) {
 		this.listaEjercicio = listaEjercicio;
 	}
-	
+
 }

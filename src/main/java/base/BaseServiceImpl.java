@@ -89,6 +89,7 @@ public abstract class BaseServiceImpl<G extends BaseEntity, D extends BaseDAO<G>
 	public G insertar(G entity, HttpServletRequest httpRequest)
 			throws AppException {
 		try {
+			System.out.println("implements de servicio tema");
 			// Usuario user = getCurrentUser();
 			entity.setFechaCreacion(new Date());
 			entity.setUsuarioCreacion(userId);

@@ -12,5 +12,7 @@ public class TemaDAO extends BaseDAO<Tema> {
 		// TODO Auto-generated method stub
 		return Tema.class;
 	}
+	
+	
 
 }

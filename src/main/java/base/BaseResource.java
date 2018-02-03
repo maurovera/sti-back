@@ -80,6 +80,7 @@ public abstract class BaseResource<G extends BaseEntity, S extends BaseService<G
 		// se parsea el json para consutrir el filtro
 		HashMap<String, Object> filtros = null;
 		if (json != null && json.trim().length() > 2) {
+			System.out.println("json: puto" + json);
 			try {
 				filtros = mapper.readValue(json,
 						new TypeReference<HashMap<String, Object>>() {
@@ -131,6 +132,7 @@ public abstract class BaseResource<G extends BaseEntity, S extends BaseService<G
 	@Produces(MediaType.APPLICATION_JSON)
 	public G insertar(G dto) {
 		try {
+			System.out.println("base resource de tema");
 			return getService().insertar(dto, httpRequest);
 		} catch (Exception e) {
 			throw new WebApplicationException(e.getMessage());

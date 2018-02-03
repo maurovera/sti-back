@@ -1,10 +1,14 @@
 package base;
 
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+
+import org.hibernate.Hibernate;
 
 import utils.AppException;
 
@@ -52,11 +56,19 @@ public abstract class BaseDAO<G extends BaseEntity> {
 		sb.append(" WHERE ");
 
 		for (String key : filtros.keySet()) {
+
+			/**
+			 * if (filtros.get(key) instanceof String){
+			 * System.out.println("soy string"); sb.append(key).append(
+			 * "= :").append(key); }
+			 **/
 			if (filtros.get(key) instanceof String) {
+				System.out.println("soy string");
 				sb.append(" LOWER(c.").append(key).append(") LIKE LOWER(:")
 						.append(key).append(")");
 			} else {
-				sb.append(key).append(" = :").append(key);
+				System.out.println("soy un interger estoy" + key);
+				sb.append(" c.").append(key).append(".id").append(" = :").append(key);
 			}
 			// se añade el 'AND' si hay más caracteres.
 			if (token < tokens) {
@@ -79,8 +91,19 @@ public abstract class BaseDAO<G extends BaseEntity> {
 			Object value = filtros.get(key);
 			if (filtros.get(key) instanceof String) {
 				value = "%" + value + "%";
+
+			} else {
+				// no agrego nada si es number . mauro cambio
+				System.out.println("entre aqui porque no string " + key + ": "
+						+ value);
+				// value = ((Long)value).longValue();
+				//value = Long.valueOf(value);
+				/** Ojo. : Siempre va a machear a long**/
+				value = Long.parseLong(value.toString());
+				
 			}
-			q.setParameter(key, value);
+			
+			q.setParameter(key,  value);
 		}
 	}
 
@@ -115,7 +138,9 @@ public abstract class BaseDAO<G extends BaseEntity> {
 		query.append("SELECT c FROM ").append(getEntity().getCanonicalName())
 				.append(" c");
 		buildWhere(query, filtros);
+		System.out.println("query puto :" + query.toString());
 		Query q = em.createQuery(query.toString());
+		System.out.println("query puto q:"+ q.toString());
 		setParametrers(q, filtros);
 		q.setFirstResult(inicio).setMaxResults(cantidad);
 		List<G> list = q.getResultList();
@@ -162,6 +187,7 @@ public abstract class BaseDAO<G extends BaseEntity> {
 	 * @throws AppException
 	 */
 	public void insert(G entity) throws AppException {
+		System.out.println("inserte de base dao tema");
 		em.persist(entity);
 	}
 
