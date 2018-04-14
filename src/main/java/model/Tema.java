@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javassist.expr.NewArray;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -18,6 +20,8 @@ import javax.persistence.Transient;
 
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.hibernate.annotations.DynamicInsert;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import base.BaseEntity;
 
@@ -47,6 +51,41 @@ public class Tema extends BaseEntity implements Serializable {
 
 	@OneToMany(mappedBy = "tema", cascade = CascadeType.ALL)
 	private List<Concepto> listaConceptos = new ArrayList<Concepto>();
+
+	
+	//agregado 9 de abril de 2018
+	@Transient
+	private Integer datoCalculado;
+	
+	// agregado 9 de abril de 2018
+	//@Transient 
+	//private List<String> listaCalculada = new ArrayList<String>();
+	
+	
+	/**Guarda el id de los conceptos
+	 **/
+	/*public List<String> getListaCalculada() {
+		
+		String cadena = null;
+		for ( Concepto c: this.listaConceptos) {
+			cadena = String.valueOf(c.getId());
+			this.listaCalculada.add(cadena);
+		}
+	
+		return listaCalculada;
+	}
+
+	public void setListaCalculada(List<String> listaCalculada) {
+		this.listaCalculada = listaCalculada;
+	}*/
+
+	public Integer getDatoCalculado() {
+		return this.peso*2;
+	}
+
+	public void setDatoCalculado(Integer datoCalculado) {
+		this.datoCalculado = datoCalculado;
+	}
 
 	public Long getId() {
 		return id;
@@ -80,6 +119,7 @@ public class Tema extends BaseEntity implements Serializable {
 		this.peso = peso;
 	}
 
+	@JsonIgnore
 	public Asignatura getAsignatura() {
 		return null;
 	}
@@ -92,7 +132,7 @@ public class Tema extends BaseEntity implements Serializable {
 	public List<Concepto> getListaConceptos() {
 		return listaConceptos;
 	}
-
+	@JsonProperty
 	public void setListaConceptos(List<Concepto> listaConceptos) {
 		this.listaConceptos = listaConceptos;
 	}

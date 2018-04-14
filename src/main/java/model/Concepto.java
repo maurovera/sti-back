@@ -3,8 +3,10 @@ package model;
 import java.io.Serializable;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -13,9 +15,12 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.hibernate.annotations.DynamicInsert;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import base.BaseEntity;
 
@@ -43,8 +48,10 @@ public class Concepto extends BaseEntity implements Serializable {
 	@ManyToOne
 	private Tema tema;
 
-	@JoinTable(name = "ejercicio_concepto", joinColumns = { @JoinColumn(name = "id_concepto", referencedColumnName = "id_concepto") }, inverseJoinColumns = { @JoinColumn(name = "id_ejercicio", referencedColumnName = "id_ejercicio") })
-	@ManyToMany
+	
+	//este puse hou 7 de abril
+	@JsonIgnore
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "listaConceptos", cascade = {CascadeType.MERGE, CascadeType.REFRESH} )
 	private List<Ejercicio> listaEjercicio;
 
 	public Long getId() {
@@ -79,8 +86,9 @@ public class Concepto extends BaseEntity implements Serializable {
 		this.peso = peso;
 	}
 
+	@JsonIgnore
 	public Tema getTema() {
-		return tema;
+		return null;
 	}
 
 	public void setTema(Tema tema) {
@@ -92,6 +100,8 @@ public class Concepto extends BaseEntity implements Serializable {
 		return listaEjercicio;
 	}
 
+	//este puse hoy 7 de abril
+	@JsonProperty
 	public void setListaEjercicio(List<Ejercicio> listaEjercicio) {
 		this.listaEjercicio = listaEjercicio;
 	}

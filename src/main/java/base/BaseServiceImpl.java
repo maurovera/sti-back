@@ -76,6 +76,7 @@ public abstract class BaseServiceImpl<G extends BaseEntity, D extends BaseDAO<G>
 			entity.setUsuarioModificacion(userId);
 			entity.setIpModificacion(httpRequest.getRemoteAddr());
 			// validate(entity);
+
 			getDao().modify(id, entity);
 		} catch (Exception e) {
 			throw new AppException(500, e.getMessage());
