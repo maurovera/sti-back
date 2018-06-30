@@ -8,17 +8,19 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
 import org.hibernate.annotations.DynamicInsert;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import base.BaseEntity;
 
@@ -63,8 +65,19 @@ public class Tarea extends BaseEntity implements Serializable {
 	@Column(name = "tiempo")
 	private Date tiempo;
 
-	@OneToMany(mappedBy = "tarea", cascade = CascadeType.ALL)
-	private List<TareaDetalle> listaTareas = new ArrayList<TareaDetalle>();
+
+    @JoinTable(name = "tarea_concepto", joinColumns = {
+            @JoinColumn(name = "id_tarea", referencedColumnName = "id_tarea")}, inverseJoinColumns = {
+            @JoinColumn(name = "id_concepto", referencedColumnName = "id_concepto")})
+    @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.MERGE,
+			CascadeType.DETACH, CascadeType.REFRESH })
+    private List<Concepto> listaConceptosTarea;
+	
+    
+    //Conceptos asociados a la tarea
+    @Transient
+	private List<String> conceptosAsociados = new ArrayList<String>();
+	
 
 	public Long getId() {
 		return id;
@@ -147,12 +160,33 @@ public class Tarea extends BaseEntity implements Serializable {
 	}
 
 	@JsonIgnore
-	public List<TareaDetalle> getListaTareas() {
-		return listaTareas;
+	public List<Concepto> getListaConceptosTarea() {
+		return listaConceptosTarea;
 	}
 
-	public void setListaTareas(List<TareaDetalle> listaTareas) {
-		this.listaTareas = listaTareas;
+	public void setListaConceptosTarea(List<Concepto> listaConceptosTarea) {
+		this.listaConceptosTarea = listaConceptosTarea;
 	}
+
+
+	public List<String> getConceptosAsociados() {
+
+		String cadena = null;
+		for (Concepto c : this.listaConceptosTarea) {
+			cadena = String.valueOf(c.getId());
+			this.conceptosAsociados.add(cadena);
+		}
+
+		return conceptosAsociados;
+	}
+
+	public void setConceptosAsociados(List<String> conceptosAsociados) {
+		this.conceptosAsociados = conceptosAsociados;
+	}
+	
+	public void addConceptos(Concepto c) {
+		this.listaConceptosTarea.add(c);
+	}
+	
 
 }

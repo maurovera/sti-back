@@ -3,8 +3,10 @@ package model;
 import java.io.Serializable;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -16,12 +18,11 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonProperty;
 import org.hibernate.annotations.DynamicInsert;
 
 import utils.AsignaturaView;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import base.BaseEntity;
 
 @Entity
@@ -54,8 +55,15 @@ public class Curso extends BaseEntity implements Serializable {
 	@Transient
 	private AsignaturaView asignaturaView = new AsignaturaView();
 
-	@JoinTable(name = "curso_alumno", joinColumns = { @JoinColumn(name = "id_curso", referencedColumnName = "id_curso") }, inverseJoinColumns = { @JoinColumn(name = "id_alumno", referencedColumnName = "id_alumno") })
-	@ManyToMany
+	@Transient 
+	private Long alumno;
+	
+	@ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
+	@JoinTable(name = "curso_alumno", 
+			joinColumns = { @JoinColumn(name = "id_curso", 
+			referencedColumnName = "id_curso") },
+			inverseJoinColumns = { @JoinColumn(
+					name = "id_alumno", referencedColumnName = "id_alumno") })
 	private List<Alumno> listaAlumno;
 
 	
@@ -83,10 +91,26 @@ public class Curso extends BaseEntity implements Serializable {
 		this.id = id;
 	}
 
+	
+	
+	
+	
+	
+	public Long getAlumno() {
+		return alumno;
+	}
+
+	public void setAlumno(Long alumno) {
+		this.alumno = alumno;
+	}
+
 	public String getNombre() {
 		return nombre;
 	}
 
+	
+	
+	
 	public void setNombre(String nombre) {
 		this.nombre = nombre;
 	}
@@ -129,9 +153,16 @@ public class Curso extends BaseEntity implements Serializable {
 		return listaAlumno;
 	}
 
+	@JsonProperty
 	public void setListaAlumno(List<Alumno> listaAlumno) {
 		this.listaAlumno = listaAlumno;
 	}
+	
+	public void agregarAlumno(Alumno al){
+		this.listaAlumno.add(al);
+	}
+	
+	
 	
 	
 }

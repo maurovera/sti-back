@@ -11,18 +11,17 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
 import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonProperty;
 import org.hibernate.annotations.DynamicInsert;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import base.BaseEntity;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "concepto")
@@ -43,17 +42,22 @@ public class Concepto extends BaseEntity implements Serializable {
 
 	@Column(name = "peso")
 	private Double peso;
-
+	
+    
 	@JoinColumn(name = "tema", referencedColumnName = "id_tema")
 	@ManyToOne
 	private Tema tema;
 
-	
-	//este puse hou 7 de abril
 	@JsonIgnore
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "listaConceptos", cascade = {CascadeType.MERGE, CascadeType.REFRESH} )
 	private List<Ejercicio> listaEjercicio;
 
+	@JsonIgnore
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "listaConceptosTarea", cascade = {CascadeType.MERGE, CascadeType.REFRESH} )
+	private List<Tarea> listaTarea;
+
+	
+	
 	public Long getId() {
 		return id;
 	}
@@ -86,16 +90,16 @@ public class Concepto extends BaseEntity implements Serializable {
 		this.peso = peso;
 	}
 
-	@JsonIgnore
+	@JsonBackReference()
 	public Tema getTema() {
-		return null;
+		return tema;
 	}
 
 	public void setTema(Tema tema) {
 		this.tema = tema;
 	}
 
-	@JsonIgnore
+	@JsonBackReference(value="ejercicio-concepto")
 	public List<Ejercicio> getListaEjercicio() {
 		return listaEjercicio;
 	}
@@ -106,4 +110,17 @@ public class Concepto extends BaseEntity implements Serializable {
 		this.listaEjercicio = listaEjercicio;
 	}
 
+	
+	@JsonBackReference(value="tarea-concepto")
+	public List<Tarea> getListaTarea() {
+		return listaTarea;
+	}
+
+	public void setListaTarea(List<Tarea> listaTarea) {
+		this.listaTarea = listaTarea;
+	}
+
+	
+	
+	
 }

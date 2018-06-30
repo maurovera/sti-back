@@ -4,8 +4,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import javassist.expr.NewArray;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -19,11 +17,12 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonProperty;
 import org.hibernate.annotations.DynamicInsert;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import base.BaseEntity;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "tema")
@@ -43,12 +42,16 @@ public class Tema extends BaseEntity implements Serializable {
 	private String descripcion;
 
 	@Column(name = "peso")
-	private Integer peso;
+	private Double peso;
+	
+	@Column(name = "peso_tema")
+	private Double pesoTema;
 
 	@JoinColumn(name = "asignatura", referencedColumnName = "id_asignatura")
 	@ManyToOne
 	private Asignatura asignatura;
 
+	@JsonIgnore
 	@OneToMany(mappedBy = "tema", cascade = CascadeType.ALL)
 	private List<Concepto> listaConceptos = new ArrayList<Concepto>();
 
@@ -79,16 +82,20 @@ public class Tema extends BaseEntity implements Serializable {
 		this.listaCalculada = listaCalculada;
 	}*/
 
-	public Integer getDatoCalculado() {
-		return this.peso*2;
-	}
+	
 
-	public void setDatoCalculado(Integer datoCalculado) {
-		this.datoCalculado = datoCalculado;
-	}
+	
 
 	public Long getId() {
 		return id;
+	}
+
+	public Double getPesoTema() {
+		return pesoTema;
+	}
+
+	public void setPesoTema(Double pesoTema) {
+		this.pesoTema = pesoTema;
 	}
 
 	public void setId(Long id) {
@@ -111,27 +118,30 @@ public class Tema extends BaseEntity implements Serializable {
 		this.descripcion = descripcion;
 	}
 
-	public Integer getPeso() {
+	public Double getPeso() {
 		return peso;
 	}
 
-	public void setPeso(Integer peso) {
+	public void setPeso(Double peso) {
 		this.peso = peso;
 	}
 
-	@JsonIgnore
+    @JsonBackReference()
 	public Asignatura getAsignatura() {
-		return null;
+		return asignatura;
 	}
 
+	//@JsonProperty
 	public void setAsignatura(Asignatura asignatura) {
 		this.asignatura = asignatura;
 	}
 
+	//@JsonIgnore jacson xml
 	@JsonIgnore
 	public List<Concepto> getListaConceptos() {
 		return listaConceptos;
 	}
+	//@JsonProperty jackson xml
 	@JsonProperty
 	public void setListaConceptos(List<Concepto> listaConceptos) {
 		this.listaConceptos = listaConceptos;

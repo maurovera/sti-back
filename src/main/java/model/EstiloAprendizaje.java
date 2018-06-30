@@ -25,24 +25,26 @@ public class EstiloAprendizaje extends BaseEntity implements Serializable {
 	@Column(name = "id_estilo")
 	private Long id;
 	
-	@Column(name = "estilo_aprendizaje")
-    private String estiloAprendizaje;
+	@Column(name = "primer_estilo")
+    private String primerEstilo;
     
+	@Column(name= "segundo_estilo")
+	private String segundoEstilo;
 	//ESTILO VISUAL
-    @Column(name = "resul_v")
-    private Integer resulV;
+    @Column(name = "resultado_v")
+    private Integer resultadoV;
     
 	//ESTILO AUDITIVO
-    @Column(name = "resul_a")
-    private Integer resulA;
+    @Column(name = "resultado_a")
+    private Integer resultadoA;
     
   //ESTILO LECTOR
-    @Column(name = "resul_r")
-    private Integer resulR;
+    @Column(name = "resultado_r")
+    private Integer resultadoR;
     
   //ESTILO KINESTESICO
-    @Column(name = "resul_k")
-    private Integer resulK;
+    @Column(name = "resultado_k")
+    private Integer resultadoK;
 
 	public Long getId() {
 		return id;
@@ -52,44 +54,55 @@ public class EstiloAprendizaje extends BaseEntity implements Serializable {
 		this.id = id;
 	}
 
-	public String getEstiloAprendizaje() {
-		return estiloAprendizaje;
+	public String getPrimerEstilo() {
+		return primerEstilo;
 	}
 
-	public void setEstiloAprendizaje(String estiloAprendizaje) {
-		this.estiloAprendizaje = estiloAprendizaje;
+	public void setPrimerEstilo(String primerEstilo) {
+		this.primerEstilo = primerEstilo;
 	}
 
-	public Integer getResulV() {
-		return resulV;
+	public String getSegundoEstilo() {
+		return segundoEstilo;
 	}
 
-	public void setResulV(Integer resulV) {
-		this.resulV = resulV;
+	public void setSegundoEstilo(String segundoEstilo) {
+		this.segundoEstilo = segundoEstilo;
 	}
 
-	public Integer getResulA() {
-		return resulA;
+	public Integer getResultadoV() {
+		return resultadoV;
 	}
 
-	public void setResulA(Integer resulA) {
-		this.resulA = resulA;
+	public void setResultadoV(Integer resultadoV) {
+		this.resultadoV = resultadoV;
 	}
 
-	public Integer getResulR() {
-		return resulR;
+	public Integer getResultadoA() {
+		return resultadoA;
 	}
 
-	public void setResulR(Integer resulR) {
-		this.resulR = resulR;
+	public void setResultadoA(Integer resultadoA) {
+		this.resultadoA = resultadoA;
 	}
 
-	public Integer getResulK() {
-		return resulK;
+	public Integer getResultadoR() {
+		return resultadoR;
 	}
 
-	public void setResulK(Integer resulK) {
-		this.resulK = resulK;
+	public void setResultadoR(Integer resultadoR) {
+		this.resultadoR = resultadoR;
 	}
 
+	public Integer getResultadoK() {
+		return resultadoK;
+	}
+
+	public void setResultadoK(Integer resultadoK) {
+		this.resultadoK = resultadoK;
+	}
+
+	
+	
+	
 }

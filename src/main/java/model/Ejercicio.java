@@ -14,74 +14,110 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.xml.bind.annotation.XmlElementWrapper;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonProperty;
 import org.hibernate.annotations.DynamicInsert;
 
 import utils.ConceptoView;
 import utils.EjercicioView;
 import base.BaseEntity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 @Entity
 @Table(name = "ejercicio")
 @DynamicInsert
 public class Ejercicio extends BaseEntity implements Serializable {
-	
+
 	private static final long serialVersionUID = 1L;
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id_ejercicio")
 	private Long id;
-	
+
 	@Column(name = "respCorrecta")
-    private Integer respCorrecta;
-    
-    @Column(name = "enunciado")
-    private String enunciado;
-   
-    //nivel de dificultad
-    @Column(name = "nivelDif")
-    private Integer nivelDif;
-    
-	//definido por el profesor
-    @Column(name = "descuido")
-    private Integer descuido;
+	private Integer respCorrecta;
 
-    
-    @JsonIgnore
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH} )
-	@JoinTable( 
-			name = "ejercicio_concepto", 
-			joinColumns = { @JoinColumn(name = "id_ejercicio", referencedColumnName = "id_ejercicio") }, 
-			inverseJoinColumns = { @JoinColumn(name = "id_concepto", referencedColumnName = "id_concepto") })
-    private List<Concepto> listaConceptos = new ArrayList<Concepto>();
+	@Column(name = "enunciado")
+	private String enunciado;
 
-    
-    @Transient
-    private List<String> conceptosAsociados = new ArrayList<String>();
-    
-    
-    @Transient
-    private List<ConceptoView> conceptosView = new ArrayList<ConceptoView>();
-    
+	// nivel de dificultad
+	@Column(name = "nivelDif")
+	private Double nivelDificultad;
+
+	// definido por el profesor
+	@Column(name = "descuido")
+	private Integer descuido;
+
+	@Column(name = "adivinanza")
+	private Double adivinanza;
+
+	@ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.MERGE,
+			CascadeType.DETACH, CascadeType.REFRESH })
+	@JoinTable(name = "ejercicio_concepto", joinColumns = { @JoinColumn(name = "id_ejercicio", referencedColumnName = "id_ejercicio") }, inverseJoinColumns = { @JoinColumn(name = "id_concepto", referencedColumnName = "id_concepto") })
+	private List<Concepto> listaConceptos = new ArrayList<Concepto>();
+
+	@JoinTable(name = "ejercicio_respuesta", joinColumns = { @JoinColumn(name = "id_ejercicio", referencedColumnName = "id_ejercicio") }, inverseJoinColumns = { @JoinColumn(name = "id_respuesta", referencedColumnName = "id_respuesta") })
+	@ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE,
+			CascadeType.DETACH, CascadeType.REFRESH })
+	private List<Respuesta> listaRespuesta;
+
+	@JoinColumn(name = "respuesta", referencedColumnName = "id_respuesta")
+	@ManyToOne()
+	private Respuesta respuesta;
+
+	// Dato que trae desde el front
+	
+	private String respuestaCorrecta;
+
+	@Transient
+	private String dificultad;
+	
+	@Transient 
+	private String nivelAdivinanza;
+	
+	public String getDificultad() {
+		return String.valueOf(nivelDificultad);
+	}
+	
+	public String getNivelAdivinanza(){
+		return String.valueOf(adivinanza);
+	}
+	
+	
+	public String getRespuestaCorrecta() {
+		return respuestaCorrecta;
+	}
+
+	public void setRespuestaCorrecta(String respuestaCorrecta) {
+		this.respuestaCorrecta = respuestaCorrecta;
+	}
+
+	@Transient
+	private List<String> conceptosAsociados = new ArrayList<String>();
+
+	@Transient
+	private List<ConceptoView> conceptosView = new ArrayList<ConceptoView>();
+
 	@Transient
 	private EjercicioView ejercicioView = new EjercicioView();
 
-   
 	public List<ConceptoView> getConceptosView() {
-		
-		for ( Concepto c: this.listaConceptos) {
+
+		for (Concepto c : this.listaConceptos) {
 			ConceptoView dato = new ConceptoView();
 			dato.setId(String.valueOf(c.getId()));
 			dato.setNombre(c.getNombre());
 			this.conceptosView.add(dato);
 		}
-	
+
 		return conceptosView;
 	}
 
@@ -90,13 +126,13 @@ public class Ejercicio extends BaseEntity implements Serializable {
 	}
 
 	public List<String> getConceptosAsociados() {
-		
+
 		String cadena = null;
-		for ( Concepto c: this.listaConceptos) {
+		for (Concepto c : this.listaConceptos) {
 			cadena = String.valueOf(c.getId());
 			this.conceptosAsociados.add(cadena);
 		}
-	
+
 		return conceptosAsociados;
 	}
 
@@ -128,14 +164,6 @@ public class Ejercicio extends BaseEntity implements Serializable {
 		this.enunciado = enunciado;
 	}
 
-	public Integer getNivelDif() {
-		return nivelDif;
-	}
-
-	public void setNivelDif(Integer nivelDif) {
-		this.nivelDif = nivelDif;
-	}
-
 	public Integer getDescuido() {
 		return descuido;
 	}
@@ -148,15 +176,50 @@ public class Ejercicio extends BaseEntity implements Serializable {
 	public List<Concepto> getListaConceptos() {
 		return this.listaConceptos;
 	}
-	
-	@JsonProperty
+
 	public void setListaConceptos(List<Concepto> listaConceptos) {
 		this.listaConceptos = listaConceptos;
 	}
-	
-	public void addConceptos(Concepto c){
+
+	public void addConceptos(Concepto c) {
 		this.listaConceptos.add(c);
 	}
-    
-   
+
+	public Double getNivelDificultad() {
+		return nivelDificultad;
+	}
+
+	public void setNivelDificultad(Double nivelDificultad) {
+		this.nivelDificultad = nivelDificultad;
+	}
+
+	public Double getAdivinanza() {
+		return adivinanza;
+	}
+
+	public void setAdivinanza(Double adivinanza) {
+		this.adivinanza = adivinanza;
+	}
+
+	public Respuesta getRespuesta() {
+		return respuesta;
+	}
+
+	public void setRespuesta(Respuesta respuesta) {
+		this.respuesta = respuesta;
+	}
+
+	@JsonIgnore
+	public List<Respuesta> getListaRespuesta() {
+		return listaRespuesta;
+	}
+
+	
+	public void setListaRespuesta(List<Respuesta> listaRespuesta) {
+		this.listaRespuesta = listaRespuesta;
+	}
+	
+	
+	
+
 }
