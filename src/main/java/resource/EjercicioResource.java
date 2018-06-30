@@ -49,6 +49,8 @@ public class EjercicioResource extends
 		try {
 			System.out.println("Ejercicio resource insertar");
 			System.out.println(dto.getListaConceptos().get(0));
+			System.out.println("Ejercicio resource. Lista de respuesta");
+			System.out.println(dto.getListaRespuesta().get(0));
 			return getService().insertar(dto, httpRequest);
 		} catch (Exception e) {
 			throw new WebApplicationException(e.getMessage());

@@ -1,13 +1,17 @@
 package service;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import javax.persistence.EntityListeners;
 import javax.servlet.http.HttpServletRequest;
 
 import model.Concepto;
 import model.Ejercicio;
+import model.Respuesta;
 import utils.AppException;
 import utils.EjercicioView;
 import base.BaseServiceImpl;
@@ -46,8 +50,45 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 			entity.setIpCreacion(httpRequest.getRemoteAddr());
 			System.out.println("primero elemento de la lista de conceptos id:");
 			System.out.println(entity.getListaConceptos().get(0).getId());
+		
+			
+			// datos de respuesta
+			for (Respuesta r : entity.getListaRespuesta()) {
+				r.setId(null);
+				r.setFechaCreacion(new Date());
+				r.setUsuarioCreacion(userId);
+				r.setIpCreacion(httpRequest.getRemoteAddr());
+			}
+			
+			
+			int respuestaNumero = Integer.valueOf(entity.getRespuestaCorrecta());
+			System.out.println("respuesta Correcta: "+ respuestaNumero);
+			switch (respuestaNumero) {
+			case 1:
+				entity.setRespuesta(entity.getListaRespuesta().get(0));
+				break;
+			case 2:
+				entity.setRespuesta(entity.getListaRespuesta().get(1));
+				break;
+			case 3:
+				entity.setRespuesta(entity.getListaRespuesta().get(2));
+				break;
+			case 4:
+				entity.setRespuesta(entity.getListaRespuesta().get(3));
+				break;
+			}
+		
+			System.out.println("creada lista respuesta");
+			
+			
+			
 			
 			getDao().insert(entity);
+			
+			
+			
+			
+			
 			
 			return entity;
 		} catch (Exception e) {
@@ -68,6 +109,8 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 			entity.setUsuarioModificacion(userId);
 			entity.setIpModificacion(httpRequest.getRemoteAddr());
 			
+			
+			/***Conceptos**/
 			entity.getListaConceptos().clear();
 			for(String c : entity.getConceptosAsociados()) {
 				Concepto datos = new Concepto();
@@ -75,8 +118,31 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 				entity.addConceptos(datos);
 			};
 			
+			/**Respuestas**/
+			for(Respuesta r : entity.getListaRespuesta()) {
+				r.setFechaModificacion(new Date());			
+				r.setUsuarioModificacion(userId);
+				r.setIpModificacion(httpRequest.getRemoteAddr());
+			};
 			
+			int respuestaNumero = Integer.valueOf(entity.getRespuestaCorrecta());
+			System.out.println("respuesta Correcta Modificada: "+ respuestaNumero);
+			switch (respuestaNumero) {
+			case 1:
+				entity.setRespuesta(entity.getListaRespuesta().get(0));
+				break;
+			case 2:
+				entity.setRespuesta(entity.getListaRespuesta().get(1));
+				break;
+			case 3:
+				entity.setRespuesta(entity.getListaRespuesta().get(2));
+				break;
+			case 4:
+				entity.setRespuesta(entity.getListaRespuesta().get(3));
+				break;
+			}
 			
+		
 			getDao().modify(id, entity);
 		} catch (Exception e) {
 			throw new AppException(500, e.getMessage());
