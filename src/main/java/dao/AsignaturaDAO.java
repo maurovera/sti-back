@@ -5,17 +5,24 @@ import java.util.HashMap;
 import java.util.List;
 
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.persistence.Query;
 
 import model.Asignatura;
 import model.Ejercicio;
+import utils.AppException;
 import utils.AsignaturaView;
+import utils.Separador;
+import base.AdministracionBase;
 import base.BaseDAO;
 import base.ListaResponse;
 
 @Stateless
 public class AsignaturaDAO extends BaseDAO<Asignatura> {
 
+	@Inject
+	AdministracionBase adm;
+	
 	@Override
 	public Class getEntity() {
 		// TODO Auto-generated method stub
@@ -165,4 +172,20 @@ public class AsignaturaDAO extends BaseDAO<Asignatura> {
 
 	}
 
+	
+	
+	
+	/**
+	 * Se agrega el arbol de asignatura. 
+	 * @param entity
+	 * @throws AppException
+	 */
+	public void insert(Asignatura entity) throws AppException {
+		System.out.println("inserte de base dao tema llegue");
+		em.persist(entity);
+		/** Se le llama al administradorBase Para crear la red.*/
+		
+		adm.agregarAsignaturaRed(entity);
+		
+	}
 }

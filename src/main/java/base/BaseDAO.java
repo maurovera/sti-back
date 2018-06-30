@@ -67,7 +67,7 @@ public abstract class BaseDAO<G extends BaseEntity> {
 				sb.append(" LOWER(c.").append(key).append(") LIKE LOWER(:")
 						.append(key).append(")");
 			} else {
-				System.out.println("soy un interger estoy" + key);
+				System.out.println("soy un interger: " + key);
 				sb.append(" c.").append(key).append(".id").append(" = :").append(key);
 			}
 			// se añade el 'AND' si hay más caracteres.
@@ -94,7 +94,7 @@ public abstract class BaseDAO<G extends BaseEntity> {
 
 			} else {
 				// no agrego nada si es number . mauro cambio
-				System.out.println("entre aqui porque no string " + key + ": "
+				System.out.println("entre aqui porque no soy string " + key + ": "
 						+ value);
 				// value = ((Long)value).longValue();
 				//value = Long.valueOf(value);
@@ -138,9 +138,9 @@ public abstract class BaseDAO<G extends BaseEntity> {
 		query.append("SELECT c FROM ").append(getEntity().getCanonicalName())
 				.append(" c");
 		buildWhere(query, filtros);
-		System.out.println("query puto :" + query.toString());
+		System.out.println("query generado  :" + query.toString());
 		Query q = em.createQuery(query.toString());
-		System.out.println("query puto q:"+ q.toString());
+		System.out.println("query generado q:"+ q.toString());
 		setParametrers(q, filtros);
 		q.setFirstResult(inicio).setMaxResults(cantidad);
 		List<G> list = q.getResultList();

@@ -22,7 +22,7 @@ public class EjercicioDAO extends BaseDAO<Ejercicio>{
 	}
 	
 	public void insert(Ejercicio entity) throws AppException {
-		System.out.println("inserte nuevo merge");
+		System.out.println("inserte nuevo ejercicio");
 		em.persist(entity);
 	}
 	
