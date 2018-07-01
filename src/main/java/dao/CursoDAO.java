@@ -8,6 +8,7 @@ import javax.persistence.Query;
 
 import model.Alumno;
 import model.Curso;
+import utils.AsignaturaView;
 import utils.CursoView;
 import base.BaseDAO;
 import base.ListaResponse;
@@ -36,26 +37,28 @@ public class CursoDAO extends BaseDAO<Curso> {
 		List<CursoView> res1 = new ArrayList<CursoView>();
 		ListaResponse<CursoView> res = new ListaResponse<CursoView>();
 		// Query para traer la lista de curso
-		Query query = em.createQuery("SELECT c FROM Alumno a "
-				+ "JOIN a.listaCurso c " + "WHERE a.id not in :lista");
-		List<Long> lista = new ArrayList<Long>();
-		lista.add(idAlumno);
-		System.out.println("es el numero: " +  idAlumno);
-		query.setParameter("lista", lista);
-		List<Curso> resultado = query.getResultList();
-		System.out.println("lista " +  resultado);
-		for (Curso curso : resultado) {
-			CursoView cu = new CursoView();
-			cu.setId(curso.getId());
-			cu.setNombre(curso.getNombre());
-			cu.setDescripcion(curso.getDescripcion());
-			for (Alumno alumno : curso.getListaAlumno()) {
-				cu.addAlumnoId(alumno.getId());
-			}
+		Query query = em.createQuery("SELECT c.id, a.id, c.nombre, c.descripcion FROM Curso c "
+				+ "left join c.listaAlumno a where a.id !=:id or a.id is null"
+				);
+		
+		query.setParameter("id", idAlumno);
 
-			res1.add(cu);
+		List<Object[]> resultado = query.getResultList();
+
+		for (int i = 0; i < resultado.size(); i++) {
+			CursoView as = new CursoView();
+			Long arg0 = (Long) resultado.get(i)[0];
+			Long arg1 = (Long) resultado.get(i)[1];
+			String arg2 = (String) resultado.get(i)[2];
+			String arg3 = (String) resultado.get(i)[3];
+			as.setId(arg0);
+			as.setAlumno(arg1);
+			as.setNombre(arg2);
+			as.setDescripcion(arg3);
+			res1.add(as);
 		}
-
+		
+		
 		int total = 0;
 		if (resultado != null)
 			total = resultado.size();
@@ -79,25 +82,27 @@ public class CursoDAO extends BaseDAO<Curso> {
 		List<CursoView> res1 = new ArrayList<CursoView>();
 		ListaResponse<CursoView> res = new ListaResponse<CursoView>();
 		// Query para traer la lista de curso
-		Query query = em.createQuery("SELECT c FROM Alumno a "
-				+ "JOIN a.listaCurso c " + "WHERE a.id in :lista");
-		List<Long> lista = new ArrayList<Long>();
-		lista.add(idAlumno);
-		query.setParameter("lista", lista);
-		List<Curso> resultado = query.getResultList();
+		Query query = em.createQuery("SELECT c.id, a.id, c.nombre, c.descripcion FROM Curso c "
+				+ "join c.listaAlumno a where a.id =:id"
+				);
+		
+		query.setParameter("id", idAlumno);
 
-		for (Curso curso : resultado) {
-			CursoView cu = new CursoView();
-			cu.setId(curso.getId());
-			cu.setNombre(curso.getNombre());
-			cu.setDescripcion(curso.getDescripcion());
-			for (Alumno alumno : curso.getListaAlumno()) {
-				cu.addAlumnoId(alumno.getId());
-			}
+		List<Object[]> resultado = query.getResultList();
 
-			res1.add(cu);
+		for (int i = 0; i < resultado.size(); i++) {
+			CursoView as = new CursoView();
+			Long arg0 = (Long) resultado.get(i)[0];
+			Long arg1 = (Long) resultado.get(i)[1];
+			String arg2 = (String) resultado.get(i)[2];
+			String arg3 = (String) resultado.get(i)[3];
+			as.setId(arg0);
+			as.setAlumno(arg1);
+			as.setNombre(arg2);
+			as.setDescripcion(arg3);
+			res1.add(as);
 		}
-
+		
 		int total = 0;
 		if (resultado != null)
 			total = resultado.size();

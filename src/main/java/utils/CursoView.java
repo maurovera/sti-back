@@ -13,6 +13,8 @@ public class CursoView implements Serializable {
 
 	private Long id;
 	
+	private Long alumno;
+	
 	private String nombre;
 
 	private String descripcion;
@@ -20,6 +22,14 @@ public class CursoView implements Serializable {
 	private List<Long> listaAlumno = new ArrayList<Long>();
 	
 	
+	public Long getAlumno() {
+		return alumno;
+	}
+
+	public void setAlumno(Long alumno) {
+		this.alumno = alumno;
+	}
+
 	public Long getId() {
 		return id;
 	}
