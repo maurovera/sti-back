@@ -24,7 +24,7 @@ public class TemaDAO extends BaseDAO<Tema> {
 	
 	
 	/**
-	 * Se agrega al arbol asignatura un tema. 
+	 * Funcion que agrega un tema.
 	 * @param entity
 	 * @throws AppException
 	 */
@@ -34,7 +34,7 @@ public class TemaDAO extends BaseDAO<Tema> {
 		
 		/** Se le llama al administradorBase Para agregar tema 
 		 * a la red bayesiana.*/
-		//adm.agregarTemaRed(entity);
+		adm.agregarTemaRed(entity);
 		
 	}
 	
@@ -51,9 +51,15 @@ public class TemaDAO extends BaseDAO<Tema> {
 		}
 		/**Nombre viejo para modificar la red bayesiana**/
 		String tituloViejo = entity.getNombre();
+
+		/**Como siempre va a settear la misma asignatura. nos aseguramos
+		 * que en front no provoque errores**/
+		dto.setAsignatura(entity.getAsignatura());
+		System.out.println("Asignatura Asignada: "+dto.getAsignatura().getId());
+		
 		em.merge(dto);
 		/**Modificacion en la red bayesiana**/
-		//adm.modificarTemaRed(dto,tituloViejo);
+		adm.modificarTemaRed(dto,tituloViejo);
 		
 	}
 	
@@ -74,7 +80,7 @@ public class TemaDAO extends BaseDAO<Tema> {
 		em.remove(entity);
 		/**Elimina el tema de la red
 		 **/
-		//adm.eliminarTemaRed(entity);
+		adm.eliminarTemaRed(entity);
 	}
 
 }

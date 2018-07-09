@@ -4,26 +4,39 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.persistence.Query;
 
 import model.Ejercicio;
 import utils.AppException;
 import utils.EjercicioView;
+import base.AdministracionBase;
 import base.BaseDAO;
 import base.ListaResponse;
 
 @Stateless
 public class EjercicioDAO extends BaseDAO<Ejercicio>{
 
+	
+	@Inject
+	AdministracionBase adm;
+	
 	@Override
 	public Class getEntity() {
 		// TODO Auto-generated method stub
 		return Ejercicio.class;
 	}
 	
+	
+	/**
+	 * Funcion para insertar un ejercicio
+	 ***/
 	public void insert(Ejercicio entity) throws AppException {
 		System.out.println("inserte nuevo ejercicio");
+		Long idAsignatura = entity.getIdAsignatura();
 		em.persist(entity);
+		/**Funcion para insertar un ejercicio*/
+		adm.agregarEjercicioRed(entity, idAsignatura);
 	}
 	
 	

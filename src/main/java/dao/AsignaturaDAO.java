@@ -176,15 +176,15 @@ public class AsignaturaDAO extends BaseDAO<Asignatura> {
 	
 	
 	/**
-	 * Se agrega el arbol de asignatura. 
+	 * Funcion que se encarga de insertar una asignatura con
+	 * su arbol bayesiano respectivamente. 
 	 * @param entity
 	 * @throws AppException
 	 */
 	public void insert(Asignatura entity) throws AppException {
-		System.out.println("inserte de base dao tema llegue");
+		System.out.println("inserte de asignatura dao");
 		em.persist(entity);
 		/** Se le llama al administradorBase Para crear la red.*/
-		
 		adm.agregarAsignaturaRed(entity);
 		
 	}

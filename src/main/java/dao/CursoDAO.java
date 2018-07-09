@@ -4,18 +4,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.persistence.Query;
 
 import model.Alumno;
+import model.Asignatura;
 import model.Curso;
+import utils.AppException;
 import utils.AsignaturaView;
 import utils.CursoView;
+import base.AdministracionBase;
 import base.BaseDAO;
 import base.ListaResponse;
 
 @Stateless
 public class CursoDAO extends BaseDAO<Curso> {
 
+	
+	@Inject
+	AdministracionBase adm;
+
+	
 	@Override
 	public Class getEntity() {
 		// TODO Auto-generated method stub
@@ -112,5 +121,32 @@ public class CursoDAO extends BaseDAO<Curso> {
 		return res;
 
 	}
+	
+	
+	
+	/**
+	 *
+	 * @param id
+	 * @param dto
+	 * @throws AppException
+	 */
+	public void inscribirse(Long id, Curso dto, Long idAlumno) throws AppException {
+		/**Inscribirse al curso.
+		 ***/
+		System.out.println("inscribirseDAO");
+		Curso entity = (Curso) em.find(getEntity(), id);
+		if (entity == null) {
+			throw new AppException(404, "Not Found");
+		}
+	
+		em.merge(dto);
+		
+		Asignatura asig = dto.getAsignatura();
+		Long idAsignatura = asig.getId();
+		adm.calcularProbabilidades(asig);
+		adm.crearRedAlumno(idAsignatura, idAlumno);
+	
+	}
+
 
 }
