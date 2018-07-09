@@ -78,11 +78,29 @@ public class Ejercicio extends BaseEntity implements Serializable {
 	private String respuestaCorrecta;
 
 	@Transient
+	private Long idAsignatura;
+	
+	
+	
+	@Transient
 	private String dificultad;
 	
 	@Transient 
 	private String nivelAdivinanza;
 	
+	
+	
+	
+	
+	
+	public Long getIdAsignatura() {
+		return idAsignatura;
+	}
+
+	public void setIdAsignatura(Long idAsignatura) {
+		this.idAsignatura = idAsignatura;
+	}
+
 	public String getDificultad() {
 		return String.valueOf(nivelDificultad);
 	}

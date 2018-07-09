@@ -65,6 +65,10 @@ public class Tarea extends BaseEntity implements Serializable {
 	@Column(name = "tiempo")
 	private Date tiempo;
 
+	
+	@Column(name = "cantidad_ejercicio_parada")
+    private Integer cantidadEjercicioParada;
+	
 
     @JoinTable(name = "tarea_concepto", joinColumns = {
             @JoinColumn(name = "id_tarea", referencedColumnName = "id_tarea")}, inverseJoinColumns = {
@@ -187,6 +191,16 @@ public class Tarea extends BaseEntity implements Serializable {
 	public void addConceptos(Concepto c) {
 		this.listaConceptosTarea.add(c);
 	}
+
+	public Integer getCantidadEjercicioParada() {
+		return cantidadEjercicioParada;
+	}
+
+	public void setCantidadEjercicioParada(Integer cantidadEjercicioParada) {
+		this.cantidadEjercicioParada = cantidadEjercicioParada;
+	}
+	
+	
 	
 
 }

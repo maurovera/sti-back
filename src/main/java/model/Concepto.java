@@ -14,6 +14,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
@@ -57,7 +58,18 @@ public class Concepto extends BaseEntity implements Serializable {
 	private List<Tarea> listaTarea;
 
 	
+	@Transient 
+	private Long idAsignatura;
 	
+	
+	public Long getIdAsignatura() {
+		return idAsignatura;
+	}
+
+	public void setIdAsignatura(Long idAsignatura) {
+		this.idAsignatura = idAsignatura;
+	}
+
 	public Long getId() {
 		return id;
 	}
@@ -90,7 +102,7 @@ public class Concepto extends BaseEntity implements Serializable {
 		this.peso = peso;
 	}
 
-	@JsonBackReference()
+	@JsonBackReference(value = "temaRecurso")
 	public Tema getTema() {
 		return tema;
 	}
