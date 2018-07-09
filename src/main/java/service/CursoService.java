@@ -63,10 +63,11 @@ public class CursoService extends BaseServiceImpl<Curso, CursoDAO> {
 
 			//Se agrega el alumno en cuestion
 			Alumno al = new Alumno();
-			al = alumnoService.obtener(entity.getAlumno());
+			Long idAlumno = entity.getAlumno();
+			al = alumnoService.obtener(idAlumno);
 			entity.agregarAlumno(al);
 
-			getDao().modify(id, entity);
+			getDao().inscribirse(id, entity, idAlumno);
 		} catch (Exception e) {
 			throw new AppException(500, e.getMessage());
 		}

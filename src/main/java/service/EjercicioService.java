@@ -52,6 +52,18 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 			System.out.println(entity.getListaConceptos().get(0).getId());
 		
 			
+			/**Datos de concepto. 
+			* Vuelvo a hacer esto porque necesito el nombre. 
+			/***Conceptos**/
+			entity.getListaConceptos().clear();
+			for(String c : entity.getConceptosAsociados()) {
+				Concepto datos = new Concepto();
+				datos = conceptoService.obtener(Long.valueOf(c));
+				entity.addConceptos(datos);
+			};
+			
+			
+			
 			// datos de respuesta
 			for (Respuesta r : entity.getListaRespuesta()) {
 				r.setId(null);
