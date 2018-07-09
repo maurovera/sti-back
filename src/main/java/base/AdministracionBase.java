@@ -4,8 +4,10 @@ import java.util.List;
 
 import javax.ejb.Stateless;
 
+import model.Alumno;
 import model.Asignatura;
 import model.Concepto;
+import model.Curso;
 import model.Ejercicio;
 import model.Tema;
 import smile.Network;
@@ -14,6 +16,7 @@ import utils.Separador;
 @Stateless
 public class AdministracionBase {
 
+	final String dir = "/home/mauro/proyectos/tesis/sti-back/src/main/resources/redes/";
 	Separador sp = new Separador();
 
 	public AdministracionBase() {
@@ -25,7 +28,7 @@ public class AdministracionBase {
 	 * Modificar. Para editar no necesita modificar la red. Eliminar. No hace
 	 * falta eliminar la asignatura. Solo queda colgado el archivo en redes. en
 	 * todo caso deberia ver como eliminar el archivo
-	 * **/
+	 ***/
 	public void agregarAsignaturaRed(Asignatura asignatura) {
 		System.out.println("agregarAsignaturaRed");
 		Network net = new Network();
@@ -35,28 +38,22 @@ public class AdministracionBase {
 		net.setOutcomeId(titulo, 0, "No_conoce");
 		net.setOutcomeId(titulo, 1, "Conoce");
 		String nombreRed = "red_asignatura_" + asignatura.getId() + ".xdsl";
-		System.out
-				.println("/home/mauro/proyectos/tesis/sti-back/src/main/resources/redes/"
-						+ nombreRed);
-		net.writeFile("/home/mauro/proyectos/tesis/sti-back/src/main/resources/redes/"
-				+ nombreRed);
+		System.out.println(dir + nombreRed);
+		net.writeFile(dir + nombreRed);
 	}
 
 	/**
 	 * Agrega un tema a la red bayesiana.
 	 **/
 	public void agregarTemaRed(Tema tema) {
-		System.out.println("agregarTemaRed/////////////");
+		System.out.println("agregarTemaRed");
 		// operaciones sobre la red bayesiana con smile
-		System.out.println(tema.getAsignatura().getId());
-		String nombreRed = "red_asignatura_" + tema.getAsignatura().getId()
-				+ ".xdsl";
-		System.out
-				.println("/home/mauro/proyectos/tesis/sti-back/src/main/resources/redes/"
-						+ nombreRed);
+		System.out.println("id Asignatura: " + tema.getAsignatura().getId());
+		Long idAsignatura = tema.getAsignatura().getId();
+		String nombreRed = "red_asignatura_" + idAsignatura + ".xdsl";
+		System.out.println(dir + nombreRed);
 		Network net = new Network();
-		net.readFile("/home/mauro/proyectos/tesis/sti-back/src/main/resources/redes/"
-				+ nombreRed);
+		net.readFile(dir + nombreRed);
 
 		// agregar nodo tema
 		// cambiar formato nodo
@@ -71,8 +68,7 @@ public class AdministracionBase {
 		net.addArc(titulo,
 				sp.convertirEspacioToGuion(tema.getAsignatura().getNombre()));
 
-		net.writeFile("/home/mauro/proyectos/tesis/sti-back/src/main/resources/redes/"
-				+ nombreRed);
+		net.writeFile(dir + nombreRed);
 	}
 
 	/**
@@ -80,12 +76,12 @@ public class AdministracionBase {
 	 **/
 	public void modificarTemaRed(Tema tema, String titulo) {
 		// operaciones sobre la red bayesiana con smile
-		String nombreRed = "red_asignatura_" + tema.getAsignatura().getId()
-				+ ".xdsl";
+
+		Long idAsignatura = tema.getAsignatura().getId();
+		String nombreRed = "red_asignatura_" + idAsignatura + ".xdsl";
 
 		Network net = new Network();
-		net.readFile("/home/mauro/proyectos/tesis/sti-back/src/main/resources/redes/"
-				+ nombreRed);
+		net.readFile(dir + nombreRed);
 
 		String tituloNuevo = sp.convertirEspacioToGuion(tema.getNombre());
 
@@ -94,8 +90,7 @@ public class AdministracionBase {
 		net.setNodeId(sp.convertirEspacioToGuion(titulo), tituloNuevo);
 		net.setNodeName(tituloNuevo, tituloNuevo);
 
-		net.writeFile("/home/mauro/proyectos/tesis/sti-back/src/main/resources/redes/"
-				+ nombreRed);
+		net.writeFile(dir + nombreRed);
 	}
 
 	/**
@@ -103,16 +98,14 @@ public class AdministracionBase {
 	 **/
 	public void eliminarTemaRed(Tema tema) {
 		// TODO Auto-generated method stub
-		String nombreRed = "red_asignatura_" + tema.getAsignatura().getId()
-				+ ".xdsl";
+		Long idAsignatura = tema.getAsignatura().getId();
+		String nombreRed = "red_asignatura_" + idAsignatura + ".xdsl";
 		Network net = new Network();
-		net.readFile("/home/mauro/proyectos/tesis/sti-back/src/main/resources/redes/"
-				+ nombreRed);
+		net.readFile(dir + nombreRed);
 		// cambiar formato nombre
 		String nom = sp.convertirEspacioToGuion(tema.getNombre());
 		net.deleteNode(nom);
-		net.writeFile("/home/mauro/proyectos/tesis/sti-back/src/main/resources/redes/"
-				+ nombreRed);
+		net.writeFile(dir + nombreRed);
 	}
 
 	/**
@@ -123,12 +116,9 @@ public class AdministracionBase {
 		String nombreRed = "red_asignatura_" + idAsignatura + ".xdsl";
 		String titulo;
 		String tituloTema;
-		System.out
-				.println("/home/mauro/proyectos/tesis/sti-back/src/main/resources/redes/"
-						+ nombreRed);
+		System.out.println(dir + nombreRed);
 		Network net = new Network();
-		net.readFile("/home/mauro/proyectos/tesis/sti-back/src/main/resources/redes/"
-				+ nombreRed);
+		net.readFile(dir + nombreRed);
 
 		// agregar nodo concepto
 		// cambiar formato nodo
@@ -150,8 +140,7 @@ public class AdministracionBase {
 		conceptoDef[0] = 1 - conceptoDef[1];
 		// cambiar formato nodo
 		net.setNodeDefinition(titulo, conceptoDef);
-		net.writeFile("/home/mauro/proyectos/tesis/sti-back/src/main/resources/redes/"
-				+ nombreRed);
+		net.writeFile(dir + nombreRed);
 	}
 
 	/**
@@ -162,12 +151,9 @@ public class AdministracionBase {
 		// operaciones sobre la red bayesiana con smile
 		String nombreRed = "red_asignatura_" + idAsignatura + ".xdsl";
 
-		System.out
-				.println("/home/mauro/proyectos/tesis/sti-back/src/main/resources/redes/"
-						+ nombreRed);
+		System.out.println(dir + nombreRed);
 		Network net = new Network();
-		net.readFile("/home/mauro/proyectos/tesis/sti-back/src/main/resources/redes/"
-				+ nombreRed);
+		net.readFile(dir + nombreRed);
 
 		// se modifica el nombre del concepto
 		String titulo = sp.convertirEspacioToGuion(concepto.getNombre());
@@ -186,8 +172,23 @@ public class AdministracionBase {
 		conceptoDef[0] = 1 - conceptoDef[1];
 		net.setNodeDefinition(titulo, conceptoDef);
 
-		net.writeFile("/home/mauro/proyectos/tesis/sti-back/src/main/resources/redes/"
-				+ nombreRed);
+		net.writeFile(dir + nombreRed);
+	}
+
+	/*** Eliminar ejercicio de la red bayesiana ***/
+	public void eliminarEjercicioRed(Ejercicio ejercicio, Long idAsignatura) {
+		// TODO Auto-generated method stub\
+		String nombreRed = "red_asignatura_" + idAsignatura + ".xdsl";
+
+		Network net = new Network();
+		net.readFile(dir + nombreRed);
+
+		// cambiar formato nodo
+		String nom = "E" + Long.toString(ejercicio.getId());
+
+		net.deleteNode(nom);
+		net.writeFile(dir + nombreRed);
+
 	}
 
 	/** Eliminar concepto de la red bayesiana */
@@ -196,30 +197,47 @@ public class AdministracionBase {
 		String nombreRed = "red_asignatura_" + idAsignatura + ".xdsl";
 
 		Network net = new Network();
-		net.readFile("/home/mauro/proyectos/tesis/sti-back/src/main/resources/redes/"
-				+ nombreRed);
+		net.readFile(dir + nombreRed);
 		// cambiar formato nodo
 		String nom = sp.convertirEspacioToGuion(concepto.getNombre());
 
 		net.deleteNode(nom);
-		net.writeFile("/home/mauro/proyectos/tesis/sti-back/src/main/resources/redes/"
-				+ nombreRed);
+		net.writeFile(dir + nombreRed);
 
+	}
+
+	/** Por cada concepto borrado o agregado. Se regenera el ejercicio.
+	 ***/
+	public void reCalcularEjercicios(List<Ejercicio> listaEjercicios,
+			Long idAsignatura) {
+		System.out.println("Re calcularEjercicios");
+		
+		for (Ejercicio ejercicio : listaEjercicios) {
+
+			/**Tipo si esta vacio. Eliminar el nodo ejercicio.**/
+			if (ejercicio.getListaConceptos().isEmpty()) {
+				System.out.println("elimine ejercicio.");
+				eliminarEjercicioRed(ejercicio, idAsignatura);
+				/**Tipo si esta con conceptos. Se borra el ejercicio y 
+				 * se vuelve a meter con sus nuevos conceptos**/
+			} else {
+				System.out.println("calcule metodo para que quede bien");
+				eliminarEjercicioRed(ejercicio, idAsignatura);
+				agregarEjercicioRed(ejercicio, idAsignatura);
+			}
+		}
 	}
 
 	/**
 	 * Agregar Ejercicio a la red bayesiana
 	 **/
-	private void agregarEjercicioRed(Ejercicio ejercicio, Long idAsignatura) {
+	public void agregarEjercicioRed(Ejercicio ejercicio, Long idAsignatura) {
 		System.out.println("Agregar Ejercicio Red");
 		// operaciones sobre la red bayesiana con smile
 		String nombreRed = "red_asignatura_" + idAsignatura + ".xdsl";
-		System.out
-				.println("/home/mauro/proyectos/tesis/sti-back/src/main/resources/redes/"
-						+ nombreRed);
+		System.out.println(dir + nombreRed);
 		Network net = new Network();
-		net.readFile("/home/mauro/proyectos/tesis/sti-back/src/main/resources/redes/"
-				+ nombreRed);
+		net.readFile(dir + nombreRed);
 
 		// agregar nodo ejercicio
 		String titulo = "E" + Long.toString(ejercicio.getId());
@@ -232,8 +250,9 @@ public class AdministracionBase {
 		// Se verfica que tenga conceptos asociados
 		if (conceptoList != null) {
 			for (Concepto concepto : conceptoList) {
-				String conceptoRed = sp.convertirEspacioToGuion(concepto
-						.getNombre());
+				String conceptoRed = new String();
+				System.out.println("primerconcepto: " + concepto.getNombre());
+				conceptoRed = sp.convertirEspacioToGuion(concepto.getNombre());
 
 				net.addArc(conceptoRed, titulo);
 			}
@@ -243,8 +262,7 @@ public class AdministracionBase {
 		double[] ejercicioDef = calcularProbabilidadesCCI(ejercicio);
 		net.setNodeDefinition(titulo, ejercicioDef);
 
-		net.writeFile("/home/mauro/proyectos/tesis/sti-back/src/main/resources/redes/"
-				+ nombreRed);
+		net.writeFile(dir + nombreRed);
 	}
 
 	/***
@@ -330,5 +348,170 @@ public class AdministracionBase {
 
 		return gX;
 	}
+	
+	
+	
+    /***Calculos de probabilidades
+     * Aqui todo este calculo se hace cuando un alumno se inscribe.calcularProbabilidadesTema
+     * Lo que hace es agregar los pesos de los temas y de los conceptos en si. 
+     * *******/
+    /***AUN NO USO**/
+    public void calcularProbabilidades(Asignatura asignatura) {
+    	
+    	System.out.println("CalcularProbabilidades. Inscribirse");
+    	// Calculo de las probabilidades condicionales de las relaciones de agregacion
+    	/**Lee la red de la asignatura**/
+    	Long idAsignatura = asignatura.getId();
+    	String nombreRed = "red_asignatura_" + idAsignatura + ".xdsl";
+		System.out.println(dir + nombreRed);
+		Network net = new Network();
+		net.readFile(dir + nombreRed);
+		
+		String nomTem;
+		//Asignatura asignatura = em.find(Asignatura.class, idAsignatura);
 
+    	//List<Tema> temaList = (List<Tema>) em.createQuery("Select e from Tema e where e.profesor = :profesor and e.asignatura=:asignatura order by e.idTema" )
+			//	.setParameter("profesor", asignatura.getProfesor()).setParameter("asignatura", asignatura).getResultList() ;
+    	List<Tema> listaTema = asignatura.getListaTemas();
+    			
+
+    	for(Tema tema : listaTema) {
+    		double[] temaDef = calcularProbabilidadesTema(tema);
+    		System.out.println(tema.getNombre()+ " "+temaDef.toString() );
+    		//cambiar formato de nodo
+    		 nomTem = sp.convertirEspacioToGuion(tema.getNombre());
+    		net.setNodeDefinition(nomTem, temaDef);
+    	}
+    	
+
+    	double[] asignaturaDef = calcularProbabilidadesAsignatura(asignatura);
+    	//cambiar formato de ndo
+    	 nomTem = sp.convertirEspacioToGuion(asignatura.getNombre());
+    	net.setNodeDefinition(nomTem, asignaturaDef);
+    	
+    	net.writeFile(dir + nombreRed);
+    
+    }
+    /***AUN NO USO**/
+    private double[] calcularProbabilidadesAsignatura(Asignatura asignatura) {
+    	int dimension = (int) Math.pow(2, asignatura.getListaTemas().size());
+    	double [] asignaturaDef = new double[dimension * 2];
+    	
+		System.out.println("DimensionAsignatura "+ dimension );
+
+    	int j = 0;
+    	for(int i = 0; i < dimension; i++) {
+    		asignaturaDef[j] = 1 - cpAsignatura(asignatura, i);
+    		j++;
+    		asignaturaDef[j] = 1 - asignaturaDef[j-1];
+    		j++;
+    		
+    	}
+    	
+    	return asignaturaDef;
+	}
+    
+	private double cpAsignatura(Asignatura asignatura, int i) {
+		
+		
+		////HAY QUE REVISAR ESTA FUNCION
+		String comb = Integer.toBinaryString(i);
+		int dimension = asignatura.getListaTemas().size();
+    	while(comb.length() != dimension){
+    		comb = "0" + comb;
+    	}
+    	
+    	double valTemp = 0;
+		//List<Tema> temaList = em.createQuery("Select e from Tema e where e.asignatura = :asignatura")
+			//	.setParameter("asignatura", asignatura).getResultList(); 
+		List<Tema> temaList = asignatura.getListaTemas();
+		System.out.println(temaList);
+    	for (int j = 0; j < temaList.size(); j++) {
+    		 if(comb.charAt(j) == '1') {
+    			 //valTemp = valTemp + temaList.get(j).getPeso();
+    			 valTemp = valTemp + temaList.get(j).getPesoTema();
+    		 } 
+    		    	}
+    	
+    	return valTemp;
+	}
+	/***AUN NO USO**/
+    private double [] calcularProbabilidadesTema(Tema tema) {
+    	//Calculo de las probabilidades condicionales 
+    	int dimension = (int) Math.pow(2, tema.getListaConceptos().size());
+    	System.out.println("dimension " + dimension);
+    	double [] temaDef = new double[dimension * 2];
+    	System.out.println("**************************************************************");
+    	int j = 0;
+    	for(int i = 0; i < dimension; i++) {
+    		temaDef[j] = 1 - cpTema(tema, i);
+    		j++;
+    		temaDef[j] = 1 - temaDef[j-1];
+    		j++;
+    		
+    	}
+    	System.out.println("**************************************************************");
+
+    	
+    	return temaDef;
+    }
+    /***AUN NO USO***/
+    private double cpTema(Tema tema, int i) {
+    	
+    	int cantidadConceptos = tema.getListaConceptos().size();
+    	String comb = Integer.toBinaryString(i);
+    	while(comb.length() < cantidadConceptos){
+    		comb = "0" + comb;
+    	}
+    
+
+    	double valTemp = 0;
+    	for (int j = 0; j < cantidadConceptos; j++) {
+    		 System.out.println("--------------------------------------------------------");
+				System.out.println("j: " + j);
+
+			    System.out.println("comb: " + comb);
+    		 if(comb.charAt(j) == '1') {
+ 				   
+    				System.out.println("concepto: " +  tema.getListaConceptos().get(j));
+    				System.out.println("peso: " +  tema.getListaConceptos().get(j).getPeso());
+ 				    System.out.println("--------------------------------------------------------");
+
+    			 valTemp = valTemp + tema.getListaConceptos().get(j).getPeso();
+    		 } 
+    	}
+    	
+    	return valTemp;
+    	
+    }
+    /***FIN Calculos de probabilidades*******/
+
+    
+    
+    
+	/**NO USE AUN* PERO CREA RED BAYESIANA POR LISTA DE ALUMNOS
+	 * Lo que hace es leer la red bayesiana con idAsignatura y guardalo
+	 * con un idAsignatura + un idAlumno. Que seria el arbol del alumno.
+	 **/
+	public void crearRedAlumno(Long idAsignatura, Long idAlumno ) {
+		// TODO Auto-generated method stub
+		
+		//Asignatura asignatura = em.find(Asignatura.class, idAsignatura);
+        //Curso curso = asignatura.getCurso();
+		//List<Alumno> alumnoList = em.createQuery("Select e from Alumno e where e.curso = :curso")
+			//	.setParameter("curso", curso).getResultList();
+		/**Crear Red Alumno**/
+		String nombreRed = "red_asignatura_" + idAsignatura + ".xdsl";
+		Network net = new Network();
+		net.readFile(dir + nombreRed);
+		
+		//for (Alumno alumno : alumnoList) {
+		//String nombreRedAlumno = "red_alumno_" + alumno.getIdAlumno() + "_asignatura_" + idAsignatura + ".xdsl";
+		String nombreRedAlumno = "red_alumno_" + idAlumno + "_asignatura_" + idAsignatura + ".xdsl";
+		net.writeFile(dir + nombreRedAlumno);
+			
+		//}
+		
+	}
+   
 }
