@@ -1,6 +1,7 @@
 package model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -64,7 +65,7 @@ public class Curso extends BaseEntity implements Serializable {
 			referencedColumnName = "id_curso") },
 			inverseJoinColumns = { @JoinColumn(
 					name = "id_alumno", referencedColumnName = "id_alumno") })
-	private List<Alumno> listaAlumno;
+	private List<Alumno> listaAlumno = new ArrayList<Alumno>();
 
 	
 	

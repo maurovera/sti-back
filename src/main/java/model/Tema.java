@@ -146,5 +146,9 @@ public class Tema extends BaseEntity implements Serializable {
 	public void setListaConceptos(List<Concepto> listaConceptos) {
 		this.listaConceptos = listaConceptos;
 	}
+	
+	public void addConcepto(Concepto concepto){
+		this.listaConceptos.add(concepto);
+	}
 
 }

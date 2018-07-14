@@ -75,7 +75,7 @@ public class Tarea extends BaseEntity implements Serializable {
             @JoinColumn(name = "id_concepto", referencedColumnName = "id_concepto")})
     @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.MERGE,
 			CascadeType.DETACH, CascadeType.REFRESH })
-    private List<Concepto> listaConceptosTarea;
+    private List<Concepto> listaConceptosTarea = new ArrayList<Concepto>();
 	
     
     //Conceptos asociados a la tarea

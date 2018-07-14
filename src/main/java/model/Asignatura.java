@@ -1,6 +1,7 @@
 package model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -38,7 +39,7 @@ public class Asignatura extends BaseEntity implements Serializable {
 
     @org.codehaus.jackson.annotate.JsonIgnore
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "asignatura", cascade = CascadeType.ALL)
-	private List<Tema> listaTemas;
+	private List<Tema> listaTemas = new ArrayList<Tema>();
 
     @JsonIgnore
 	public List<Tema> getListaTemas() {
@@ -72,6 +73,10 @@ public class Asignatura extends BaseEntity implements Serializable {
 
 	public void setDescripcion(String descripcion) {
 		this.descripcion = descripcion;
+	}
+	
+	public void addTema(Tema tema){
+		this.listaTemas.add(tema);
 	}
 
 }

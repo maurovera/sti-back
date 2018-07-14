@@ -67,7 +67,7 @@ public class Ejercicio extends BaseEntity implements Serializable {
 	@JoinTable(name = "ejercicio_respuesta", joinColumns = { @JoinColumn(name = "id_ejercicio", referencedColumnName = "id_ejercicio") }, inverseJoinColumns = { @JoinColumn(name = "id_respuesta", referencedColumnName = "id_respuesta") })
 	@ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE,
 			CascadeType.DETACH, CascadeType.REFRESH })
-	private List<Respuesta> listaRespuesta;
+	private List<Respuesta> listaRespuesta = new ArrayList<Respuesta>();
 
 	@JoinColumn(name = "respuesta", referencedColumnName = "id_respuesta")
 	@ManyToOne()
@@ -202,6 +202,11 @@ public class Ejercicio extends BaseEntity implements Serializable {
 	public void addConceptos(Concepto c) {
 		this.listaConceptos.add(c);
 	}
+	
+	
+	public void addRespuesta(Respuesta r) {
+		this.listaRespuesta.add(r);
+	}
 
 	public Double getNivelDificultad() {
 		return nivelDificultad;
@@ -237,6 +242,11 @@ public class Ejercicio extends BaseEntity implements Serializable {
 		this.listaRespuesta = listaRespuesta;
 	}
 	
+	
+	@Override
+	public String toString() {
+		return "model.Ejercicio[ idEjercicio=" + enunciado + " ]";
+	}
 	
 	
 
