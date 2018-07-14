@@ -2,18 +2,22 @@ package resource;
 
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import model.Ejercicio;
 import service.EjercicioService;
+import utils.AppException;
+import utils.CursoView;
 import utils.EjercicioView;
 import base.BaseResource;
 import base.ListaResponse;
@@ -94,6 +98,23 @@ public class EjercicioResource extends
 	public ListaResponse<EjercicioView> listarEjercicio() throws NoSuchFieldException {
 
 		return getService().listarEjercicio();
+	}
+	
+	
+	/**
+	 * Prueba lista curso por alumno inscriptos al curso.
+	 * 
+	 * @param idAlumno
+	 * @throws AppException 
+	 * **/
+	@GET
+	@Path("/simulacion")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String simulacion(
+			@QueryParam("idAlumno") @DefaultValue("1") Long idAlumno)
+			throws NoSuchFieldException, AppException {
+		System.out.println("simulacion ");
+		return service.simulacion(httpRequest);
 	}
 
 

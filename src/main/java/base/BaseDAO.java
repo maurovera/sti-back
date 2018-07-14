@@ -187,7 +187,7 @@ public abstract class BaseDAO<G extends BaseEntity> {
 	 * @throws AppException
 	 */
 	public void insert(G entity) throws AppException {
-		System.out.println("inserte de base dao tema llegue");
+		System.out.println("inserte de base dao");
 		em.persist(entity);
 		
 	}

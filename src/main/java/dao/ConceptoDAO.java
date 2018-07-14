@@ -139,5 +139,40 @@ public class ConceptoDAO extends BaseDAO<Concepto> {
 		 **/
 		adm.eliminarConceptoRed(entity, idAsignatura);
 	}
+	
+	
+	
+	
+	/**
+	 * Lista de ejercicios que recibe un concepto
+	 * 
+	 * @serialData 26062018
+	 * @since 1
+	 * @return listaEjercicio con el concepto asociado.
+	 * @param Concepto
+	 ***/
+	public List<Ejercicio> listaEjerciciosConcepto(Concepto concepto)
+			throws AppException {
+
+		System.out.println("Lista de curso que el alumno esta inscripto");
+
+		/**
+		 * Query que lista los ejercicios asociados
+		 ***/
+		Query q = em.createQuery("SELECT distinct e FROM Concepto c "
+				+ "JOIN c.listaEjercicio e " + "WHERE c = :Concepto");
+
+		q.setParameter("Concepto", concepto);
+
+		List<Ejercicio> lista = q.getResultList();
+
+		if (lista == null) {
+			throw new AppException(404, "Not Found");
+		}
+
+		return lista;
+
+	}
+
 
 }
