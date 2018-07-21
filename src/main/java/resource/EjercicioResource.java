@@ -36,8 +36,7 @@ public class EjercicioResource extends
 		// TODO Auto-generated method stub
 		return service;
 	}
-	
-	
+
 	/**
 	 * Se encarga de insertar un nuevo registro.
 	 *
@@ -60,8 +59,7 @@ public class EjercicioResource extends
 			throw new WebApplicationException(e.getMessage());
 		}
 	}
-	
-	
+
 	/**
 	 * Se encarga de actualizar un recurso ya existente.
 	 *
@@ -74,7 +72,7 @@ public class EjercicioResource extends
 	@PUT
 	@Path("/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Ejercicio modificar(@PathParam("id") Long id,Ejercicio dto) {
+	public Ejercicio modificar(@PathParam("id") Long id, Ejercicio dto) {
 		try {
 			System.out.println("Ejercicio resource modificar");
 			System.out.println(dto.getListaConceptos().get(0));
@@ -85,27 +83,26 @@ public class EjercicioResource extends
 					Response.Status.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
-	
-	/**Se encarga de traer una lista de ejercicios
-	 * En un futuro proximo. Pasandole el id de curso
-	 * trae todo los ejercicios relacionados a la asignatura ligada
-	 * al curso.
+
+	/**
+	 * Se encarga de traer una lista de ejercicios En un futuro proximo.
+	 * Pasandole el id de curso trae todo los ejercicios relacionados a la
+	 * asignatura ligada al curso.
 	 **/
 	@GET
 	@Path("/listaEjercicio")
 	@Produces(MediaType.APPLICATION_JSON)
-	public ListaResponse<EjercicioView> listarEjercicio() throws NoSuchFieldException {
+	public ListaResponse<EjercicioView> listarEjercicio()
+			throws NoSuchFieldException {
 
 		return getService().listarEjercicio();
 	}
-	
-	
+
 	/**
 	 * Prueba lista curso por alumno inscriptos al curso.
 	 * 
 	 * @param idAlumno
-	 * @throws AppException 
+	 * @throws AppException
 	 * **/
 	@GET
 	@Path("/simulacion")
@@ -117,5 +114,28 @@ public class EjercicioResource extends
 		return service.simulacion(httpRequest);
 	}
 
+	/** Recurso para traer el siguiente ejercicio **/
+	@GET
+	@Path("/siguienteEjercicio")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Ejercicio siguienteEjercicio(@QueryParam("idTarea") @DefaultValue("1") Long idTarea,
+			@QueryParam("idAlumno") @DefaultValue("1") Long idAlumno,
+			@QueryParam("idAsignatura") @DefaultValue("1") Long idAsignatura,
+			@QueryParam("respuesta") @DefaultValue("r1") String respuesta,
+			@QueryParam("idEjercicioAnterior") @DefaultValue("0") Long idEjercicioAnterior) {
+		
+		Ejercicio dto = null;
+		try {
+			dto = getService().siguienteEjercicio(idTarea,idAlumno,idAsignatura,respuesta,idEjercicioAnterior);
+		} catch (Exception e) {
+			throw new WebApplicationException(e.getMessage(),
+					Response.Status.INTERNAL_SERVER_ERROR);
+		}
+		if (dto == null) {
+			throw new WebApplicationException(Response.Status.NOT_FOUND);
+		}
+		return dto;
+		
+	}
 
 }

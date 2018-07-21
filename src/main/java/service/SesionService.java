@@ -4,6 +4,7 @@ import java.util.Date;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
 
 import model.Alumno;
 import model.Ejercicio;
@@ -33,14 +34,14 @@ public class SesionService extends BaseServiceImpl<Sesion, SesionDAO> {
 		return dao;
 	}
 
-	public Long registrarSesion(Long idAlumno, Long idTarea)
+	public Sesion registrarSesion(Long idAlumno, Long idTarea, HttpServletRequest httpRequest)
 			throws AppException {
 		Sesion sesion = new Sesion();
 		try {
 			
 			sesion.setFechaCreacion(new Date());
 			sesion.setUsuarioCreacion(userId);
-			sesion.setIpCreacion("127.1.1.1");
+			sesion.setIpCreacion(httpRequest.getRemoteAddr());
 			
 
 			sesion.setEntrada(new Date(System.currentTimeMillis()));
@@ -52,11 +53,12 @@ public class SesionService extends BaseServiceImpl<Sesion, SesionDAO> {
 			sesion.setTarea(tarea);
 
 			dao.insert(sesion);
+			
 		} catch (Exception e) {
 			throw new AppException(500, e.getMessage());
 		}
 
-		return sesion.getId();
+		return sesion;
 	}
 
 	public Sesion sesionAnterior(Long idAlumno, Long idTarea)

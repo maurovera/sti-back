@@ -132,7 +132,7 @@ public abstract class BaseResource<G extends BaseEntity, S extends BaseService<G
 	@Produces(MediaType.APPLICATION_JSON)
 	public G insertar(G dto) {
 		try {
-			System.out.println("base resource de tema");
+			System.out.println("base resource insertar");
 			return getService().insertar(dto, httpRequest);
 		} catch (Exception e) {
 			throw new WebApplicationException(e.getMessage());

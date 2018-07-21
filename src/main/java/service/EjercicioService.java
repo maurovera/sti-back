@@ -15,6 +15,7 @@ import model.Concepto;
 import model.Curso;
 import model.Ejercicio;
 import model.Respuesta;
+import model.Sesion;
 import model.Tarea;
 import model.Tema;
 import utils.AppException;
@@ -193,6 +194,54 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 		return res;
 	}
 
+
+	
+	/***Traer el siguiente Ejercicio correspondiente al test adaptativo
+	 * @param idTarea: tarea al cual corresponde
+	 * @param idAlumno: alumno de la tarea
+	 * @param idAsignatura: asignatura al cual corresponde 
+	 * @param respuesta: respuesta del alumno al ejercicio
+	 * @return Ejercicio
+	 **/
+	public Ejercicio siguienteEjercicio(Long idTarea, Long idAlumno, 
+			Long idAsignatura, String respuesta, Long idEjercicioAnterior)throws AppException 
+	{
+			try {
+				String siguienteEjercicio = null;// en un comienzo te devuelve un string
+				Tarea tarea = tareaService.obtener(idTarea);
+				Alumno alumno = alumnoService.obtener(idAlumno);
+				Asignatura asig = asignaturaService.obtener(idAsignatura);
+				/**Primer ejercicio**/
+				Ejercicio ejercicioAnterior = null;
+				if(idEjercicioAnterior != 0)
+					ejercicioAnterior = dao.get(idEjercicioAnterior);
+				
+				/***Se obtiene el siguiente ejercicio***/	
+				siguienteEjercicio = admAlumno.getSiguienteEjercicio(tarea, alumno, ejercicioAnterior,
+						idAsignatura, respuesta, asig);
+				if (siguienteEjercicio == null)
+					siguienteEjercicio = "No hay nada";
+
+				System.out.println("#####################Ejercicio: " + siguienteEjercicio);
+				
+				// traigo el ejercicio y le tiro la respuesta
+				String[] ejercicioString = siguienteEjercicio.split("#");
+				Long idEje = Long.valueOf(ejercicioString[0]);
+				Ejercicio ejercicioNuevo = dao.get(idEje);
+				
+				return ejercicioNuevo;
+				
+			} catch (Exception e) {
+				throw new AppException(500, e.getMessage());
+			}
+	}
+	
+	
+	
+	
+	
+	
+	
 	public String simulacion(HttpServletRequest httpRequest)
 			throws AppException {
 		Asignatura asig = new Asignatura();
@@ -428,6 +477,7 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 
 		// obtenemos el alumno
 		Long idAlumno = new Long(1);
+		
 		Alumno al = alumnoService.obtener(idAlumno);
 		c.agregarAlumno(al);
 		cursoService.insertar(c, httpRequest);
@@ -491,12 +541,12 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 		String rr4 = new String();
 		String rr5 = new String();
 		
-		Long idSesion = sesionService
-				.registrarSesion(idAlumno, tarea01.getId());
+		Sesion sesion = sesionService
+				.registrarSesion(idAlumno, tarea01.getId(), httpRequest);
 		// se prueba con siguiente ejercicio
 		// como es el primero. No existe ejercicio anterior. Por ello null
 		
-		
+		Long idSesion = sesion.getId();
 		/*****************PRIMER EJERCICIO**********************************/
 		String siguienteEjercicio = null;
 		siguienteEjercicio = admAlumno.getSiguienteEjercicio(tarea01, al, null,
