@@ -3,7 +3,6 @@ package service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Random;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -35,6 +34,8 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 	@Inject
 	private SesionService sesionService;
 
+
+	
 	@Inject
 	AdministracionBase adm;
 
@@ -468,18 +469,30 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 		System.out.println("Ejercicio 9: " + e9.getId());
 		System.out.println("Ejercicio 10: " + e10.getId());
 
+		
+		
+		Alumno alu = new Alumno();
+		alu.setApellidos("apellidos");
+		alu.setEdad(10);
+		alu.setFechaNacimiento(new Date());
+		alu.setGenero("m");
+		alu.setNombres("nombres");
+		alumnoService.insertar(alu, httpRequest);
+		
+		System.out.println("alumno:" + alu.getId());
+		
 		// Curso
 		Curso c = new Curso();
-		c.setAlumno(new Long(1));
+		c.setAlumno(alu.getId());
 		c.setAsignatura(asig);
 		c.setDescripcion("curso matematica");
 		c.setNombre("matematica2018");
 
 		// obtenemos el alumno
-		Long idAlumno = new Long(1);
+		Long idAlumno = alu.getId();
 		
-		Alumno al = alumnoService.obtener(idAlumno);
-		c.agregarAlumno(al);
+		//Alumno al = alumnoService.obtener(idAlumno);
+		c.agregarAlumno(alu);
 		cursoService.insertar(c, httpRequest);
 		System.out.println("Curso id: " + c.getId());
 
@@ -549,7 +562,7 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 		Long idSesion = sesion.getId();
 		/*****************PRIMER EJERCICIO**********************************/
 		String siguienteEjercicio = null;
-		siguienteEjercicio = admAlumno.getSiguienteEjercicio(tarea01, al, null,
+		siguienteEjercicio = admAlumno.getSiguienteEjercicio(tarea01, alu, null,
 				asig.getId(), "respuesta", asig);
 		if (siguienteEjercicio == null)
 			siguienteEjercicio = "No hay nada";
@@ -578,7 +591,7 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 		
 		// llama al siguiente ejercicio
 		/***************SEGUNDO EJERCICIO*************************/
-		siguienteEjercicio = admAlumno.getSiguienteEjercicio(tarea01, al,
+		siguienteEjercicio = admAlumno.getSiguienteEjercicio(tarea01, alu,
 				ejercicioNumero, asig.getId(), respuesta, asig);
 		if (siguienteEjercicio == null)
 			siguienteEjercicio = "No hay nada de siguiente ejercicio";
@@ -604,7 +617,7 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 		listaResultado.add(rr2);
 		
 		/**** LLAMA AL TERCER EJERCICIO ***************/
-		siguienteEjercicio = admAlumno.getSiguienteEjercicio(tarea01, al,
+		siguienteEjercicio = admAlumno.getSiguienteEjercicio(tarea01, alu,
 				ejercicioNumero, asig.getId(), respuesta, asig);
 		if (siguienteEjercicio == null)
 			siguienteEjercicio = "No hay nada de siguiente ejercicio";
@@ -632,7 +645,7 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 		
 		
 		/***LLAMA AL CUARTO EJERCICIO**/
-		siguienteEjercicio = admAlumno.getSiguienteEjercicio(tarea01, al,
+		siguienteEjercicio = admAlumno.getSiguienteEjercicio(tarea01, alu,
 				ejercicioNumero, asig.getId(), respuesta, asig);
 		if (siguienteEjercicio == null)
 			siguienteEjercicio = "No hay nada de siguiente ejercicio";
@@ -659,7 +672,7 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 		
 		
 		/****LLAMA AL QUINTO EJERCICIO***/
-		siguienteEjercicio = admAlumno.getSiguienteEjercicio(tarea01, al,
+		siguienteEjercicio = admAlumno.getSiguienteEjercicio(tarea01, alu,
 				ejercicioNumero, asig.getId(), respuesta, asig);
 		if (siguienteEjercicio == null)
 			siguienteEjercicio = "No hay nada de siguiente ejercicio";
