@@ -8,6 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.Size;
 
 import org.hibernate.annotations.DynamicInsert;
 
@@ -34,6 +35,16 @@ public class Profesor extends BaseEntity implements Serializable {
 	
 	@Column(name = "cedula")
     private int cedula;
+	
+	@Column(name = "direccion")
+    private String direccion;
+	
+	@Column(name = "email")
+    private String email;
+	
+	@Size(max = 1)
+	@Column(name = "genero")
+    private String genero;
 
 	public Long getId() {
 		return id;
@@ -65,6 +76,30 @@ public class Profesor extends BaseEntity implements Serializable {
 
 	public void setCedula(int cedula) {
 		this.cedula = cedula;
+	}
+
+	public String getDireccion() {
+		return direccion;
+	}
+
+	public void setDireccion(String direccion) {
+		this.direccion = direccion;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public String getGenero() {
+		return genero;
+	}
+
+	public void setGenero(String genero) {
+		this.genero = genero;
 	}
 	
 }

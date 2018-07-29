@@ -43,6 +43,18 @@ public class Curso extends BaseEntity implements Serializable {
 	@Column(name = "descripcion")
 	private String descripcion;
 
+	@Column(name = "introduccion")
+	private String introduccion;
+	
+	@Column(name = "acerca_de")
+	private String acerca_de;
+	
+	@Column(name = "para_quienes")
+	private String para_quienes;
+	
+	@Column(name = "calif_alumn")
+	private String calif_alumn;
+	
 	@OneToOne
 	private Asignatura asignatura;
 
@@ -161,6 +173,38 @@ public class Curso extends BaseEntity implements Serializable {
 	
 	public void agregarAlumno(Alumno al){
 		this.listaAlumno.add(al);
+	}
+
+	public String getIntroduccion() {
+		return introduccion;
+	}
+
+	public void setIntroduccion(String introduccion) {
+		this.introduccion = introduccion;
+	}
+
+	public String getAcerca_de() {
+		return acerca_de;
+	}
+
+	public void setAcerca_de(String acerca_de) {
+		this.acerca_de = acerca_de;
+	}
+
+	public String getPara_quienes() {
+		return para_quienes;
+	}
+
+	public void setPara_quienes(String para_quienes) {
+		this.para_quienes = para_quienes;
+	}
+
+	public String getCalif_alumn() {
+		return calif_alumn;
+	}
+
+	public void setCalif_alumn(String calif_alumn) {
+		this.calif_alumn = calif_alumn;
 	}
 	
 	
