@@ -29,7 +29,7 @@ public class Drl extends BaseEntity implements Serializable {
 	@Column(columnDefinition = "text", name = "archivo_drl")
 	private String archivoDrl;
 
-	
+	private String nuevaColumna;
 	// oid
 	//@Lob
 	//private byte[] campo02;
@@ -58,6 +58,15 @@ public class Drl extends BaseEntity implements Serializable {
 		this.archivoDrl = archivoDrl;
 	}
 
+	public String getNuevaColumna() {
+		return nuevaColumna;
+	}
+
+	public void setNuevaColumna(String nuevaColumna) {
+		this.nuevaColumna = nuevaColumna;
+	}
+
+	
 	
 	
 
