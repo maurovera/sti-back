@@ -31,18 +31,19 @@ public class Respuesta extends BaseEntity implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id_respuesta")
 	private Long id;
-	
+
 	@Column(name = "descripcion")
-    private String descripcion;
-	
+	private String descripcion;
+
 	@JsonIgnore
-    @ManyToMany(mappedBy = "listaRespuesta", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST,CascadeType.MERGE, CascadeType.REFRESH})
-    private List<Ejercicio> listaEjercicio;
+	@ManyToMany(mappedBy = "listaRespuesta", fetch = FetchType.LAZY, cascade = {
+			CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH })
+	private List<Ejercicio> listaEjercicio;
 
 	public Long getId() {
 		return id;
@@ -60,7 +61,7 @@ public class Respuesta extends BaseEntity implements Serializable {
 		this.descripcion = descripcion;
 	}
 
-	@JsonBackReference(value="respuesta-ejercicio")
+	@JsonBackReference(value = "respuesta-ejercicio")
 	public List<Ejercicio> getListaEjercicio() {
 		return listaEjercicio;
 	}
@@ -69,7 +70,33 @@ public class Respuesta extends BaseEntity implements Serializable {
 	public void setListaEjercicio(List<Ejercicio> listaEjercicio) {
 		this.listaEjercicio = listaEjercicio;
 	}
-    
-    
+
+	@Override
+	public int hashCode() {
+		int hash = 0;
+		hash += (id != null ? id.hashCode() : 0);
+		return hash;
+	}
+
+	@Override
+	public boolean equals(Object object) {
+		// TODO: Warning - this method won't work in the case the id fields are
+		// not set
+		if (!(object instanceof Respuesta)) {
+			return false;
+		}
+		Respuesta other = (Respuesta) object;
+		if ((this.id == null && other.id != null)
+				|| (this.id != null && !this.id
+						.equals(other.id))) {
+			return false;
+		}
+		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "model.Respuesta[ idRespuesta=" + id + " ]";
+	}
 
 }

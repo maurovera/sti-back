@@ -7,11 +7,10 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.Query;
 
-import model.Alumno;
 import model.Asignatura;
 import model.Curso;
+import model.Tarea;
 import utils.AppException;
-import utils.AsignaturaView;
 import utils.CursoView;
 import base.AdministracionBase;
 import base.BaseDAO;
@@ -20,11 +19,9 @@ import base.ListaResponse;
 @Stateless
 public class CursoDAO extends BaseDAO<Curso> {
 
-	
 	@Inject
 	AdministracionBase adm;
 
-	
 	@Override
 	public Class getEntity() {
 		// TODO Auto-generated method stub
@@ -46,10 +43,10 @@ public class CursoDAO extends BaseDAO<Curso> {
 		List<CursoView> res1 = new ArrayList<CursoView>();
 		ListaResponse<CursoView> res = new ListaResponse<CursoView>();
 		// Query para traer la lista de curso
-		Query query = em.createQuery("SELECT c.id, a.id, c.nombre, c.descripcion FROM Curso c "
-				+ "left join c.listaAlumno a where a.id !=:id or a.id is null"
-				);
-		
+		Query query = em
+				.createQuery("SELECT c.id, a.id, c.nombre, c.descripcion FROM Curso c "
+						+ "left join c.listaAlumno a where a.id !=:id or a.id is null");
+
 		query.setParameter("id", idAlumno);
 
 		List<Object[]> resultado = query.getResultList();
@@ -66,8 +63,7 @@ public class CursoDAO extends BaseDAO<Curso> {
 			as.setDescripcion(arg3);
 			res1.add(as);
 		}
-		
-		
+
 		int total = 0;
 		if (resultado != null)
 			total = resultado.size();
@@ -91,10 +87,10 @@ public class CursoDAO extends BaseDAO<Curso> {
 		List<CursoView> res1 = new ArrayList<CursoView>();
 		ListaResponse<CursoView> res = new ListaResponse<CursoView>();
 		// Query para traer la lista de curso
-		Query query = em.createQuery("SELECT c.id, a.id, c.nombre, c.descripcion FROM Curso c "
-				+ "join c.listaAlumno a where a.id =:id"
-				);
-		
+		Query query = em
+				.createQuery("SELECT c.id, a.id, c.nombre, c.descripcion FROM Curso c "
+						+ "join c.listaAlumno a where a.id =:id");
+
 		query.setParameter("id", idAlumno);
 
 		List<Object[]> resultado = query.getResultList();
@@ -111,7 +107,7 @@ public class CursoDAO extends BaseDAO<Curso> {
 			as.setDescripcion(arg3);
 			res1.add(as);
 		}
-		
+
 		int total = 0;
 		if (resultado != null)
 			total = resultado.size();
@@ -121,32 +117,55 @@ public class CursoDAO extends BaseDAO<Curso> {
 		return res;
 
 	}
-	
-	
-	
+
 	/**
 	 *
 	 * @param id
 	 * @param dto
 	 * @throws AppException
 	 */
-	public void inscribirse(Long id, Curso dto, Long idAlumno) throws AppException {
-		/**Inscribirse al curso.
+	public void inscribirse(Long id, Curso dto, Long idAlumno)
+			throws AppException {
+		/**
+		 * Inscribirse al curso.
 		 ***/
 		System.out.println("inscribirseDAO");
 		Curso entity = (Curso) em.find(getEntity(), id);
 		if (entity == null) {
 			throw new AppException(404, "Not Found");
 		}
-	
+
 		em.merge(dto);
-		
+
 		Asignatura asig = dto.getAsignatura();
 		Long idAsignatura = asig.getId();
 		adm.calcularProbabilidades(asig);
 		adm.crearRedAlumno(idAsignatura, idAlumno);
-	
+
 	}
 
+	/**
+	 *
+	 * Lista De tareas del curso
+	 */
+	public List<Tarea> listaTarea(Long id) throws AppException {
+		List<Tarea> lista = new ArrayList<Tarea>();
+		System.out.println("ListaTarea");
+		// Query para traer la lista de curso
+		Query query = em
+				.createQuery("SELECT t FROM Tarea t "
+						+ "where curso.id =:idCurso");
+
+		query.setParameter("idCurso", id);
+
+		lista = query.getResultList();
+
+		if (lista == null || lista.isEmpty()) {
+			throw new AppException(404, "Not Found");
+		}
+
+		return lista;
+
+	}
 
 }

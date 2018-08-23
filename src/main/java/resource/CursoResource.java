@@ -16,8 +16,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import model.Curso;
-import model.Ejercicio;
+import model.Tarea;
 import service.CursoService;
+import utils.AppException;
 import utils.CursoView;
 import base.BaseResource;
 import base.ListaResponse;
@@ -85,6 +86,19 @@ public class CursoResource extends BaseResource<Curso, CursoService> {
 	
 	
 	
+	/**
+	 * lista de tareas de un curso 
+	 * @param idCurso
+	 * @throws AppException 
+	 * **/
+	@GET
+	@Path("/listaTarea")
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<Tarea> listarTareas(
+	@QueryParam("idCurso") @DefaultValue("1") Long idCurso) throws NoSuchFieldException, AppException {
+		System.out.println("Lista de tareas resource de un curso");
+		return service.listaTarea(idCurso);
+	}
 	
 	
 

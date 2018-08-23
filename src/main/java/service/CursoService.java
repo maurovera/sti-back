@@ -1,6 +1,8 @@
 package service;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -8,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import model.Alumno;
 import model.Curso;
+import model.Tarea;
 import utils.AppException;
 import utils.CursoView;
 import base.BaseServiceImpl;
@@ -73,4 +76,18 @@ public class CursoService extends BaseServiceImpl<Curso, CursoDAO> {
 		}
 	}
 
+	
+	/**Tarea una lista de tareas**/
+	public List<Tarea> listaTarea(Long id) throws AppException {
+		List<Tarea> lista = new ArrayList<Tarea>();
+		try {
+			
+			lista = getDao().listaTarea(id);
+		} catch (Exception e) {
+			throw new AppException(500, e.getMessage());
+		}
+		return lista;
+	}
+
+	
 }

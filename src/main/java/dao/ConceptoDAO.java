@@ -154,7 +154,7 @@ public class ConceptoDAO extends BaseDAO<Concepto> {
 	public List<Ejercicio> listaEjerciciosConcepto(Concepto concepto)
 			throws AppException {
 
-		System.out.println("Lista de curso que el alumno esta inscripto");
+		System.out.println("Lista de ejercicios que pertenece a un alumno");
 
 		/**
 		 * Query que lista los ejercicios asociados

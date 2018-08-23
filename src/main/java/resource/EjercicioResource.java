@@ -98,21 +98,7 @@ public class EjercicioResource extends
 		return getService().listarEjercicio();
 	}
 
-	/**
-	 * Prueba lista curso por alumno inscriptos al curso.
-	 * 
-	 * @param idAlumno
-	 * @throws AppException
-	 * **/
-	@GET
-	@Path("/simulacion")
-	@Produces(MediaType.APPLICATION_JSON)
-	public String simulacion(
-			@QueryParam("idAlumno") @DefaultValue("1") Long idAlumno)
-			throws NoSuchFieldException, AppException {
-		System.out.println("simulacion ");
-		return service.simulacion(httpRequest);
-	}
+	
 
 	/** Recurso para traer el siguiente ejercicio **/
 	@GET

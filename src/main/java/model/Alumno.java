@@ -14,6 +14,7 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.validation.constraints.Size;
 
 import org.codehaus.jackson.annotate.JsonIgnore;
@@ -56,6 +57,10 @@ public class Alumno extends BaseEntity implements Serializable {
 
 	@Column(name = "edad")
 	private Integer edad;
+	
+	
+	@Column(name = "tipo")
+	private Double tipo;
 
 	
 	@JsonIgnore
@@ -135,6 +140,15 @@ public class Alumno extends BaseEntity implements Serializable {
 	
 	public void setListaCurso(List<Curso> listaCurso) {
 		this.listaCurso = listaCurso;
+	}
+	
+	
+	public Double getTipo() {
+		return tipo;
+	}
+
+	public void setTipo(Double tipo) {
+		this.tipo = tipo;
 	}
 
 }
