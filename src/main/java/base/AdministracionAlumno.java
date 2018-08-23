@@ -27,7 +27,7 @@ public class AdministracionAlumno {
 
 	@Inject
 	SesionService sesionService;
-	
+
 	@Inject
 	ConceptoService conceptoService;
 
@@ -38,7 +38,8 @@ public class AdministracionAlumno {
 	 * id tarea, idAlumno, Ejercicio is null respuesta = 'respuesta'
 	 ***/
 	public String getSiguienteEjercicio(Tarea tarea, Alumno alumno,
-			Ejercicio ejercicioAnterior, Long idAsignatura, String respuesta, Asignatura asig) {
+			Ejercicio ejercicioAnterior, Long idAsignatura, String respuesta,
+			Asignatura asig) {
 
 		// Tarea tarea = em.find(Tarea.class, idTarea);
 		// Alumno alumno = em.find(Alumno.class, idAlumno);
@@ -57,7 +58,8 @@ public class AdministracionAlumno {
 		}
 
 		// Ejercicio ejercicio = seleccionAleatoria(tarea);
-		ejercicioSiguiente = seleccionUtilidadMax(tarea, alumno, idEjercicio, asig);
+		ejercicioSiguiente = seleccionUtilidadMax(tarea, alumno, idEjercicio,
+				asig);
 
 		if (ejercicioSiguiente != null) {
 			enunciado = toASCII(ejercicioSiguiente.getEnunciado());
@@ -109,6 +111,10 @@ public class AdministracionAlumno {
 			System.out
 					.println("No hay concepto. Es nulo la lista de conceptos. ");
 
+		/**
+		 * Observacion importante. Porque todos los conceptos del arbol No
+		 * deberia ser de la tarea nomas
+		 ***/
 		for (Concepto concepto : listaConceptos) {
 			String nombreConcepto = concepto.getNombre();
 			double[] probCalc = net1.getNodeValue(nombreConcepto);
@@ -153,8 +159,8 @@ public class AdministracionAlumno {
 			 */
 			Sesion sesionAnterior = null;
 			try {
-				sesionAnterior = sesionService.sesionAnterior(idAlumno,
-						idTarea);
+				sesionAnterior = sesionService
+						.sesionAnterior(idAlumno, idTarea);
 			} catch (AppException e) {
 				System.out.println("No se pudo obtener la sesion");
 				e.printStackTrace();
@@ -209,21 +215,20 @@ public class AdministracionAlumno {
 				BigDecimal pC0 = new BigDecimal(String.valueOf(values[0])); // P(C=0)
 
 				int cont = 0;
-				/**Aqui no trae porque no esta asi en el modelo.***/
-				List<Ejercicio> ejercicios = conceptoService.listaEjercicioConcepto(concepto);
+				/** Aqui no trae porque no esta asi en el modelo. ***/
+				List<Ejercicio> ejercicios = conceptoService
+						.listaEjercicioConcepto(concepto);
 				if (ejercicios != null) {
 					System.out.println("Traje la lista de ejercicios concepto");
 				} else {
-					System.out
-							.println("Quilombo. no traje la lista");
+					System.out.println("Quilombo. no traje la lista");
 				}
-				
-				//List<Ejercicio> ejercicios = concepto.getListaEjercicio();
+
+				// List<Ejercicio> ejercicios = concepto.getListaEjercicio();
 				// System.out.println("cantidad ejercicio: " +
 				// ejercicios.size());
 				for (Ejercicio ejercicioConcepto : ejercicios) {
-					String nombreEjercicio = "E"
-							+ ejercicioConcepto.getId();
+					String nombreEjercicio = "E" + ejercicioConcepto.getId();
 
 					values = net1.getNodeValue(nombreEjercicio);
 					Double pE1 = values[1]; // P(E=1)
@@ -304,7 +309,8 @@ public class AdministracionAlumno {
 			for (int i = 0; i < tUtilidades.size(); i++) {
 
 				Map.Entry<BigDecimal, List> valor = tree.pollLastEntry();
-				System.out.println("ejercicio: "+valor.getValue().toString()+"utilidad: " + valor.getKey().toString());
+				System.out.println("ejercicio: " + valor.getValue().toString()
+						+ "utilidad: " + valor.getKey().toString());
 				List<Ejercicio> ejercicioLista = valor.getValue();
 				/*
 				 * for( Ejercicio ejer : ejercicioLista){
@@ -366,5 +372,297 @@ public class AdministracionAlumno {
 		System.out.println(output);
 		return output;
 	}// remove1
+
+	// #####################FUNCIONES PARA EL TUTOR####################3
+	/** Se encarga de abrir la redBayesiana **/
+	public Network abrirRed(Long alumno, Long asignatura) {
+
+		Network net1 = new Network();
+		String nombreRed = "red_alumno_" + alumno + "_asignatura_" + asignatura
+				+ ".xdsl";
+		// System.out.println("seleccionUtilidadMax - /home/mauro/proyectos/tesis/ejercitarMau/src/main/redes/"
+		// + nombreRed);
+
+		net1.readFile(dir + nombreRed);
+		net1.updateBeliefs();
+
+		return net1;
+
+	}
+
+	/**
+	 * @param la
+	 *            red bayesiana y la lista de conceptos
+	 * 
+	 *            El metodo devuelve una lista de nombre de conceptos que el
+	 *            alumno no conoce. El criterio para determinar si conoce o no
+	 *            un concepto es si la probabilidad de conocer el concepto en la
+	 *            red es mayor o igual a un nivel de concepto fijado por el
+	 *            profesor por concepto.
+	 * 
+	 **/
+	public List<String> listarConceptosDesconocidos(Network red,
+			List<String> listaConceptos) {
+
+		// Network net = new Network();
+		// net.readFile(red);
+		// net.updateBeliefs();
+
+		Double valorPurete = new Double(0.75);
+		List<String> devolver = new ArrayList<String>();
+		System.out.println("\nFuncion listar\n");
+		for (String nombre : listaConceptos) {
+
+			double[] valor = red.getNodeValue(nombre);
+			double conoce = valor[1];
+			if (conoce >= valorPurete) {
+				System.out.println("Conoce este concepto: " + nombre
+						+ " valor: " + conoce);
+			} else {
+				System.out.println("No conoce este concepto: " + nombre
+						+ " valor: " + conoce);
+				devolver.add(nombre);
+			}
+		}
+		return devolver;
+	}
+
+	/**
+	 * Metodo que devuelve un ejercicio Este ejercicio es el que tiene mayor
+	 * utilidad para el concepto
+	 **/
+	private Ejercicio seleccionUtilidadMaxPorConcepto(Long idTarea,
+			Long idAlumno, Long idAsignatura, Concepto concepto) {
+
+		try {
+
+			/*** para obtener la sesion anterior. ***/
+
+			Sesion sesionAnterior = null;
+			try {
+				sesionAnterior = sesionService
+						.sesionAnterior(idAlumno, idTarea);
+			} catch (AppException e) {
+				System.out.println("No se pudo obtener la sesion");
+				e.printStackTrace();
+			}
+
+			/*** inicializacion ***/
+
+			Double utilidadMax = 0.0;
+			Map<BigDecimal, List> hUtilidades = new HashMap<BigDecimal, List>();
+			Ejercicio ejercicio = null;
+
+			/*** Abre el archivo de la red bayesiana **/
+			Network net1 = new Network();
+			String nombreRed = "red_alumno_" + idAlumno + "_asignatura_"
+					+ idAsignatura + ".xdsl";
+			net1.readFile(dir + nombreRed);
+			net1.updateBeliefs();
+
+			/***
+			 * Quita las probabilidades del concepto P(c=1) conoce P(c=0)
+			 * no_conoce
+			 ***/
+			String nombreConcepto = concepto.getNombre();
+			double[] values = net1.getNodeValue(nombreConcepto);
+			BigDecimal pC1 = new BigDecimal(String.valueOf(values[1])); // P(C=1)
+			BigDecimal pC0 = new BigDecimal(String.valueOf(values[0])); // P(C=0)
+
+			int cont = 0;
+			/**
+			 * Traemos todo los ejercicios relacionados con el concepto.
+			 ***/
+			List<Ejercicio> ejercicios = conceptoService
+					.listaEjercicioConcepto(concepto);
+			if (ejercicios != null) {
+				System.out.println("Traje la lista de ejercicios concepto");
+			} else {
+				System.out.println("Quilombo. no traje la lista");
+			}
+
+			/**
+			 * For por la lista de ejercicios Vamos calculando su utilidad
+			 ***/
+			for (Ejercicio ejercicioConcepto : ejercicios) {
+				String nombreEjercicio = "E" + ejercicioConcepto.getId();
+
+				/** Probabilidades de un ejercicio **/
+				values = net1.getNodeValue(nombreEjercicio);
+				Double pE1 = values[1]; // P(E=1)
+				Double pE0 = values[0]; // P(E=0)
+
+				net1.setEvidence(nombreConcepto, "Conoce");
+				net1.updateBeliefs();
+				values = net1.getNodeValue(nombreEjercicio);
+				BigDecimal pE1C1 = new BigDecimal(String.valueOf(values[1])); // P(E=1/C=1)
+				BigDecimal pAuxi1 = new BigDecimal(pE1C1.toString());// -pE1;
+																		// //P(E=1/C=1)
+																		// -
+																		// P(E=1)
+				BigDecimal utilidadParcial1 = pAuxi1.multiply(pC1);
+				net1.clearEvidence(nombreConcepto);
+				net1.updateBeliefs();
+
+				net1.setEvidence(nombreConcepto, "No_conoce");
+				net1.updateBeliefs();
+				values = net1.getNodeValue(nombreEjercicio);
+				Double pE0C0 = values[0]; // P(E=0/C=0)
+				BigDecimal pAuxi0 = new BigDecimal(pE0C0.toString());// -pE0;
+																		// //P(E=0/C=0)
+																		// -
+																		// P(E=0)
+				BigDecimal utilidadParcial2 = pAuxi0.multiply(pC0);
+				BigDecimal utilidadMaxParcial = utilidadParcial1
+						.add(utilidadParcial2);
+
+				utilidadMaxParcial = utilidadMaxParcial.setScale(10,
+						utilidadMaxParcial.ROUND_HALF_UP);
+				List utilidades = hUtilidades.get(utilidadMaxParcial);
+
+				if (utilidades == null)
+					utilidades = new ArrayList();
+
+				if (sesionAnterior.getListaEjercicio() == null
+						|| !sesionAnterior.getListaEjercicio().contains(
+								ejercicioConcepto))
+					utilidades.add(ejercicioConcepto);
+
+				if (utilidades.size() > 0)
+					hUtilidades.put(utilidadMaxParcial, utilidades);
+
+			}
+
+			TreeMap<BigDecimal, List> tUtilidades = new TreeMap<BigDecimal, List>(
+					hUtilidades);
+			TreeMap<BigDecimal, List> tree = (TreeMap<BigDecimal, List>) tUtilidades
+					.clone();
+
+			for (int i = 0; i < tUtilidades.size(); i++) {
+
+				Map.Entry<BigDecimal, List> valor = tree.pollLastEntry();
+				System.out.println("ejercicio: " + valor.getValue().toString()
+						+ "utilidad: " + valor.getKey().toString());
+				List<Ejercicio> ejercicioLista = valor.getValue();
+			}
+
+			Map.Entry<BigDecimal, List> valor;
+			Map.Entry<BigDecimal, List> primerValor;
+			valor = tUtilidades.pollLastEntry();
+
+			List lista = valor.getValue();
+			Random rnd = new Random();
+			int eleccion = rnd.nextInt(lista.size());
+
+			return (Ejercicio) lista.get(eleccion);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	/***
+	 * Este metodo recibe tarea: es un id de la tarea. Sirve para la sesion
+	 * alumno: id del alumno. Sirve para la sesion idAsignatura: sirve para
+	 * abrir la redBayesiana concepto: Es el concepto que se necesita para
+	 * buscar el siguiente ejercicio
+	 ***/
+	public Ejercicio getSiguienteEjercicioPorConcepto(Long tarea, Long alumno,
+			Long idAsignatura, Concepto concepto) {
+
+		Ejercicio ejercicioSiguiente = null;
+
+		/**
+		 * Ejercicio seleccionado por la utilidad maxima que el ejercicio ofrece
+		 * para el concepto seleccionado
+		 ***/
+		ejercicioSiguiente = seleccionUtilidadMaxPorConcepto(tarea, alumno,
+				idAsignatura, concepto);
+
+		if (ejercicioSiguiente == null)
+			System.out.println("No hay ejercicio Siguiente");
+
+		return ejercicioSiguiente;
+
+	}
+
+	/***
+	 * Al responder un ejercicio del tutor se guarda en la sesion anterior Se
+	 * actualiza el conocimiento del concepto o los conceptos que componen el
+	 * ejercicio y del alumno en general.
+	 * 
+	 * @throws AppException
+	 ***/
+	public Boolean responderEjercicioConcepto(Ejercicio ejercicio,
+			String respuesta, Long idAlumno, Long idAsignatura, Long idTarea) {
+
+		Boolean retorno = false;
+		/**
+		 * Se abre el archivo que corresponde
+		 **/
+		Network net1 = new Network();
+		String nombreRed = "red_alumno_" + idAlumno + "_asignatura_"
+				+ idAsignatura + ".xdsl";
+		net1.readFile(dir + nombreRed);
+		net1.updateBeliefs();
+
+		/**
+		 * Se quita el nombre del ejercicio dentro de la red bayesiana
+		 **/
+		Long idEjercicio = ejercicio.getId();
+		String nombreEjercicio = "E" + idEjercicio;
+
+		/**
+		 * Aca se envia la respuesta. Si es correcto o no.
+		 ***/
+		if (respuesta.equals(ejercicio.getRespuesta().getDescripcion())) {
+			net1.setEvidence(nombreEjercicio, "Correcto");
+			retorno = true;
+		} else {
+			net1.setEvidence(nombreEjercicio, "Incorrecto");
+			retorno = false;
+		}
+		net1.updateBeliefs();
+
+		List<Concepto> listaConceptos = ejercicio.getListaConceptos();
+		if (listaConceptos != null)
+			System.out.println("hay conceptos. No es nulo");
+		else
+			System.out
+					.println("No hay concepto. Es nulo la lista de conceptos. ");
+
+		/**
+		 * Observacion importante. Actualizacion de lista de conceptos del
+		 * ejercicio evaluado
+		 ***/
+		for (Concepto concepto : listaConceptos) {
+			String nombreConcepto = concepto.getNombre();
+			double[] probCalc = net1.getNodeValue(nombreConcepto);
+			// System.out.println("proba " + probCalc.toString());
+			net1.setNodeDefinition(nombreConcepto, probCalc);
+		}
+
+		net1.clearEvidence(nombreEjercicio);
+		net1.updateBeliefs();
+		net1.writeFile(dir + nombreRed);
+
+		/**
+		 * Se registra en la sesion el ejercicio evaluado
+		 **/
+		try {
+			Sesion sesionAnterior = sesionService.sesionAnterior(idAlumno,
+					idTarea);
+			sesionService.insertarEjercicioResuelto(sesionAnterior.getId(),
+					sesionAnterior, ejercicio);
+		} catch (AppException e) {
+			System.out
+					.println("No se pudo obtener la sesion o simplemente no se pudo insertar sesion");
+			e.printStackTrace();
+		}
+		
+		return retorno;
+
+	}
 
 }
