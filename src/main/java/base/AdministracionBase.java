@@ -1,13 +1,12 @@
 package base;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.ejb.Stateless;
 
-import model.Alumno;
 import model.Asignatura;
 import model.Concepto;
-import model.Curso;
 import model.Ejercicio;
 import model.Tema;
 import smile.Network;
@@ -206,20 +205,23 @@ public class AdministracionBase {
 
 	}
 
-	/** Por cada concepto borrado o agregado. Se regenera el ejercicio.
+	/**
+	 * Por cada concepto borrado o agregado. Se regenera el ejercicio.
 	 ***/
 	public void reCalcularEjercicios(List<Ejercicio> listaEjercicios,
 			Long idAsignatura) {
 		System.out.println("Re calcularEjercicios");
-		
+
 		for (Ejercicio ejercicio : listaEjercicios) {
 
-			/**Tipo si esta vacio. Eliminar el nodo ejercicio.**/
+			/** Tipo si esta vacio. Eliminar el nodo ejercicio. **/
 			if (ejercicio.getListaConceptos().isEmpty()) {
 				System.out.println("elimine ejercicio.");
 				eliminarEjercicioRed(ejercicio, idAsignatura);
-				/**Tipo si esta con conceptos. Se borra el ejercicio y 
-				 * se vuelve a meter con sus nuevos conceptos**/
+				/**
+				 * Tipo si esta con conceptos. Se borra el ejercicio y se vuelve
+				 * a meter con sus nuevos conceptos
+				 **/
 			} else {
 				System.out.println("calcule metodo para que quede bien");
 				eliminarEjercicioRed(ejercicio, idAsignatura);
@@ -348,170 +350,285 @@ public class AdministracionBase {
 
 		return gX;
 	}
-	
-	
-	
-    /***Calculos de probabilidades
-     * Aqui todo este calculo se hace cuando un alumno se inscribe.calcularProbabilidadesTema
-     * Lo que hace es agregar los pesos de los temas y de los conceptos en si. 
-     * *******/
-    /***AUN NO USO**/
-    public void calcularProbabilidades(Asignatura asignatura) {
-    	
-    	System.out.println("CalcularProbabilidades. Inscribirse");
-    	// Calculo de las probabilidades condicionales de las relaciones de agregacion
-    	/**Lee la red de la asignatura**/
-    	Long idAsignatura = asignatura.getId();
-    	String nombreRed = "red_asignatura_" + idAsignatura + ".xdsl";
+
+	/***
+	 * Calculos de probabilidades Aqui todo este calculo se hace cuando un
+	 * alumno se inscribe.calcularProbabilidadesTema Lo que hace es agregar los
+	 * pesos de los temas y de los conceptos en si.
+	 * *******/
+	/*** AUN NO USO **/
+	public void calcularProbabilidades(Asignatura asignatura) {
+
+		System.out.println("CalcularProbabilidades. Inscribirse");
+		// Calculo de las probabilidades condicionales de las relaciones de
+		// agregacion
+		/** Lee la red de la asignatura **/
+		Long idAsignatura = asignatura.getId();
+		String nombreRed = "red_asignatura_" + idAsignatura + ".xdsl";
 		System.out.println(dir + nombreRed);
 		Network net = new Network();
 		net.readFile(dir + nombreRed);
-		
+
 		String nomTem;
-		//Asignatura asignatura = em.find(Asignatura.class, idAsignatura);
+		// Asignatura asignatura = em.find(Asignatura.class, idAsignatura);
 
-    	//List<Tema> temaList = (List<Tema>) em.createQuery("Select e from Tema e where e.profesor = :profesor and e.asignatura=:asignatura order by e.idTema" )
-			//	.setParameter("profesor", asignatura.getProfesor()).setParameter("asignatura", asignatura).getResultList() ;
-    	List<Tema> listaTema = asignatura.getListaTemas();
-    			
+		// List<Tema> temaList = (List<Tema>)
+		// em.createQuery("Select e from Tema e where e.profesor = :profesor and e.asignatura=:asignatura order by e.idTema"
+		// )
+		// .setParameter("profesor",
+		// asignatura.getProfesor()).setParameter("asignatura",
+		// asignatura).getResultList() ;
+		List<Tema> listaTema = asignatura.getListaTemas();
 
-    	for(Tema tema : listaTema) {
-    		double[] temaDef = calcularProbabilidadesTema(tema);
-    		System.out.println(tema.getNombre()+ " "+temaDef.toString() );
-    		//cambiar formato de nodo
-    		 nomTem = sp.convertirEspacioToGuion(tema.getNombre());
-    		net.setNodeDefinition(nomTem, temaDef);
-    	}
-    	
+		for (Tema tema : listaTema) {
+			double[] temaDef = calcularProbabilidadesTema(tema);
+			System.out.println(tema.getNombre() + " " + temaDef.toString());
+			// cambiar formato de nodo
+			nomTem = sp.convertirEspacioToGuion(tema.getNombre());
+			net.setNodeDefinition(nomTem, temaDef);
+		}
 
-    	double[] asignaturaDef = calcularProbabilidadesAsignatura(asignatura);
-    	//cambiar formato de ndo
-    	 nomTem = sp.convertirEspacioToGuion(asignatura.getNombre());
-    	net.setNodeDefinition(nomTem, asignaturaDef);
-    	
-    	net.writeFile(dir + nombreRed);
-    
-    }
-    /***AUN NO USO**/
-    private double[] calcularProbabilidadesAsignatura(Asignatura asignatura) {
-    	int dimension = (int) Math.pow(2, asignatura.getListaTemas().size());
-    	double [] asignaturaDef = new double[dimension * 2];
-    	
-		System.out.println("DimensionAsignatura "+ dimension );
+		double[] asignaturaDef = calcularProbabilidadesAsignatura(asignatura);
+		// cambiar formato de ndo
+		nomTem = sp.convertirEspacioToGuion(asignatura.getNombre());
+		net.setNodeDefinition(nomTem, asignaturaDef);
 
-    	int j = 0;
-    	for(int i = 0; i < dimension; i++) {
-    		asignaturaDef[j] = 1 - cpAsignatura(asignatura, i);
-    		j++;
-    		asignaturaDef[j] = 1 - asignaturaDef[j-1];
-    		j++;
-    		
-    	}
-    	
-    	return asignaturaDef;
+		net.writeFile(dir + nombreRed);
+
 	}
-    
+
+	/*** AUN NO USO **/
+	private double[] calcularProbabilidadesAsignatura(Asignatura asignatura) {
+		int dimension = (int) Math.pow(2, asignatura.getListaTemas().size());
+		double[] asignaturaDef = new double[dimension * 2];
+
+		System.out.println("DimensionAsignatura " + dimension);
+
+		int j = 0;
+		for (int i = 0; i < dimension; i++) {
+			asignaturaDef[j] = 1 - cpAsignatura(asignatura, i);
+			j++;
+			asignaturaDef[j] = 1 - asignaturaDef[j - 1];
+			j++;
+
+		}
+
+		return asignaturaDef;
+	}
+
 	private double cpAsignatura(Asignatura asignatura, int i) {
-		
-		
-		////HAY QUE REVISAR ESTA FUNCION
+
+		// //HAY QUE REVISAR ESTA FUNCION
 		String comb = Integer.toBinaryString(i);
 		int dimension = asignatura.getListaTemas().size();
-    	while(comb.length() != dimension){
-    		comb = "0" + comb;
-    	}
-    	
-    	double valTemp = 0;
-		//List<Tema> temaList = em.createQuery("Select e from Tema e where e.asignatura = :asignatura")
-			//	.setParameter("asignatura", asignatura).getResultList(); 
+		while (comb.length() != dimension) {
+			comb = "0" + comb;
+		}
+
+		double valTemp = 0;
+		// List<Tema> temaList =
+		// em.createQuery("Select e from Tema e where e.asignatura = :asignatura")
+		// .setParameter("asignatura", asignatura).getResultList();
 		List<Tema> temaList = asignatura.getListaTemas();
 		System.out.println(temaList);
-    	for (int j = 0; j < temaList.size(); j++) {
-    		 if(comb.charAt(j) == '1') {
-    			 //valTemp = valTemp + temaList.get(j).getPeso();
-    			 valTemp = valTemp + temaList.get(j).getPesoTema();
-    		 } 
-    		    	}
-    	
-    	return valTemp;
+		for (int j = 0; j < temaList.size(); j++) {
+			if (comb.charAt(j) == '1') {
+				// valTemp = valTemp + temaList.get(j).getPeso();
+				valTemp = valTemp + temaList.get(j).getPesoTema();
+			}
+		}
+
+		return valTemp;
 	}
-	/***AUN NO USO**/
-    private double [] calcularProbabilidadesTema(Tema tema) {
-    	//Calculo de las probabilidades condicionales 
-    	int dimension = (int) Math.pow(2, tema.getListaConceptos().size());
-    	System.out.println("dimension " + dimension);
-    	double [] temaDef = new double[dimension * 2];
-    	System.out.println("**************************************************************");
-    	int j = 0;
-    	for(int i = 0; i < dimension; i++) {
-    		temaDef[j] = 1 - cpTema(tema, i);
-    		j++;
-    		temaDef[j] = 1 - temaDef[j-1];
-    		j++;
-    		
-    	}
-    	System.out.println("**************************************************************");
 
-    	
-    	return temaDef;
-    }
-    /***AUN NO USO***/
-    private double cpTema(Tema tema, int i) {
-    	
-    	int cantidadConceptos = tema.getListaConceptos().size();
-    	String comb = Integer.toBinaryString(i);
-    	while(comb.length() < cantidadConceptos){
-    		comb = "0" + comb;
-    	}
-    
+	/*** AUN NO USO **/
+	private double[] calcularProbabilidadesTema(Tema tema) {
+		// Calculo de las probabilidades condicionales
+		int dimension = (int) Math.pow(2, tema.getListaConceptos().size());
+		System.out.println("dimension " + dimension);
+		double[] temaDef = new double[dimension * 2];
+		System.out
+				.println("**************************************************************");
+		int j = 0;
+		for (int i = 0; i < dimension; i++) {
+			temaDef[j] = 1 - cpTema(tema, i);
+			j++;
+			temaDef[j] = 1 - temaDef[j - 1];
+			j++;
 
-    	double valTemp = 0;
-    	for (int j = 0; j < cantidadConceptos; j++) {
-    		 System.out.println("--------------------------------------------------------");
-				System.out.println("j: " + j);
+		}
+		System.out
+				.println("**************************************************************");
 
-			    System.out.println("comb: " + comb);
-    		 if(comb.charAt(j) == '1') {
- 				   
-    				System.out.println("concepto: " +  tema.getListaConceptos().get(j));
-    				System.out.println("peso: " +  tema.getListaConceptos().get(j).getPeso());
- 				    System.out.println("--------------------------------------------------------");
+		return temaDef;
+	}
 
-    			 valTemp = valTemp + tema.getListaConceptos().get(j).getPeso();
-    		 } 
-    	}
-    	
-    	return valTemp;
-    	
-    }
-    /***FIN Calculos de probabilidades*******/
+	/*** AUN NO USO ***/
+	private double cpTema(Tema tema, int i) {
 
-    
-    
-    
-	/**NO USE AUN* PERO CREA RED BAYESIANA POR LISTA DE ALUMNOS
-	 * Lo que hace es leer la red bayesiana con idAsignatura y guardalo
-	 * con un idAsignatura + un idAlumno. Que seria el arbol del alumno.
+		int cantidadConceptos = tema.getListaConceptos().size();
+		String comb = Integer.toBinaryString(i);
+		while (comb.length() < cantidadConceptos) {
+			comb = "0" + comb;
+		}
+
+		double valTemp = 0;
+		for (int j = 0; j < cantidadConceptos; j++) {
+			System.out
+					.println("--------------------------------------------------------");
+			System.out.println("j: " + j);
+
+			System.out.println("comb: " + comb);
+			if (comb.charAt(j) == '1') {
+
+				System.out.println("concepto: "
+						+ tema.getListaConceptos().get(j));
+				System.out.println("peso: "
+						+ tema.getListaConceptos().get(j).getPeso());
+				System.out
+						.println("--------------------------------------------------------");
+
+				valTemp = valTemp + tema.getListaConceptos().get(j).getPeso();
+			}
+		}
+
+		return valTemp;
+
+	}
+
+	/*** FIN Calculos de probabilidades *******/
+
+	/**
+	 * NO USE AUN* PERO CREA RED BAYESIANA POR LISTA DE ALUMNOS Lo que hace es
+	 * leer la red bayesiana con idAsignatura y guardalo con un idAsignatura +
+	 * un idAlumno. Que seria el arbol del alumno.
 	 **/
-	public void crearRedAlumno(Long idAsignatura, Long idAlumno ) {
+	public void crearRedAlumno(Long idAsignatura, Long idAlumno) {
 		// TODO Auto-generated method stub
-		
-		//Asignatura asignatura = em.find(Asignatura.class, idAsignatura);
-        //Curso curso = asignatura.getCurso();
-		//List<Alumno> alumnoList = em.createQuery("Select e from Alumno e where e.curso = :curso")
-			//	.setParameter("curso", curso).getResultList();
-		/**Crear Red Alumno**/
+
+		// Asignatura asignatura = em.find(Asignatura.class, idAsignatura);
+		// Curso curso = asignatura.getCurso();
+		// List<Alumno> alumnoList =
+		// em.createQuery("Select e from Alumno e where e.curso = :curso")
+		// .setParameter("curso", curso).getResultList();
+		/** Crear Red Alumno **/
 		String nombreRed = "red_asignatura_" + idAsignatura + ".xdsl";
 		Network net = new Network();
 		net.readFile(dir + nombreRed);
-		
-		//for (Alumno alumno : alumnoList) {
-		//String nombreRedAlumno = "red_alumno_" + alumno.getIdAlumno() + "_asignatura_" + idAsignatura + ".xdsl";
-		String nombreRedAlumno = "red_alumno_" + idAlumno + "_asignatura_" + idAsignatura + ".xdsl";
+
+		// for (Alumno alumno : alumnoList) {
+		// String nombreRedAlumno = "red_alumno_" + alumno.getIdAlumno() +
+		// "_asignatura_" + idAsignatura + ".xdsl";
+		String nombreRedAlumno = "red_alumno_" + idAlumno + "_asignatura_"
+				+ idAsignatura + ".xdsl";
 		net.writeFile(dir + nombreRedAlumno);
-			
-		//}
-		
+
+		// }
+
 	}
-   
+
+	/** Metodo para el log **/
+	public List<Object> registrarEjercicio(Asignatura asignatura,
+			Long idAlumno, Ejercicio ejercicio, Boolean respuesta,
+			int cantEjercicio, String tipoAlumno) {
+
+		List<Object> datosFila = new ArrayList<Object>();
+
+		/***
+		 * String queryConceptos =
+		 * "select c from Concepto c  join c.tema t where t.asignatura = :asignatura"
+		 * ; Query query = em.createQuery(queryConceptos);
+		 * query.setParameter("asignatura", asignatura); List<Concepto>
+		 * conceptos = query.getResultList();
+		 */
+		/* List<Tema> temas = obtenerTemas(asignatura); */
+
+		datosFila.add(idAlumno);
+		datosFila.add(getValorNodoRed(asignatura.getNombre(),
+				asignatura.getId(), idAlumno));
+
+		/**
+		 * Lista de conceptos y temas
+		 ***/
+
+		List<Tema> temas = new ArrayList<Tema>();
+
+		temas = asignatura.getListaTemas();
+		for (Tema tema : temas) {
+			String porcentajeTema = getValorNodoRed(tema.getNombre(),
+					asignatura.getId(), idAlumno);
+			if (porcentajeTema == null)
+				porcentajeTema = "temaNulo";
+
+			datosFila.add(porcentajeTema);
+			for (Concepto concepto : tema.getListaConceptos()) {
+				String porcentajeConcepto = getValorNodoRed(
+						concepto.getNombre(), asignatura.getId(), idAlumno);
+
+				if (porcentajeConcepto == null)
+					porcentajeConcepto = "conceptoNulo";
+
+				datosFila.add(porcentajeConcepto);
+
+			}
+		}
+
+		datosFila.add(ejercicio.getId());
+		datosFila.add(ejercicio.getAdivinanza());
+		datosFila.add(ejercicio.getNivelDificultad());
+		datosFila.add((respuesta) ? "SI" : "NO");
+		datosFila.add(cantEjercicio);
+		datosFila.add(tipoAlumno);
+		datosFila.add("\r");
+
+		return datosFila;
+
+	}
+
+	/** Utilizado para el log **/
+	public String getValorNodoRed(String nombre, Long idAsignatura,
+			Long idAlumno) {
+		// TODO Auto-generated method stub
+		String nombreRed = "red_alumno_" + idAlumno + "_asignatura_"
+				+ idAsignatura + ".xdsl";
+
+		Network net = new Network();
+		net.readFile(dir + nombreRed);
+
+		net.updateBeliefs();
+		String titulo = sp.convertirEspacioToGuion(nombre);
+		// System.out.println(titulo);
+		double[] valor = net.getNodeValue(titulo);
+
+		double conoce = valor[1];
+
+		return Double.toString(conoce);
+
+	}
+
+	
+	/**Retorna el double*/
+	public Double getValorNodoRedDouble(String nombre, Long idAsignatura,
+			Long idAlumno) {
+		// TODO Auto-generated method stub
+		String nombreRed = "red_alumno_" + idAlumno + "_asignatura_"
+				+ idAsignatura + ".xdsl";
+
+		Network net = new Network();
+		net.readFile(dir + nombreRed);
+
+		net.updateBeliefs();
+		String titulo = sp.convertirEspacioToGuion(nombre);
+		// System.out.println(titulo);
+		double[] valor = net.getNodeValue(titulo);
+
+		double conoce = valor[1];
+
+		return conoce;
+
+	}
+
+	
+	
+	
 }
