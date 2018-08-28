@@ -33,11 +33,11 @@ public class MaterialDAO extends BaseDAO<Material> {
 	 * @throws AppException 
 	 * 
 	 */
-	public List<Material> materialesDisponibles(List<Material> listaMateriales, Regla regla) throws AppException {
+	public Material materialesDisponibles(List<Material> listaMateriales, Regla regla) throws AppException {
 
 		/**Lista de retorno**/
-		List<Material> listaRetorno = null;
-	
+		//List<Material> listaRetorno = null;
+		Material materialR = null;
 		/**
 		 * Query que trae la lista de materiales disponibles
 		 ***/
@@ -52,18 +52,19 @@ public class MaterialDAO extends BaseDAO<Material> {
 		q.setParameter("concepto", regla.getConcepto());
 		q.setParameter("nivel", regla.getNivel());
 		q.setParameter("estilo", regla.getEstilo());
+		q.setMaxResults(1);
+		//listaRetorno = q.getResultList();
+		materialR = (Material) q.getResultList();
 		
-		listaRetorno = q.getResultList();
-		
-		if (listaRetorno == null) {
+		if (materialR == null) {
 			throw new AppException(404, "Not Found lista materiales");
 		}
 		
-		for (Material m : listaRetorno) {
-			System.out.println(m.getId());
-		}
-		
-		return listaRetorno;
+	//	for (Material m : listaRetorno) {
+		//	System.out.println(m.getId());
+	//	}
+		System.out.println("material seleccionado: " + materialR.getId());
+		return materialR;
 
 	}
 

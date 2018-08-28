@@ -34,11 +34,12 @@ public class MaterialResource extends BaseResource<Material, MaterialService> {
 	
 	/***Lista de materiales disponible. Queda pendiente si ver 
 	 * que tenga en cuenta el id de la asignatura
+	 * Ejemplo
 	 * **/
 	@GET
 	@Path("/materiales")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Material> listarMaterialesDisponibles() throws NoSuchFieldException, AppException {
+	public Material listarMaterialesDisponibles() throws NoSuchFieldException, AppException {
 		System.out.println("Listar materiales disponibles");
 		Material m = service.obtener(new Long(1));
 		Material m2 = service.obtener(new Long(2));
