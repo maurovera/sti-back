@@ -1,9 +1,15 @@
 package service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
 import model.Material;
+import model.Tarea;
+import utils.AppException;
+import utils.Regla;
 import base.BaseServiceImpl;
 import dao.MaterialDAO;
 
@@ -17,6 +23,22 @@ public class MaterialService extends BaseServiceImpl<Material, MaterialDAO> {
 	public MaterialDAO getDao() {
 		// TODO Auto-generated method stub
 		return dao;
+	}
+
+	
+	
+	/**Lista de materiales que estan disponibles**/
+	public List<Material> materialesDisponibles(List<Material> materiales, 
+			Regla regla) throws AppException {
+		
+		List<Material> lista = new ArrayList<Material>();
+		try {
+			
+			lista = getDao().materialesDisponibles(materiales, regla);
+		} catch (Exception e) {
+			throw new AppException(500, e.getMessage());
+		}
+		return lista;
 	}
 
 }
