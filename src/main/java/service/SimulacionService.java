@@ -23,6 +23,7 @@ import model.Evidencia;
 import model.Material;
 import model.Respuesta;
 import model.Sesion;
+import model.SesionMaterial;
 import model.Simulacion;
 import model.Tarea;
 import model.Tema;
@@ -82,6 +83,9 @@ public class SimulacionService extends
 
 	@Inject
 	private MaterialService materialService;
+
+	@Inject
+	private SesionMaterialService sesionMaterialService;
 
 	// private SessionService session;
 	final private long userId = 1;
@@ -1093,10 +1097,11 @@ public class SimulacionService extends
 					// Aqui si se registra un nuevo valor de nodo
 					e.setNivelEvidencia(valorNodo);
 
-				} else if(!respuesta){
+				} else if (!respuesta) {
 					// e.formatearEvidencia();
 
-					Material material = aplicarReglaMaterial(e, hd);
+					Material material = aplicarReglaMaterial(e, hd, idTarea,
+							idAlu);
 					mostrarMaterial(material);
 					e.addMaterial(material.getId());
 					pasoPorMaterial = true;
@@ -1175,10 +1180,10 @@ public class SimulacionService extends
 
 	}
 
-	private Material aplicarReglaMaterial(Evidencia e, HerramientasDrools hd)
-			throws AppException {
+	private Material aplicarReglaMaterial(Evidencia e, HerramientasDrools hd,
+			Long idTarea, Long idAlu) throws AppException {
 
-		Material m = new Material();
+		Material material = new Material();
 
 		// iniciamos sesion y le tiramos el material
 		hd.iniciarSession();
@@ -1192,22 +1197,46 @@ public class SimulacionService extends
 		hd.ejecutarRegla(r);
 		hd.terminarSession();
 
+		/**Aqui abrimos una sesion**/
+		SesionMaterial sesionMaterialAnterior = sesionMaterialService
+				.sesionMaterialAnterior(idAlu, idTarea);
+		
+		
 		// quitamos su id
 		if (r.getMaterialAMostrar() != null) {
 			String[] parts = r.getMaterialAMostrar().split("M");
 			String part2 = parts[1]; // 654321
 			Long idMaterial = new Long(part2);
-			m = materialService.obtener(idMaterial);
+			material = materialService.obtener(idMaterial);
 			System.out.println("#####################################");
 			System.out.println("Material de la regla");
 
+			// Aqui se reemplaza por sesionAnterior
+			try {
+				
+				sesionMaterialService.insertarMaterialVisto(
+						sesionMaterialAnterior.getId(), sesionMaterialAnterior,
+						material);
+			} catch (AppException ex) {
+				System.out
+						.println("No se pudo obtener la sesionMaterial o simplemente no se pudo insertar sesion");
+				ex.printStackTrace();
+			}
+
 		} else { // aun no esta hecho
-			m = materialService.obtener(new Long(1));
+			material = materialService.obtener(new Long(1));
+			
+			if (sesionMaterialAnterior.getListaMaterial() == null
+					|| !sesionMaterialAnterior.getListaMaterial().contains(
+							material))
+				
+				
+			
 			System.out.println("#####################################");
 			System.out.println("Material al azar");
 		}
 
-		return m;
+		return material;
 	}
 
 	private void mostrarMaterial(Material material) {

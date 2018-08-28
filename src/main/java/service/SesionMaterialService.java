@@ -61,7 +61,7 @@ public class SesionMaterialService extends BaseServiceImpl<SesionMaterial, Sesio
 		return sesion;
 	}
 
-	public SesionMaterial sesionAnterior(Long idAlumno, Long idTarea)
+	public SesionMaterial sesionMaterialAnterior(Long idAlumno, Long idTarea)
 			throws AppException {
 		try {
 			return dao.sesionMaterialAnterior(idAlumno, idTarea);
