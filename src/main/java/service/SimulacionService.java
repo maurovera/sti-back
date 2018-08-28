@@ -225,8 +225,21 @@ public class SimulacionService extends
 		System.out.println("idMultiplicacion: " + c4.getId());
 		System.out.println("idPotencia: " + c5.getId());
 
+		List<Concepto> listaConc = new ArrayList<Concepto>();
+		listaConc.add(c1);
+		listaConc.add(c2);
+		listaConc.add(c3);
+		listaConc.add(c4);
+		listaConc.add(c5);
+
+		List<Ejercicio> listaEjercicio = new ArrayList<Ejercicio>();
+		listaEjercicio = creadorCombinadoDeEjercicios(5, listaConc, asig.getId(), 0);
+		
+		if(listaEjercicio.isEmpty())
+			System.out.println("SE FUE TODO A LA PUTA NO CREO NINGUN EJERCICIO");
+		
 		// ejercicio01
-		Ejercicio e1 = new Ejercicio();
+	/*	Ejercicio e1 = new Ejercicio();
 		e1.setAdivinanza(new Double(0.1));// bajo
 		e1.setNivelDificultad(new Double(1));// facil
 		e1.setEnunciado("ejercicio01");
@@ -533,7 +546,7 @@ public class SimulacionService extends
 		listaEjercicio.add(e28);
 		listaEjercicio.add(e29);
 		listaEjercicio.add(e30);
-
+*/
 		for (Ejercicio e : listaEjercicio) {
 			Respuesta r1 = new Respuesta();
 			Respuesta r2 = new Respuesta();
@@ -573,7 +586,7 @@ public class SimulacionService extends
 			ejercicioService.insertarSimulacion(e, httpRequest);
 		}
 
-		System.out.println("Ejercicio 1: " + e1.getId());
+		/*System.out.println("Ejercicio 1: " + e1.getId());
 		System.out.println("Ejercicio 2: " + e2.getId());
 		System.out.println("Ejercicio 3: " + e3.getId());
 		System.out.println("Ejercicio 4: " + e4.getId());
@@ -583,7 +596,7 @@ public class SimulacionService extends
 		System.out.println("Ejercicio 8: " + e8.getId());
 		System.out.println("Ejercicio 9: " + e9.getId());
 		System.out.println("Ejercicio 10: " + e10.getId());
-		System.out.println("Ejercicio 30: " + e30.getId());
+		System.out.println("Ejercicio 30: " + e30.getId());*/
 
 		/** Creacion de asignatura **/
 
@@ -599,64 +612,181 @@ public class SimulacionService extends
 		/** crea la red de la asignatura ***/
 		adm.calcularProbabilidades(asig);
 
-		/** Creacion de material ****/
-		Material material1 = new Material();
-		Material material2 = new Material();
-		Material material3 = new Material();
-		Material material4 = new Material();
-		Material material5 = new Material();
-		Material material6 = new Material();
-
-		// M1
-		material1.setConcepto("division");
-		material1.setEstilo("visual");
-		material1.setIdAsignatura(asig.getId());
-		material1.setNivel("bajo");
-		material1.setUrlMaterial("https://www.youtube.com/watch?v=-4pe1ui9b7g");
-
-		// M2
-		material2.setConcepto("division");
-		material2.setEstilo("visual");
-		material2.setIdAsignatura(asig.getId());
-		material2.setNivel("bajo");
-		material2.setUrlMaterial("https://www.youtube.com/watch?v=kuZii-vk5Xw");
-
-		// M3
-		material3.setConcepto("potencia");
-		material3.setEstilo("visual");
-		material3.setIdAsignatura(asig.getId());
-		material3.setNivel("bajo");
-		material3.setUrlMaterial("https://www.youtube.com/watch?v=5WU3id8xhiw");
-
-		// M4
-		material4.setConcepto("potencia");
-		material4.setEstilo("visual");
-		material4.setIdAsignatura(asig.getId());
-		material4.setNivel("bajo");
-		material4.setUrlMaterial("https://www.youtube.com/watch?v=vC33KSOkmk8");
-
-		// M6
-		material6.setConcepto("potencia");
-		material6.setEstilo("visual");
-		material6.setIdAsignatura(asig.getId());
-		material6.setNivel("bajo");
-		material6.setUrlMaterial("https://www.youtube.com/watch?v=JwjvT-9Zz58");
-
-		// M5
-		material5.setConcepto("suma");
-		material5.setEstilo("visual");
-		material5.setIdAsignatura(asig.getId());
-		material5.setNivel("bajo");
-		material5.setUrlMaterial("https://www.youtube.com/watch?v=MnKRsHDchmw");
-
-		materialService.insertar(material1, httpRequest);
-		materialService.insertar(material2, httpRequest);
-		materialService.insertar(material3, httpRequest);
-		materialService.insertar(material4, httpRequest);
-		materialService.insertar(material5, httpRequest);
-		materialService.insertar(material6, httpRequest);
+		crearMateriales(httpRequest, asig.getId());
 
 		return asig;
+
+	}
+
+	/***
+	 * Esta funcion devuelve un lista de ejercicios que estan definidos por una
+	 * escala como la que sigue. cantidadConcepto | adivinanza | dificultad 1 |
+	 * bajo | facil 2 | medio | facil 3 | medio | normal 4 | alto | normal 5 |
+	 * alto | dificil
+	 * 
+	 * @param num
+	 *            . Es el numero de concepto para hacer la combinacion
+	 * @param conceptos
+	 *            . Es la lista de conceptos
+	 * @param idAsignatura
+	 *            . id de la asignatura
+	 * @param  numeroDelFor. un for externo por si se quiera hacer varias veces.        
+	 *            
+	 * @return listaDeEjercicios
+	 * ***/
+	public List<Ejercicio> creadorCombinadoDeEjercicios(int num, List<Concepto> conceptos,
+			Long idAsignatura, int numeroDelFor) {
+
+		List<Ejercicio> listaRetorno = new ArrayList<Ejercicio>();
+		Double bajoAdivinanza = new Double(0.1);
+		Double medioAdivinanza = new Double(0.2);
+		Double altoAdivinanza = new Double(0.3);
+
+		Double facilDificultad = new Double(1);
+		Double normalDificultad = new Double(2);
+		Double dificilDificultad = new Double(3);
+
+		for (int i = 0; i < Math.pow(2, num); i++) {
+			int arreglo[] = new int[num];
+			int temp = i;
+			for (int l = 0; l < arreglo.length; l++) {
+				arreglo[l] = temp % 2;
+				temp /= 2;
+			}
+			String res = "";
+			// posicion dentro del arraydeConceptos
+			List<Integer> posicion = new ArrayList<Integer>();
+			for (int j = 0; j < arreglo.length; j++) {
+				if (arreglo[j] == 1) {
+					res += "[" + (j + 1) + "]";
+					posicion.add(j);
+				}
+			}
+
+			int combinacion = i + 1;
+			int cantidadCon = posicion.size();
+
+			// un concepto
+			if (cantidadCon == 1) {
+				int secuencia = combinacion + (numeroDelFor * 32);
+				Ejercicio e = cargaUnEjercicio(posicion, conceptos, secuencia,
+						bajoAdivinanza, facilDificultad, idAsignatura);
+				listaRetorno.add(e);
+
+			}
+			// dos conceptos
+			if (cantidadCon == 2) {
+
+				int secuencia = combinacion + (numeroDelFor * 32);
+				Ejercicio e = cargaUnEjercicio(posicion, conceptos, secuencia,
+						medioAdivinanza, facilDificultad, idAsignatura);
+				listaRetorno.add(e);
+
+			}
+			// tres conceptos
+			if (cantidadCon == 3) {
+
+				int secuencia = combinacion + (numeroDelFor * 32);
+				Ejercicio e = cargaUnEjercicio(posicion, conceptos, secuencia,
+						medioAdivinanza, normalDificultad, idAsignatura);
+				listaRetorno.add(e);
+
+			}
+			// cuatro conceptos
+			if (cantidadCon == 4) {
+
+				int secuencia = combinacion + (numeroDelFor * 32);
+				Ejercicio e = cargaUnEjercicio(posicion, conceptos, secuencia,
+						altoAdivinanza, normalDificultad, idAsignatura);
+				listaRetorno.add(e);
+
+			}
+			// cinco conceptos
+			if (cantidadCon == 5) {
+
+				int secuencia = combinacion + (numeroDelFor * 32);
+				Ejercicio e = cargaUnEjercicio(posicion, conceptos, secuencia,
+						altoAdivinanza, dificilDificultad, idAsignatura);
+				listaRetorno.add(e);
+
+			}
+
+		}
+		
+		return listaRetorno;
+
+	}
+
+	/** Carga un ejercicio ***/
+	private Ejercicio cargaUnEjercicio(List<Integer> posicion,
+			List<Concepto> lista, int secuencia, Double adivinanza,
+			Double dificultad, Long idAsignatura) {
+
+		// ejercicio
+		Ejercicio e = new Ejercicio();
+		e.setAdivinanza(adivinanza);// bajo
+		e.setNivelDificultad(dificultad);// facil
+		e.setEnunciado("ejercicio" + secuencia);
+		e.setIdAsignatura(idAsignatura);
+		for (Integer ppp : posicion) {
+			// System.out.println("Concepto: " + lista.get(ppp));
+			e.addConceptos(lista.get(ppp));
+		}
+		
+		return e;
+
+	}
+
+	private void crearMateriales(HttpServletRequest httpRequest, Long asig)
+			throws AppException {
+
+		/**
+		 * Creacion de material ** 12 por cada concepto
+		 **/
+		List<String> lista = new ArrayList<String>();
+		lista.add("suma");
+		lista.add("division");
+		lista.add("potencia");
+
+		for (String c : lista) {
+
+			for (int i = 0; i < 13; i++) {
+				if (i < 4) {
+					String nivel = "bajo";
+					String estilo = "visual";
+					String url = "https://www.youtube.com/watch?v=-4pe1ui" + i
+							+ "b" + i + "g";
+					crearMaterial(httpRequest, nivel, estilo, c, asig, url);
+				} else if (i >= 4 && i <= 10) {
+					String nivel = "medio";
+					String estilo = "visual";
+					String url = "https://www.youtube.com/watch?v=-4pe1ui" + i
+							+ "b" + i + "g";
+					crearMaterial(httpRequest, nivel, estilo, c, asig, url);
+
+				} else if (i > 10) {
+					String nivel = "alto";
+					String estilo = "visual";
+					String url = "https://www.youtube.com/watch?v=-4pe1ui" + i
+							+ "b" + i + "g";
+					crearMaterial(httpRequest, nivel, estilo, c, asig, url);
+				}
+
+			}
+		}
+
+	}
+
+	private void crearMaterial(HttpServletRequest httpRequest, String nivel,
+			String estilo, String c, Long asig, String url) throws AppException {
+		Material material = new Material();
+		material.setConcepto(c);
+		material.setEstilo(estilo);
+		material.setIdAsignatura(asig);
+		material.setNivel(nivel);
+		material.setUrlMaterial(url);
+
+		materialService.insertar(material, httpRequest);
 
 	}
 
@@ -1122,11 +1252,11 @@ public class SimulacionService extends
 
 				// aumenta la cantidad de intentos
 				x++;
-
-				System.out.println("\nEjercicio: " + ejercicio.toString());
-				System.out.println("Respuesta del ejercicio: " + respuesta
-						+ "\n");
-
+				System.out.println("##############################");
+				System.out
+						.println("\nEjercicio Visto: " + ejercicio.toString());
+				System.out.println("Respuesta del ejercicio: " + respuesta);
+				System.out.println("##############################\n");
 				/** Contador Para respuestasGeneradas **/
 				// contador++
 			}
@@ -1136,10 +1266,9 @@ public class SimulacionService extends
 				informarProfesor(valorNodo, nombreConcepto);
 			} else {
 				System.out.println("##############################");
-				System.out.println("Concepto que el alumno logro superar: ");
+				System.out.println("Concepto Superado: ");
 				System.out.println("Concepto: " + nombreConcepto + ", Valor: "
 						+ valorNodo);
-				System.out.println("\n");
 				System.out.println("##############################\n");
 
 			}
@@ -1157,10 +1286,8 @@ public class SimulacionService extends
 	private void informarProfesor(Double valor, String nombre) {
 
 		System.out.println("##############################");
-		System.out
-				.println("Concepto que el alumno no logro superar el la tutorizacion: ");
+		System.out.println("Concepto NO superado: ");
 		System.out.println("Concepto: " + nombre + ", Valor: " + valor);
-		System.out.println("\n");
 		System.out.println("##############################\n");
 	}
 
@@ -1169,7 +1296,12 @@ public class SimulacionService extends
 
 	}
 
-	/** Registra una evidencia y reinicia la evidencia por llamarlo asi **/
+	/**
+	 * Registra una evidencia y reinicia la evidencia por llamarlo asi
+	 * 
+	 * @Param evidencia
+	 * @Param http
+	 * **/
 	private void registrarLog(Evidencia e, HttpServletRequest httpRequest)
 			throws AppException {
 
@@ -1180,6 +1312,15 @@ public class SimulacionService extends
 
 	}
 
+	/**
+	 * Obtiene un material si existe una regla por la evidencia del alumno en
+	 * caso de no obtener un material por regla. obtiene un material aleatorio
+	 * basado en concepto, nivel y estilo que aun no se haya visto el alumno
+	 * 
+	 * @Param evidencia e
+	 * @Param hd. Instancia del drools
+	 * @Return {@link Class} Material
+	 ***/
 	private Material aplicarReglaMaterial(Evidencia e, HerramientasDrools hd,
 			Long idTarea, Long idAlu) throws AppException {
 
@@ -1197,43 +1338,53 @@ public class SimulacionService extends
 		hd.ejecutarRegla(r);
 		hd.terminarSession();
 
-		/**Aqui abrimos una sesion**/
+		/** Aqui abrimos una sesion **/
 		SesionMaterial sesionMaterialAnterior = sesionMaterialService
 				.sesionMaterialAnterior(idAlu, idTarea);
-		
-		
-		// quitamos su id
+
+		/**
+		 * Si consigo un material entra aqui. - Si el material ya se mostro. Que
+		 * se hace??????????????? se busca otra regla. o se asume que funciona y
+		 * se guarda en materiales mostrados - Ahora se muestra el material que
+		 * genera la regla por mas que ya se haya mostrado
+		 * ***/
 		if (r.getMaterialAMostrar() != null) {
 			String[] parts = r.getMaterialAMostrar().split("M");
 			String part2 = parts[1]; // 654321
 			Long idMaterial = new Long(part2);
 			material = materialService.obtener(idMaterial);
 			System.out.println("#####################################");
-			System.out.println("Material de la regla");
+			System.out.println("Material de la regla: " + material.getId());
+			System.out.println("#####################################\n");
 
-			// Aqui se reemplaza por sesionAnterior
-			try {
-				
-				sesionMaterialService.insertarMaterialVisto(
-						sesionMaterialAnterior.getId(), sesionMaterialAnterior,
-						material);
-			} catch (AppException ex) {
-				System.out
-						.println("No se pudo obtener la sesionMaterial o simplemente no se pudo insertar sesion");
-				ex.printStackTrace();
-			}
-
-		} else { // aun no esta hecho
-			material = materialService.obtener(new Long(1));
-			
-			if (sesionMaterialAnterior.getListaMaterial() == null
-					|| !sesionMaterialAnterior.getListaMaterial().contains(
-							material))
-				
-				
-			
+			/***
+			 * Si la regla no consiguio material entonces se busca un material
+			 * que no haya sido seleccionado aun es decir que no este en la
+			 * sesion anterior
+			 ***/
+		} else {
+			// material = materialService.obtener(new Long(1));
+			List<Material> materiales = sesionMaterialAnterior
+					.getListaMaterial();
+			material = materialService.materialesDisponibles(materiales, r);
 			System.out.println("#####################################");
-			System.out.println("Material al azar");
+			System.out.println("Material al azar: " + material.getId());
+			System.out.println("#####################################\n");
+
+		}
+
+		/**
+		 * Una vez mostrado el material por la regla o al azar se guarda en la
+		 * sesionMaterialAnterior
+		 ***/
+		try {
+
+			sesionMaterialService.insertarMaterialVisto(
+					sesionMaterialAnterior.getId(), sesionMaterialAnterior,
+					material);
+		} catch (AppException ex) {
+			System.out.println("No se pudo insertar el material");
+			ex.printStackTrace();
 		}
 
 		return material;
