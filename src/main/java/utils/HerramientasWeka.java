@@ -197,6 +197,7 @@ public class HerramientasWeka {
 		r.append("then\n");
 		r.append("ImprimirRegla.writeTODO('" + regla.getMaterialAMostrar() + "','"
 				+ regla.getEjercioValido() + "');\n");
+		r.append("regla.setResultado('"+regla.getMaterialAMostrar() + "');\n" );
 		r.append("end\n\n");
 
 	}

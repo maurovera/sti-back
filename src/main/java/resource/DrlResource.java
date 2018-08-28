@@ -43,7 +43,7 @@ public class DrlResource  extends BaseResource<Drl, DrlService>{
 			Drl d = new Drl();
 			//d.setArchivoDrl("Hola mundo pude meterllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll todo esto en laklsdflasdknflkasdjnflkjndsflkjnadsflkadsnlkfnasdlkfjnasdlkjfnasdlknfladskjfnlkasdjnflkasdnflkasjndflkajndflkasdjnflkajdnsflkjnadflkjnds base de datos");
 			
-			HerramientasWeka hw = new HerramientasWeka("/home/mauro/datosPrueba/PATRONES_GUION.csv");
+			HerramientasWeka hw = new HerramientasWeka("/home/mauro/datosPrueba/patronesAgosto2018.csv");
 			hw.ejecutar();
 			System.out.println(hw.getDrl());
 			String drl = hw.getDrl();
@@ -51,7 +51,7 @@ public class DrlResource  extends BaseResource<Drl, DrlService>{
 			
 			
 			
-			System.out.println("base resource insertar");
+			System.out.println("base resource insertar archivo drl");
 			getService().insertarDrl(d, httpRequest);
 			return resul;
 		} catch (Exception e) {
@@ -78,8 +78,8 @@ public class DrlResource  extends BaseResource<Drl, DrlService>{
 			String drl = dto.getArchivoDrl();
 			HerramientasDrools hd = new HerramientasDrools(drl);
 			hd.iniciarBaseConocimiento();
-			hd.iniciarSession();
 			
+			hd.iniciarSession();
 			Regla r = new Regla();
 	        r.setConcepto("SUM");
 	        r.setNivel("BAJO");
@@ -91,7 +91,7 @@ public class DrlResource  extends BaseResource<Drl, DrlService>{
 			hd.ejecutarRegla(r);
 			
 			hd.terminarSession();
-			System.out.println("termineee ");
+			System.out.println("resultado : "+ r.getResultado());
 			
 		} catch (Exception e) {
 			throw new WebApplicationException(e.getMessage(),
@@ -104,6 +104,36 @@ public class DrlResource  extends BaseResource<Drl, DrlService>{
 	}
 
 
-	
 
+	
+	
+	
+	/**
+	 * Este método se encarga de obtener un recurso por su id. para 
+	 * obtener el archivo drl generado por la reglas.
+	 *
+	 * @param id
+	 *            Idenfiticador del recurso.
+	 * @return el dto del recurso en formato json.
+	 * 
+	 */
+	@GET
+	@Path("archivo/{id}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String obtenerArchivo(@PathParam("id") Long id) {
+		String drl = null;
+		try {
+			drl = getService().obtenerArchivo(id);
+			
+		} catch (Exception e) {
+			throw new WebApplicationException(e.getMessage(),
+					Response.Status.INTERNAL_SERVER_ERROR);
+		}
+		if ( drl==null) {
+			throw new WebApplicationException(Response.Status.NOT_FOUND);
+		}
+		return drl;
+	}
+	
+	
 }

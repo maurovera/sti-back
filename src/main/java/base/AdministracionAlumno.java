@@ -15,6 +15,7 @@ import model.Alumno;
 import model.Asignatura;
 import model.Concepto;
 import model.Ejercicio;
+import model.Material;
 import model.Sesion;
 import model.Tarea;
 import service.ConceptoService;
@@ -663,6 +664,22 @@ public class AdministracionAlumno {
 		
 		return retorno;
 
+	}
+	
+	
+	
+	public Material aplicarReglaMaterial(Alumno alumno,Concepto concepto){
+		
+		Material material = new Material();
+		/**Tipo si no encuentro reglas tirar uno al azar***/
+		
+		
+		
+		/**Si encuentro tirar.**/
+		
+		
+		return material;
+		
 	}
 
 }

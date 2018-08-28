@@ -10,7 +10,7 @@ public class Regla {
 	private String secuenciaEjercicios;
 	private String ejercioValido;
 	private String prioridad;
-	
+	private String resultado;
 	
 	public Regla(String materialAMostrar, String concepto, String nivel,
 			String estilo, String secuenciaVideos, String secuenciaEjercicios,
@@ -24,6 +24,7 @@ public class Regla {
 		this.secuenciaEjercicios = secuenciaEjercicios;
 		this.ejercioValido = ejercioValido;
 		this.prioridad = prioridad;
+		
 	}
 	
 	
@@ -82,5 +83,15 @@ public class Regla {
 	public void setPrioridad(String prioridad) {
 		this.prioridad = prioridad;
 	}
+
+	public String getResultado() {
+		return resultado;
+	}
+
+	public void setResultado(String resultado) {
+		this.resultado = resultado;
+	}
+	
+	
 	
 }

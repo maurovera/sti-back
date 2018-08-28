@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 
 import utils.AppException;
+import utils.HerramientasDrools;
 import model.Drl;
 import base.BaseServiceImpl;
 import dao.DrlDAO;
@@ -46,5 +47,32 @@ public class DrlService extends BaseServiceImpl<Drl, DrlDAO> {
 	}
 	
 	
+	/**
+	 * Obtiene el archivo del drl asignado por el id
+	 **/
+	public String obtenerArchivo(Long id) throws AppException {
+		Drl drl = null;
+		try {
+			drl =  getDao().get(id);
+			return drl.getArchivoDrl();
+		} catch (Exception e) {
+			throw new AppException(500, e.getMessage());
+		}
+	}
+	
+	
+	/**
+	 * Inicia un herramienta drools. Osea inicia el motor de reglas. 
+	 **/
+	public HerramientasDrools iniciarDrools(String drl) throws AppException {
+		HerramientasDrools hd = null;
+		try {
+			hd = new HerramientasDrools(drl);
+			hd.iniciarBaseConocimiento();
+			return hd;
+		} catch (Exception e) {
+			throw new AppException(500, e.getMessage());
+		}
+	}
 	
 }

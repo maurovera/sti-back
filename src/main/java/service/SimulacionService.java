@@ -19,13 +19,16 @@ import model.Asignatura;
 import model.Concepto;
 import model.Curso;
 import model.Ejercicio;
+import model.Evidencia;
+import model.Material;
 import model.Respuesta;
 import model.Sesion;
 import model.Simulacion;
 import model.Tarea;
 import model.Tema;
-import smile.Network;
 import utils.AppException;
+import utils.HerramientasDrools;
+import utils.Regla;
 import base.AdministracionAlumno;
 import base.AdministracionBase;
 import base.BaseServiceImpl;
@@ -70,6 +73,15 @@ public class SimulacionService extends
 
 	@Inject
 	private AlumnoService alumnoService;
+
+	@Inject
+	private EvidenciaService evidenciaService;
+
+	@Inject
+	private DrlService drlService;
+
+	@Inject
+	private MaterialService materialService;
 
 	// private SessionService session;
 	final private long userId = 1;
@@ -583,6 +595,63 @@ public class SimulacionService extends
 		/** crea la red de la asignatura ***/
 		adm.calcularProbabilidades(asig);
 
+		/** Creacion de material ****/
+		Material material1 = new Material();
+		Material material2 = new Material();
+		Material material3 = new Material();
+		Material material4 = new Material();
+		Material material5 = new Material();
+		Material material6 = new Material();
+
+		// M1
+		material1.setConcepto("division");
+		material1.setEstilo("visual");
+		material1.setIdAsignatura(asig.getId());
+		material1.setNivel("bajo");
+		material1.setUrlMaterial("https://www.youtube.com/watch?v=-4pe1ui9b7g");
+
+		// M2
+		material2.setConcepto("division");
+		material2.setEstilo("visual");
+		material2.setIdAsignatura(asig.getId());
+		material2.setNivel("bajo");
+		material2.setUrlMaterial("https://www.youtube.com/watch?v=kuZii-vk5Xw");
+
+		// M3
+		material3.setConcepto("potencia");
+		material3.setEstilo("visual");
+		material3.setIdAsignatura(asig.getId());
+		material3.setNivel("bajo");
+		material3.setUrlMaterial("https://www.youtube.com/watch?v=5WU3id8xhiw");
+
+		// M4
+		material4.setConcepto("potencia");
+		material4.setEstilo("visual");
+		material4.setIdAsignatura(asig.getId());
+		material4.setNivel("bajo");
+		material4.setUrlMaterial("https://www.youtube.com/watch?v=vC33KSOkmk8");
+
+		// M6
+		material6.setConcepto("potencia");
+		material6.setEstilo("visual");
+		material6.setIdAsignatura(asig.getId());
+		material6.setNivel("bajo");
+		material6.setUrlMaterial("https://www.youtube.com/watch?v=JwjvT-9Zz58");
+
+		// M5
+		material5.setConcepto("suma");
+		material5.setEstilo("visual");
+		material5.setIdAsignatura(asig.getId());
+		material5.setNivel("bajo");
+		material5.setUrlMaterial("https://www.youtube.com/watch?v=MnKRsHDchmw");
+
+		materialService.insertar(material1, httpRequest);
+		materialService.insertar(material2, httpRequest);
+		materialService.insertar(material3, httpRequest);
+		materialService.insertar(material4, httpRequest);
+		materialService.insertar(material5, httpRequest);
+		materialService.insertar(material6, httpRequest);
+
 		return asig;
 
 	}
@@ -855,13 +924,17 @@ public class SimulacionService extends
 	 *             ***
 	 * 
 	 */
-	public String simulacionTutor(HttpServletRequest httpRequest)
-			throws AppException {
+	public String simulacionTutor(HttpServletRequest httpRequest, Long idAsig,
+			Long idAlu, Long idTarea, Long idArchivo) throws AppException {
+
+		/** Arranca el motor de reglas. Va a obtener el archivo 1 **/
+		String archivo = drlService.obtenerArchivo(idArchivo);
+		HerramientasDrools hd = drlService.iniciarDrools(archivo);
 
 		/* Obtenemos la tarea 1* */
-		Long id_tarea = new Long(1);
+		// Long idTarea = new Long(7);
 		Tarea tarea = new Tarea();
-		tarea = tareaService.obtener(id_tarea);
+		tarea = tareaService.obtener(idTarea);
 		if (tarea != null) {
 			System.out.println("Conseguimos tarea");
 		} else {
@@ -879,14 +952,15 @@ public class SimulacionService extends
 		}
 		String nombreConcepto = null;
 		Double valorNodo = null;
-		Long idAsig = new Long(1);
-		Long idAlu = new Long(1);
+		// Long idAsig = new Long(4);
+		// Long idAlu = new Long(37);
 
-		Double valorFijadoProfesor = new Double(0.75);
+		Double valorFijadoProfesor = new Double(0.70);
 		List<Concepto> conceptosAEvaluar = new ArrayList<Concepto>();
 
 		/**
 		 * Se determina que conceptos no conoce Por el criterio de
+		 * valorFijadoProfesor
 		 **/
 		for (Concepto c : listaConcepto) {
 			nombreConcepto = c.getNombre();
@@ -900,55 +974,314 @@ public class SimulacionService extends
 
 		}
 		if (conceptosAEvaluar != null) {
-			evaluarTutor(conceptosAEvaluar, idAlu, idAsig, id_tarea);
+
+			evaluarTutor(conceptosAEvaluar, idAlu, idAsig, idTarea,
+					httpRequest, hd);
 		}
 
 		return "termineTutor";
 
 	}
 
+	/**
+	 * Aqui esta el tutor en si
+	 * 
+	 * @throws AppException
+	 */
 	private void evaluarTutor(List<Concepto> lista, Long idAlu, Long idAsig,
-			Long idTarea) {
+			Long idTarea, HttpServletRequest httpRequest, HerramientasDrools hd)
+			throws AppException {
 
-		
+		// List<String> listaR = new ArrayList<String>();
 		String nombreConcepto = null;
 		Double valorNodo = null;
-		int x = 1; // bandera para controlar la cantidad de intentos. 
-		int cantidadIntentos = 5;  // esto deberia ser tarea.getCantidadIntentos.
+		/** Concepto umbral definido aqui. **/
+		Double conceptoUmbral = new Double("0.70");
+		int x = 1; // bandera para controlar la cantidad de intentos.
+		int cantidadIntentos = 7; // esto deberia ser
+									// tarea.getCantidadIntentos.
 		boolean pasoPorMaterial = false;
 		String respuestaEjercicio = null;
-		Boolean respuesta = null;// respuesta true si respondio bien y false si respondio mal
+		Boolean respuesta = null;// respuesta true si respondio bien y false si
+									// respondio mal
+
+		/*** Se crea una lista de respuesta **/
+		// listaR = respuestasGeneradas(numero);
+		// int contador = 0;
+
 		/**
 		 * Por cada concepto traer un ejercicio
 		 **/
 		for (Concepto c : lista) {
 
-			/**Traemos el valor del nodo**/
+			/** Traemos el valor del nodo **/
 			nombreConcepto = c.getNombre();
 			valorNodo = adm
 					.getValorNodoRedDouble(nombreConcepto, idAsig, idAlu);
 
-			/**bandera para controlar la cantidad de intentos**/
+			/** bandera para controlar la cantidad de intentos **/
 			x = 1;
-			/**Paso por material. Bandera para controlar el tema de registrar
-			 * los logs**/
-			pasoPorMaterial = false;
-			
 			/**
-			 * Esta funcion trae el siguiente ejercicio en base a su utilidad
-			 * sobre el concepto c y no sobre la asignatura
+			 * Paso por material. Bandera para controlar el tema de registrar
+			 * los logs
 			 **/
-			Ejercicio ejercicio = admAlumno.getSiguienteEjercicioPorConcepto(
-					idTarea, idAlu, idAsig, c);
-			System.out.println("Ejercicio: " + ejercicio.toString());
-			
-			//responde bien
-			respuestaEjercicio = ejercicio.getRespuesta().getDescripcion();
-			
-			respuesta = admAlumno.responderEjercicioConcepto(ejercicio, respuestaEjercicio, idAlu, idAsig, idTarea);		
-			System.out.println("\nRespuesta del ejercicio: " +  respuesta);
+			pasoPorMaterial = false;
+
+			// random para que las respuestas sean aleatorias.
+			Random aleatorio = new Random(System.currentTimeMillis());
+
+			/**
+			 * Se crea una evidencia por concepto y se setea su concepto, su
+			 * nivel actual en este concepto
+			 * **/
+			Evidencia e = new Evidencia();
+			e.setConcepto(nombreConcepto);
+			e.setNivelEvidencia(valorNodo);
+
+			/** estaticos aun **/
+			e.setEstilo("visual");
+			e.setIdAsignatura(idAsig);
+
+			/**
+			 * Mientras el valor del nodo sea menor al umbral requerido
+			 * valorNodo < conceptoUmbral &&
+			 **/
+			while (valorNodo < conceptoUmbral && x <= cantidadIntentos) {
+				/**
+				 * Esta funcion trae el siguiente ejercicio en base a su
+				 * utilidad sobre el concepto c y no sobre la asignatura
+				 **/
+				Ejercicio ejercicio = admAlumno
+						.getSiguienteEjercicioPorConcepto(idTarea, idAlu,
+								idAsig, c);
+
+				if (ejercicio == null) {
+					System.out.println("ejercicio nulo");
+					break;
+				}
+				// res respuestaEjercicio =
+				// ejercicio.getRespuesta().getDescripcion();
+				/**
+				 * Respuesta aleatoria con una semilla presente estatica if
+				 * (listaR.get(contador) == "T") { respuestaEjercicio =
+				 * ejercicio.getRespuesta().getDescripcion(); } else {
+				 * respuestaEjercicio = "respuestaMALA"; }
+				 */
+
+				int intAletorio = aleatorio.nextInt(2);
+				if (intAletorio == 1) {
+
+					respuestaEjercicio = ejercicio.getRespuesta()
+							.getDescripcion();
+				} else {
+					respuestaEjercicio = "respuestaMALA";
+				}
+
+				aleatorio.setSeed(System.currentTimeMillis());
+
+				respuesta = admAlumno.responderEjercicioConcepto(ejercicio,
+						respuestaEjercicio, idAlu, idAsig, idTarea);
+
+				// se registra el ejercicio en la evidencia
+				e.addEjercicio(ejercicio.getId());
+
+				if (respuesta && pasoPorMaterial) {
+
+					registrarLog(e, httpRequest);
+					x--;
+					pasoPorMaterial = false;
+					// Aqui si se registra un nuevo valor de nodo
+					e.setNivelEvidencia(valorNodo);
+
+				} else if(!respuesta){
+					// e.formatearEvidencia();
+
+					Material material = aplicarReglaMaterial(e, hd);
+					mostrarMaterial(material);
+					e.addMaterial(material.getId());
+					pasoPorMaterial = true;
+				}
+
+				// se recalcula el valor del nodo pase o no por un material.
+				valorNodo = adm.getValorNodoRedDouble(nombreConcepto, idAsig,
+						idAlu);
+
+				/***
+				 * verifica que exista otro estilo de aprendizaje Por ahora no
+				 * tiene
+				 **/
+				if (x == cantidadIntentos && tieneSegundoEstilo(idAlu)) {
+					cambiarEstilo(idAlu);
+					// x = 0;
+				}
+
+				// aumenta la cantidad de intentos
+				x++;
+
+				System.out.println("\nEjercicio: " + ejercicio.toString());
+				System.out.println("Respuesta del ejercicio: " + respuesta
+						+ "\n");
+
+				/** Contador Para respuestasGeneradas **/
+				// contador++
+			}
+
+			if (x > cantidadIntentos) {
+
+				informarProfesor(valorNodo, nombreConcepto);
+			} else {
+				System.out.println("##############################");
+				System.out.println("Concepto que el alumno logro superar: ");
+				System.out.println("Concepto: " + nombreConcepto + ", Valor: "
+						+ valorNodo);
+				System.out.println("\n");
+				System.out.println("##############################\n");
+
+			}
 
 		}
+
+	}
+
+	/** Retorna si tiene segundo estilo **/
+	private Boolean tieneSegundoEstilo(Long idAlu) {
+		return false;
+	}
+
+	/** Retorna si tiene segundo estilo **/
+	private void informarProfesor(Double valor, String nombre) {
+
+		System.out.println("##############################");
+		System.out
+				.println("Concepto que el alumno no logro superar el la tutorizacion: ");
+		System.out.println("Concepto: " + nombre + ", Valor: " + valor);
+		System.out.println("\n");
+		System.out.println("##############################\n");
+	}
+
+	/** cambia de estilo **/
+	private void cambiarEstilo(long idAlu) {
+
+	}
+
+	/** Registra una evidencia y reinicia la evidencia por llamarlo asi **/
+	private void registrarLog(Evidencia e, HttpServletRequest httpRequest)
+			throws AppException {
+
+		e.formatearEvidencia();
+		Evidencia e01 = new Evidencia(e);
+
+		evidenciaService.insertar(e01, httpRequest);
+
+	}
+
+	private Material aplicarReglaMaterial(Evidencia e, HerramientasDrools hd)
+			throws AppException {
+
+		Material m = new Material();
+
+		// iniciamos sesion y le tiramos el material
+		hd.iniciarSession();
+		Regla r = new Regla();
+		r.setConcepto(e.getConcepto());
+		r.setNivel(e.getNivel());
+		r.setEstilo(e.getEstilo());
+		r.setSecuenciaEjercicios(e.getSecuenciaEjercicio());
+		r.setSecuenciaVideos(e.getSecuenciaMaterial());
+
+		hd.ejecutarRegla(r);
+		hd.terminarSession();
+
+		// quitamos su id
+		if (r.getMaterialAMostrar() != null) {
+			String[] parts = r.getMaterialAMostrar().split("M");
+			String part2 = parts[1]; // 654321
+			Long idMaterial = new Long(part2);
+			m = materialService.obtener(idMaterial);
+			System.out.println("#####################################");
+			System.out.println("Material de la regla");
+
+		} else { // aun no esta hecho
+			m = materialService.obtener(new Long(1));
+			System.out.println("#####################################");
+			System.out.println("Material al azar");
+		}
+
+		return m;
+	}
+
+	private void mostrarMaterial(Material material) {
+		System.out.println("##############################");
+		System.out.println("Material Mostrado: " + material.getId() + "  ");
+		System.out.println("##############################\n");
+	}
+
+	/**
+	 * Lista de respuestas posibles para tres conceptos. T,T,T
+	 **/
+	private List<String> respuestasGeneradas(int numero) {
+
+		List<String> d = new ArrayList<String>();
+
+		switch (numero) {
+
+		case 1:
+			d.add("T");
+			d.add("T");
+			d.add("T");
+			break;
+
+		case 2:
+			d.add("T");
+			d.add("T");
+			d.add("F");
+			break;
+
+		case 3:
+			d.add("T");
+			d.add("F");
+			d.add("T");
+			break;
+
+		case 4:
+			d.add("T");
+			d.add("F");
+			d.add("F");
+			break;
+
+		case 5:
+			d.add("F");
+			d.add("T");
+			d.add("T");
+			break;
+
+		case 6:
+			d.add("F");
+			d.add("T");
+			d.add("F");
+			break;
+
+		case 7:
+			d.add("F");
+			d.add("F");
+			d.add("T");
+			break;
+
+		case 8:
+			d.add("F");
+			d.add("F");
+			d.add("F");
+			break;
+
+		default:
+			d.add("F");
+			d.add("F");
+			d.add("F");
+			break;
+
+		}
+
+		return d;
 
 	}
 
