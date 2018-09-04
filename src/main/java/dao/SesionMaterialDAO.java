@@ -25,6 +25,8 @@ public class SesionMaterialDAO extends BaseDAO<SesionMaterial> {
 	public SesionMaterial sesionMaterialAnterior(Long idAlumno, Long idTarea)
 			throws AppException {
 		System.out.println("Sesion Material anterior dao");
+		
+		SesionMaterial sesionAnterior = null;
 
 		// Query para traer la sesion anterior
 
@@ -33,12 +35,12 @@ public class SesionMaterialDAO extends BaseDAO<SesionMaterial> {
 		query.setParameter("alumno", idAlumno);
 		query.setParameter("tarea", idTarea);
 		query.setMaxResults(1);
-		SesionMaterial sesionAnterior = (SesionMaterial) query
+		sesionAnterior = (SesionMaterial) query
 				.getSingleResult();
 
-		// if (sesionAnterior == null) {
-		// throw new AppException(404, "Not Found");
-		// }
+		if (sesionAnterior == null) {
+		 throw new AppException(404, "Not Found, No existe sesion anterior.");
+		 }
 
 		return sesionAnterior;
 

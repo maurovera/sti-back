@@ -244,7 +244,7 @@ public class SimulacionService extends
 		//listaEjercicio = creadorCombinadoDeEjercicios(5, listaConc, asig.getId(), 5);
 		
 		if(listaEjercicio.isEmpty())
-			System.out.println("SE FUE TODO A LA PUTA NO CREO NINGUN EJERCICIO");
+			System.out.println(" NO CREO NINGUN EJERCICIO");
 		
 		for (Ejercicio e : listaEjercicio) {
 			Respuesta r1 = new Respuesta();
@@ -425,6 +425,9 @@ public class SimulacionService extends
 
 	}
 
+	/**
+	 * Crea 54 materiales para la lista de conceptos ahi adentro.
+	 **/
 	private void crearMateriales(HttpServletRequest httpRequest, Long asig)
 			throws AppException {
 
@@ -438,21 +441,21 @@ public class SimulacionService extends
 
 		for (String c : lista) {
 
-			for (int i = 0; i < 13; i++) {
-				if (i < 4) {
+			for (int i = 0; i < 54; i++) {
+				if (i < 18) {
 					String nivel = "bajo";
 					String estilo = "visual";
 					String url = "https://www.youtube.com/watch?v=-4pe1ui" + i
 							+ "b" + i + "g";
 					crearMaterial(httpRequest, nivel, estilo, c, asig, url);
-				} else if (i >= 4 && i <= 10) {
+				} else if (i >= 18 && i <= 36) {
 					String nivel = "medio";
 					String estilo = "visual";
 					String url = "https://www.youtube.com/watch?v=-4pe1ui" + i
 							+ "b" + i + "g";
 					crearMaterial(httpRequest, nivel, estilo, c, asig, url);
 
-				} else if (i > 10) {
+				} else if (i > 36) {
 					String nivel = "alto";
 					String estilo = "visual";
 					String url = "https://www.youtube.com/watch?v=-4pe1ui" + i
@@ -806,7 +809,7 @@ public class SimulacionService extends
 	}
 
 	/**
-	 * Aqui esta el tutor en si
+	 * Aqui esta el tutor en si. Evalua a un alumno en el test.
 	 * 
 	 * @throws AppException
 	 */
@@ -827,6 +830,15 @@ public class SimulacionService extends
 		Boolean respuesta = null;// respuesta true si respondio bien y false si
 									// respondio mal
 
+		
+		
+		/** Creacion de sesionMaterial ***/
+		SesionMaterial sesionMaterial = null;
+		sesionMaterial = sesionMaterialService.registrarSesionMaterial(idAlu, idTarea, httpRequest);
+		Long idSesionMaterial = sesionMaterial.getId();
+		System.out.println("##########sesion Material creada ######");
+		
+		
 		/*** Se crea una lista de respuesta **/
 		// listaR = respuestasGeneradas(numero);
 		// int contador = 0;
@@ -878,7 +890,8 @@ public class SimulacionService extends
 								idAsig, c);
 
 				if (ejercicio == null) {
-					System.out.println("ejercicio nulo");
+					System.out.println("ejercicio nulo, Hacemos un break porque no existe mas ningun ejercicio"
+							+ "######################################################");
 					break;
 				}
 				// res respuestaEjercicio =
@@ -944,6 +957,7 @@ public class SimulacionService extends
 				System.out
 						.println("\nEjercicio Visto: " + ejercicio.toString());
 				System.out.println("Respuesta del ejercicio: " + respuesta);
+				System.out.println("Valor Concepto: "+ valorNodo);
 				System.out.println("##############################\n");
 				/** Contador Para respuestasGeneradas **/
 				// contador++
@@ -962,6 +976,10 @@ public class SimulacionService extends
 			}
 
 		}
+		
+		/**Terminamos la sesion***/
+		sesionMaterial.setEstadoTerminado(true);
+		sesionMaterialService.modificar(sesionMaterial.getId(), sesionMaterial, httpRequest);
 
 	}
 
@@ -1026,7 +1044,7 @@ public class SimulacionService extends
 		hd.ejecutarRegla(r);
 		hd.terminarSession();
 
-		/** Aqui abrimos una sesion **/
+		/** Aqui abrimos la sesion anterior **/
 		SesionMaterial sesionMaterialAnterior = sesionMaterialService
 				.sesionMaterialAnterior(idAlu, idTarea);
 

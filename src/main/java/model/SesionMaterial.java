@@ -69,7 +69,7 @@ public class SesionMaterial extends BaseEntity implements Serializable{
 	
 	@ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.MERGE,
 			CascadeType.DETACH, CascadeType.REFRESH })
-	@JoinTable(name = "sesion_material", 
+	@JoinTable(name = "sesion_mat_material", 
 			joinColumns = { @JoinColumn(name = "id_sesion_mat", 
 			referencedColumnName = "id_sesion_mat") }, 
 			inverseJoinColumns = { @JoinColumn(name = "id_material", 
