@@ -2,13 +2,16 @@ package resource;
 
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import model.Drl;
 import service.DrlService;
@@ -134,6 +137,35 @@ public class DrlResource  extends BaseResource<Drl, DrlService>{
 		}
 		return drl;
 	}
+	
+	
+	/**
+	 * Metodo que se encarga de generar las reglas para el weka
+	 * que se obtiene de evidencias y luego transformarlo en
+	 * reglas drl. en otras palabras para el motor de regla. 
+	 * 
+	 * @param id asignatura y idCurso
+	 * @return un clase drl nueva
+	 **/
+	
+	@GET
+	@Path("/generarReglasDrl")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response guardarReglasDrl(
+			@QueryParam("idAsig") @DefaultValue("1") Long idAsig,
+			@QueryParam("idCurso") @DefaultValue("1") Long idCurso) {
+		try {
+			System.out.println("Resource insertar archivo drl");
+			getService().guardarReglasDrl(idAsig, idCurso, httpRequest);
+			
+		} catch (Exception e) {
+			throw new WebApplicationException(e.getMessage());
+		}
+		return Response.status(Status.OK).build();
+	}
+	
+	
+	
 	
 	
 }

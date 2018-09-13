@@ -6,9 +6,12 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.QueryParam;
 
 import utils.AppException;
 import utils.HerramientasDrools;
+import utils.HerramientasWeka;
 import model.Drl;
 import base.BaseServiceImpl;
 import dao.DrlDAO;
@@ -21,6 +24,9 @@ public class DrlService extends BaseServiceImpl<Drl, DrlDAO> {
 	
 	@Inject
 	private DrlDAO dao;
+	
+	@Inject
+	private EvidenciaService evidenciaService;
 
 	@Override
 	public DrlDAO getDao() {
@@ -58,6 +64,42 @@ public class DrlService extends BaseServiceImpl<Drl, DrlDAO> {
 		} catch (Exception e) {
 			throw new AppException(500, e.getMessage());
 		}
+	}
+	
+	
+	
+	/**
+	 * Metodo que se encarga de generar las reglas para el weka
+	 * que se obtiene de evidencias y luego transformarlo en
+	 * reglas drl. en otras palabras para el motor de regla. 
+	 * 
+	 * @param id asignatura y idCurso
+	 * @return un clase drl nueva
+	 * @throws AppException 
+	 **/
+	public String guardarReglasDrl(
+			Long idAsig,
+			 Long idCurso,HttpServletRequest httpRequest) throws AppException  {
+		
+		/**Aqui crea el archivo que necesita weka.**/
+		String nombreArchivo = new String();
+		nombreArchivo = evidenciaService.escribirArchivoWekaEvidencia(idAsig, idCurso);
+		
+		/***Se le pasa el nombre del archivo para ejecutar el algoritmo nnge y trasformarlo a drl
+		 ***/
+		Drl d = new Drl();
+		HerramientasWeka hw = new HerramientasWeka(nombreArchivo);
+		hw.ejecutar();
+		System.out.println(hw.getDrl());
+		String drl = hw.getDrl();
+		d.setArchivoDrl(drl);
+		
+		// se inserta el archivo drl
+		d = insertarDrl(d, httpRequest);
+		
+		
+		return nombreArchivo;
+		
 	}
 	
 	
