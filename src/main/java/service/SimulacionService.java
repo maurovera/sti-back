@@ -20,6 +20,7 @@ import model.Concepto;
 import model.Curso;
 import model.Ejercicio;
 import model.Evidencia;
+import model.Log;
 import model.Material;
 import model.Respuesta;
 import model.Sesion;
@@ -78,6 +79,9 @@ public class SimulacionService extends
 	@Inject
 	private EvidenciaService evidenciaService;
 
+	@Inject
+	private LogService logService;
+	
 	@Inject
 	private DrlService drlService;
 
@@ -871,11 +875,30 @@ public class SimulacionService extends
 			Evidencia e = new Evidencia();
 			e.setConcepto(nombreConcepto);
 			e.setNivelEvidencia(valorNodo);
-
 			/** estaticos aun **/
 			e.setEstilo("visual");
 			e.setIdAsignatura(idAsig);
 
+
+			
+			/** OJOOOO .... SE DEBE BORRAR AL FINALIZAR LAS PRUEBAS
+			 * PRUEBA
+			 * Se crea un log que guarda toda la ruta del alumno. Ya existe
+			 * evidencia. pero es para las reglas. 
+			 * Este log es temporal para revisar 
+			 * el comportamiento del tutor en si. 
+			 * #######################################################
+			 * **/
+			Log log = new Log();
+			log.setConcepto(nombreConcepto);
+			log.setAlumno(idAlu);
+			log.setAsignatura(idAsig);
+			log.setTarea(idTarea);
+			log.addSecuencia(nombreConcepto);
+			log.addSecuencia(valorNodo.toString());
+
+			
+			
 			/**
 			 * Mientras el valor del nodo sea menor al umbral requerido
 			 * valorNodo < conceptoUmbral &&
@@ -919,7 +942,10 @@ public class SimulacionService extends
 
 				// se registra el ejercicio en la evidencia
 				e.addEjercicio(ejercicio.getId());
-
+				
+				Material material = null;
+				Boolean noEsRegla = false;
+				
 				if (respuesta && pasoPorMaterial) {
 
 					registrarLog(e, httpRequest);
@@ -931,8 +957,8 @@ public class SimulacionService extends
 				} else if (!respuesta) {
 					// e.formatearEvidencia();
 
-					Material material = aplicarReglaMaterial(e, hd, idTarea,
-							idAlu);
+					material = aplicarReglaMaterial(e, hd, idTarea,
+							idAlu, noEsRegla);
 					mostrarMaterial(material);
 					e.addMaterial(material.getId());
 					pasoPorMaterial = true;
@@ -959,6 +985,18 @@ public class SimulacionService extends
 				System.out.println("Respuesta del ejercicio: " + respuesta);
 				System.out.println("Valor Concepto: "+ valorNodo);
 				System.out.println("##############################\n");
+				
+				
+				log.addSecuencia("E"+ejercicio.getId());
+				log.addSecuencia(respuesta.toString());
+				log.addSecuencia(valorNodo.toString());
+				log.addSecuencia("#");
+				
+				/***aca recolecta la informacion**/
+				if(material !=  null){
+					log.addSecuencia("M"+material.getId());
+					log.addSecuencia(noEsRegla.toString());
+				}
 				/** Contador Para respuestasGeneradas **/
 				// contador++
 			}
@@ -966,16 +1004,25 @@ public class SimulacionService extends
 			if (x > cantidadIntentos) {
 
 				informarProfesor(valorNodo, nombreConcepto);
+				log.addSecuencia("NoSUPERADO");
 			} else {
 				System.out.println("##############################");
 				System.out.println("Concepto Superado: ");
 				System.out.println("Concepto: " + nombreConcepto + ", Valor: "
 						+ valorNodo);
 				System.out.println("##############################\n");
+				log.addSecuencia("SUPERADO");
 
 			}
+			
+		
+			// se guarda en la base de datos.
+			Log l01 = new Log(log);
+			logService.insertar(l01, httpRequest);
 
 		}
+		
+		
 		
 		/**Terminamos la sesion***/
 		sesionMaterial.setEstadoTerminado(true);
@@ -1028,7 +1075,7 @@ public class SimulacionService extends
 	 * @Return {@link Class} Material
 	 ***/
 	private Material aplicarReglaMaterial(Evidencia e, HerramientasDrools hd,
-			Long idTarea, Long idAlu) throws AppException {
+			Long idTarea, Long idAlu, Boolean noEsRegla) throws AppException {
 
 		Material material = new Material();
 
@@ -1062,7 +1109,7 @@ public class SimulacionService extends
 			System.out.println("#####################################");
 			System.out.println("Material de la regla: " + material.getId());
 			System.out.println("#####################################\n");
-
+			noEsRegla = true;
 			/***
 			 * Si la regla no consiguio material entonces se busca un material
 			 * que no haya sido seleccionado aun es decir que no este en la
@@ -1076,7 +1123,7 @@ public class SimulacionService extends
 			System.out.println("#####################################");
 			System.out.println("Material al azar: " + material.getId());
 			System.out.println("#####################################\n");
-
+		
 		}
 
 		/**
