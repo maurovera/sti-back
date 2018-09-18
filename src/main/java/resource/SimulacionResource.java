@@ -5,6 +5,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
@@ -53,11 +54,15 @@ public class SimulacionResource extends BaseResource<Simulacion, SimulacionServi
 	 * @throws AppException
 	 * **/
 	@GET
-	@Path("/simulacion02Tutor")
+	@Path("/simulacion02Tutor/{idAsig}/{idAlu}/{idTarea}/{idArchivo}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String simulacionTutor()
+	public String simulacionTutor(@PathParam("idAsig") Long idAsig,
+			@PathParam("idAlu") Long idAlu,
+			@PathParam("idTarea") Long idTarea,
+			@PathParam("idArchivo") Long idArchivo
+			)
 			throws NoSuchFieldException, AppException {
 		System.out.println("simulacion tutor ");
-		return service.simulacionTutor(httpRequest);
+		return service.simulacionTutor(httpRequest,idAsig,idAlu,idTarea, idArchivo);
 	}
 }

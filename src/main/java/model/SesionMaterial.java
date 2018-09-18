@@ -1,7 +1,5 @@
 package model;
 
-/*
- * Sesion */
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -27,20 +25,21 @@ import javax.validation.constraints.Size;
 
 import org.hibernate.annotations.DynamicInsert;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-
 import base.BaseEntity;
 
-@Entity
-@Table(name = "sesion")
-@DynamicInsert
-public class Sesion extends BaseEntity implements Serializable {
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
+
+@Entity
+@Table(name = "sesion_material")
+@DynamicInsert
+public class SesionMaterial extends BaseEntity implements Serializable{
+	
 	private static final long serialVersionUID = 1L;
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id_sesion")
+	@Column(name = "id_sesion_mat")
 	private Long id;
 
 	@Basic(optional = false)
@@ -52,10 +51,6 @@ public class Sesion extends BaseEntity implements Serializable {
 	@Column(name = "salida")
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date salida;
-	
-	@Size(max = 10)
-	@Column(name = "estado_animo")
-	private String estadoAnimo;
 	
 	@Column(name = "estado_terminado")
 	private Boolean estadoTerminado;
@@ -74,21 +69,21 @@ public class Sesion extends BaseEntity implements Serializable {
 	
 	@ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.MERGE,
 			CascadeType.DETACH, CascadeType.REFRESH })
-	@JoinTable(name = "sesion_ejercicio", 
-			joinColumns = { @JoinColumn(name = "id_sesion", 
-			referencedColumnName = "id_sesion") }, 
-			inverseJoinColumns = { @JoinColumn(name = "id_ejercicio", 
-			referencedColumnName = "id_ejercicio") })
-	private List<Ejercicio> listaEjercicio = new ArrayList<Ejercicio>();
+	@JoinTable(name = "sesion_mat_material", 
+			joinColumns = { @JoinColumn(name = "id_sesion_mat", 
+			referencedColumnName = "id_sesion_mat") }, 
+			inverseJoinColumns = { @JoinColumn(name = "id_material", 
+			referencedColumnName = "id_material") })
+	private List<Material> listaMaterial = new ArrayList<Material>();
 
-	public Sesion() {
+	public SesionMaterial() {
 	}
 
-	public Sesion(Long idSesion) {
+	public SesionMaterial(Long idSesion) {
 		this.id = idSesion;
 	}
 
-	public Sesion(Long idSesion, Date entrada, Date salida) {
+	public SesionMaterial(Long idSesion, Date entrada, Date salida) {
 		this.id = idSesion;
 		this.entrada = entrada;
 		this.salida = salida;
@@ -127,13 +122,7 @@ public class Sesion extends BaseEntity implements Serializable {
 		this.salida = salida;
 	}
 
-	public String getEstadoAnimo() {
-		return estadoAnimo;
-	}
-
-	public void setEstadoAnimo(String estadoAnimo) {
-		this.estadoAnimo = estadoAnimo;
-	}
+	
 
 	public Boolean getEstadoTerminado() {
 		return estadoTerminado;
@@ -143,7 +132,7 @@ public class Sesion extends BaseEntity implements Serializable {
 		this.estadoTerminado = estadoAnimo;
 	}
 
-	@JsonBackReference(value="tarea-sesion")
+	@JsonBackReference(value="tarea-sesion-mat")
 	public Tarea getTarea() {
 		return tarea;
 	}
@@ -152,7 +141,7 @@ public class Sesion extends BaseEntity implements Serializable {
 		this.tarea = tarea;
 	}
 
-	@JsonBackReference(value="alumno-sesion")
+	@JsonBackReference(value="alumno-sesion-mat")
 	public Alumno getAlumno() {
 		return alumno;
 	}
@@ -161,20 +150,25 @@ public class Sesion extends BaseEntity implements Serializable {
 		this.alumno = alumno;
 	}
 	
-	//@JsonBackReference(value="ejercicios-sesion")
-	public List<Ejercicio> getListaEjercicio() {
-		return listaEjercicio;
-	}
-
-	public void setListaEjercicio(List<Ejercicio> listaEjercicio) {
-		this.listaEjercicio = listaEjercicio;
-	}
-
 	
-	public void addEjercicioResuelto(Ejercicio ejercicio){
-		this.listaEjercicio.add(ejercicio);
+	public Integer getCantidadEjerciciosResueltos() {
+		return cantidadEjerciciosResueltos;
 	}
 	
+	public void addMaterialVisto(Material material){
+		this.listaMaterial.add(material);
+	}
+	
+	
+	
+
+	public List<Material> getListaMaterial() {
+		return listaMaterial;
+	}
+
+	public void setListaMaterial(List<Material> listaMaterial) {
+		this.listaMaterial = listaMaterial;
+	}
 
 	@Override
 	public int hashCode() {
@@ -185,10 +179,10 @@ public class Sesion extends BaseEntity implements Serializable {
 
 	@Override
 	public boolean equals(Object object) {
-		if (!(object instanceof Sesion)) {
+		if (!(object instanceof SesionMaterial)) {
 			return false;
 		}
-		Sesion other = (Sesion) object;
+		SesionMaterial other = (SesionMaterial) object;
 		if ((this.id == null && other.id != null)
 				|| (this.id != null && !this.id
 						.equals(other.id))) {
@@ -199,7 +193,8 @@ public class Sesion extends BaseEntity implements Serializable {
 
 	@Override
 	public String toString() {
-		return "model.Sesion[ idSesion=" + id + " ]";
+		return "model.SesionMaterial[ idSesion=" + id + " ]";
 	}
+
 
 }

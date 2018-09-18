@@ -245,7 +245,7 @@ public class Ejercicio extends BaseEntity implements Serializable {
 	
 	@Override
 	public String toString() {
-		return "model.Ejercicio[ idEjercicio=" + enunciado + " ]";
+		return "model.Ejercicio[ Enunciado=" + enunciado + " id: "+id+" ]";
 	}
 	
 	

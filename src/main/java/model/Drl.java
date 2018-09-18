@@ -30,6 +30,14 @@ public class Drl extends BaseEntity implements Serializable {
 	private String archivoDrl;
 
 	private String nuevaColumna;
+	
+	private Long asignatura;
+	
+	private Long curso;
+	
+	private Long tarea;
+	
+	
 	// oid
 	//@Lob
 	//private byte[] campo02;
@@ -66,8 +74,29 @@ public class Drl extends BaseEntity implements Serializable {
 		this.nuevaColumna = nuevaColumna;
 	}
 
-	
-	
-	
+	public Long getAsignatura() {
+		return asignatura;
+	}
 
+	public void setAsignatura(Long asignatura) {
+		this.asignatura = asignatura;
+	}
+
+	public Long getCurso() {
+		return curso;
+	}
+
+	public void setCurso(Long curso) {
+		this.curso = curso;
+	}
+
+	public Long getTarea() {
+		return tarea;
+	}
+
+	public void setTarea(Long tarea) {
+		this.tarea = tarea;
+	}
+
+	
 }

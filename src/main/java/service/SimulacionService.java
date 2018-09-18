@@ -19,13 +19,18 @@ import model.Asignatura;
 import model.Concepto;
 import model.Curso;
 import model.Ejercicio;
+import model.Evidencia;
+import model.Log;
+import model.Material;
 import model.Respuesta;
 import model.Sesion;
+import model.SesionMaterial;
 import model.Simulacion;
 import model.Tarea;
 import model.Tema;
-import smile.Network;
 import utils.AppException;
+import utils.HerramientasDrools;
+import utils.Regla;
 import base.AdministracionAlumno;
 import base.AdministracionBase;
 import base.BaseServiceImpl;
@@ -70,6 +75,21 @@ public class SimulacionService extends
 
 	@Inject
 	private AlumnoService alumnoService;
+
+	@Inject
+	private EvidenciaService evidenciaService;
+
+	@Inject
+	private LogService logService;
+	
+	@Inject
+	private DrlService drlService;
+
+	@Inject
+	private MaterialService materialService;
+
+	@Inject
+	private SesionMaterialService sesionMaterialService;
 
 	// private SessionService session;
 	final private long userId = 1;
@@ -209,315 +229,27 @@ public class SimulacionService extends
 		System.out.println("idMultiplicacion: " + c4.getId());
 		System.out.println("idPotencia: " + c5.getId());
 
-		// ejercicio01
-		Ejercicio e1 = new Ejercicio();
-		e1.setAdivinanza(new Double(0.1));// bajo
-		e1.setNivelDificultad(new Double(1));// facil
-		e1.setEnunciado("ejercicio01");
-		e1.setIdAsignatura(asig.getId());
-		e1.addConceptos(c5);
-
-		// Ejercicio02
-		Ejercicio e2 = new Ejercicio();
-		e2.setAdivinanza(new Double(0.1));// bajo
-		e2.setNivelDificultad(new Double(1));// facil
-		e2.setEnunciado("ejercicio02");
-		e2.setIdAsignatura(asig.getId());
-		e2.addConceptos(c4);
-
-		// Ejercicio03
-		Ejercicio e3 = new Ejercicio();
-		e3.setAdivinanza(new Double(0.1));// medio
-		e3.setNivelDificultad(new Double(1));// normal
-		e3.setEnunciado("ejercicio03");
-		e3.setIdAsignatura(asig.getId());
-		e3.addConceptos(c3);
-
-		// Ejercicio04
-		Ejercicio e4 = new Ejercicio();
-		e4.setAdivinanza(new Double(0.1));// medio
-		e4.setNivelDificultad(new Double(1));// dificil
-		e4.setEnunciado("ejercicio04");
-		e4.setIdAsignatura(asig.getId());
-		e4.addConceptos(c2);
-
-		// Ejercicio05
-		Ejercicio e5 = new Ejercicio();
-		e5.setAdivinanza(new Double(0.1));// bajo
-		e5.setNivelDificultad(new Double(1));// facil
-		e5.setEnunciado("ejercicio05");
-		e5.setIdAsignatura(asig.getId());
-		e5.addConceptos(c1);
-
-		// Ejercicio06
-		Ejercicio e6 = new Ejercicio();
-		e6.setAdivinanza(new Double(0.2));// medio
-		e6.setNivelDificultad(new Double(1));// facil
-		e6.setEnunciado("ejercicio06");
-		e6.setIdAsignatura(asig.getId());
-		e6.addConceptos(c1);
-		e6.addConceptos(c2);
-
-		// Ejercicio07
-		Ejercicio e7 = new Ejercicio();
-		e7.setAdivinanza(new Double(0.2));// medio
-		e7.setNivelDificultad(new Double(2));// normal
-		e7.setEnunciado("ejercicio07");
-		e7.setIdAsignatura(asig.getId());
-		e7.addConceptos(c1);
-		e7.addConceptos(c2);
-		e7.addConceptos(c3);
-
-		// Ejercicio08
-		Ejercicio e8 = new Ejercicio();
-		e8.setAdivinanza(new Double(0.3));// alto
-		e8.setNivelDificultad(new Double(2));// normal
-		e8.setEnunciado("ejercicio08");
-		e8.setIdAsignatura(asig.getId());
-		e8.addConceptos(c1);
-		e8.addConceptos(c2);
-		e8.addConceptos(c3);
-		e8.addConceptos(c4);
-
-		// Ejercicio09
-		Ejercicio e9 = new Ejercicio();
-		e9.setAdivinanza(new Double(0.3));// alto
-		e9.setNivelDificultad(new Double(3));// dificil
-		e9.setEnunciado("ejercicio09");
-		e9.setIdAsignatura(asig.getId());
-		e9.addConceptos(c1);
-		e9.addConceptos(c2);
-		e9.addConceptos(c3);
-		e9.addConceptos(c4);
-		e9.addConceptos(c5);
-
-		// Ejercicio10
-		Ejercicio e10 = new Ejercicio();
-		e10.setAdivinanza(new Double(0.2));// medio
-		e10.setNivelDificultad(new Double(1));// facil
-		e10.setEnunciado("ejercicio10");
-		e10.setIdAsignatura(asig.getId());
-		e10.addConceptos(c4);
-		e10.addConceptos(c5);
-
-		// Ejercicio11
-		Ejercicio e11 = new Ejercicio();
-		e11.setAdivinanza(new Double(0.2));// medio
-		e11.setNivelDificultad(new Double(1));// facil
-		e11.setEnunciado("ejercicio11");
-		e11.setIdAsignatura(asig.getId());
-		e11.addConceptos(c1);
-
-		// Ejercicio12
-		Ejercicio e12 = new Ejercicio();
-		e12.setAdivinanza(new Double(0.3));// alto
-		e12.setNivelDificultad(new Double(1));// facil
-		e12.setEnunciado("ejercicio12");
-		e12.setIdAsignatura(asig.getId());
-		e12.addConceptos(c1);
-
-		// Ejercicio13
-		Ejercicio e13 = new Ejercicio();
-		e13.setAdivinanza(new Double(0.2));// medio
-		e13.setNivelDificultad(new Double(1));// facil
-		e13.setEnunciado("ejercicio13");
-		e13.setIdAsignatura(asig.getId());
-		e13.addConceptos(c3);
-
-		// Ejercicio14
-		Ejercicio e14 = new Ejercicio();
-		e14.setAdivinanza(new Double(0.3));// alto
-		e14.setNivelDificultad(new Double(1));// facil
-		e14.setEnunciado("ejercicio14");
-		e14.setIdAsignatura(asig.getId());
-		e14.addConceptos(c3);
-
-		// Ejercicio15
-		Ejercicio e15 = new Ejercicio();
-		e15.setAdivinanza(new Double(0.2));// medio
-		e15.setNivelDificultad(new Double(1));// facil
-		e15.setEnunciado("ejercicio15");
-		e15.setIdAsignatura(asig.getId());
-		e15.addConceptos(c5);
-
-		// Ejercicio16
-		Ejercicio e16 = new Ejercicio();
-		e16.setAdivinanza(new Double(0.3));// alto
-		e16.setNivelDificultad(new Double(1));// facil
-		e16.setEnunciado("ejercicio16");
-		e16.setIdAsignatura(asig.getId());
-		e16.addConceptos(c5);
-
-		// Ejercicio17
-		Ejercicio e17 = new Ejercicio();
-		e17.setAdivinanza(new Double(0.2));// medio
-		e17.setNivelDificultad(new Double(2));// medio
-		e17.setEnunciado("ejercicio17");
-		e17.setIdAsignatura(asig.getId());
-		e17.addConceptos(c3);
-		e17.addConceptos(c1);
-
-		// Ejercicio18
-		Ejercicio e18 = new Ejercicio();
-		e18.setAdivinanza(new Double(0.1));// medio
-		e18.setNivelDificultad(new Double(2));// medio
-		e18.setEnunciado("ejercicio18");
-		e18.setIdAsignatura(asig.getId());
-		e18.addConceptos(c3);
-		e18.addConceptos(c1);
-
-		// Ejercicio19
-		Ejercicio e19 = new Ejercicio();
-		e19.setAdivinanza(new Double(0.1));// medio
-		e19.setNivelDificultad(new Double(3));// medio
-		e19.setEnunciado("ejercicio19");
-		e19.setIdAsignatura(asig.getId());
-		e19.addConceptos(c3);
-		e19.addConceptos(c1);
-		e19.addConceptos(c5);
-
-		// Ejercicio20
-		Ejercicio e20 = new Ejercicio();
-		e20.setAdivinanza(new Double(0.2));// medio
-		e20.setNivelDificultad(new Double(3));// medio
-		e20.setEnunciado("ejercicio20");
-		e20.setIdAsignatura(asig.getId());
-		e20.addConceptos(c3);
-		e20.addConceptos(c1);
-		e20.addConceptos(c5);
-
-		// Ejercicio21
-		Ejercicio e21 = new Ejercicio();
-		e21.setAdivinanza(new Double(0.3));// medio
-		e21.setNivelDificultad(new Double(3));// medio
-		e21.setEnunciado("ejercicio21");
-		e21.setIdAsignatura(asig.getId());
-		e21.addConceptos(c3);
-		e21.addConceptos(c1);
-		e21.addConceptos(c5);
-
-		// Ejercicio22
-		Ejercicio e22 = new Ejercicio();
-		e22.setAdivinanza(new Double(0.3));// medio
-		e22.setNivelDificultad(new Double(3));// medio
-		e22.setEnunciado("ejercicio22");
-		e22.setIdAsignatura(asig.getId());
-		e22.addConceptos(c3);
-		e22.addConceptos(c1);
-		e22.addConceptos(c2);
-		e22.addConceptos(c4);
-
-		// Ejercicio23
-		Ejercicio e23 = new Ejercicio();
-		e23.setAdivinanza(new Double(0.3));// medio
-		e23.setNivelDificultad(new Double(3));// medio
-		e23.setEnunciado("ejercicio23");
-		e23.setIdAsignatura(asig.getId());
-		e23.addConceptos(c3);
-		e23.addConceptos(c1);
-		e23.addConceptos(c2);
-		e23.addConceptos(c4);
-		e23.addConceptos(c5);
-
-		// Ejercicio24
-		Ejercicio e24 = new Ejercicio();
-		e24.setAdivinanza(new Double(0.1));// bajo
-		e24.setNivelDificultad(new Double(2));// medio
-		e24.setEnunciado("ejercicio24");
-		e24.setIdAsignatura(asig.getId());
-		e24.addConceptos(c5);
-		e24.addConceptos(c1);
-
-		// Ejercicio25
-		Ejercicio e25 = new Ejercicio();
-		e25.setAdivinanza(new Double(0.2));// medio
-		e25.setNivelDificultad(new Double(2));// medio
-		e25.setEnunciado("ejercicio25");
-		e25.setIdAsignatura(asig.getId());
-		e25.addConceptos(c5);
-		e25.addConceptos(c1);
-
-		// Ejercicio26
-		Ejercicio e26 = new Ejercicio();
-		e26.setAdivinanza(new Double(0.2));// medio
-		e26.setNivelDificultad(new Double(3));// alto
-		e26.setEnunciado("ejercicio26");
-		e26.setIdAsignatura(asig.getId());
-		e26.addConceptos(c5);
-		e26.addConceptos(c1);
-
-		// Ejercicio27
-		Ejercicio e27 = new Ejercicio();
-		e27.setAdivinanza(new Double(0.1));// medio
-		e27.setNivelDificultad(new Double(2));// alto
-		e27.setEnunciado("ejercicio27");
-		e27.setIdAsignatura(asig.getId());
-		e27.addConceptos(c5);
-		e27.addConceptos(c3);
-
-		// Ejercicio28
-		Ejercicio e28 = new Ejercicio();
-		e28.setAdivinanza(new Double(0.2));// medio
-		e28.setNivelDificultad(new Double(2));// alto
-		e28.setEnunciado("ejercicio28");
-		e28.setIdAsignatura(asig.getId());
-		e28.addConceptos(c5);
-		e28.addConceptos(c3);
-
-		// Ejercicio29
-		Ejercicio e29 = new Ejercicio();
-		e29.setAdivinanza(new Double(0.3));// medio
-		e29.setNivelDificultad(new Double(3));// alto
-		e29.setEnunciado("ejercicio29");
-		e29.setIdAsignatura(asig.getId());
-		e29.addConceptos(c2);
-		e29.addConceptos(c3);
-		e29.addConceptos(c4);
-
-		// Ejercicio30
-		Ejercicio e30 = new Ejercicio();
-		e30.setAdivinanza(new Double(0.3));// medio
-		e30.setNivelDificultad(new Double(3));// alto
-		e30.setEnunciado("ejercicio30");
-		e30.setIdAsignatura(asig.getId());
-		e30.addConceptos(c2);
-		e30.addConceptos(c3);
-		e30.addConceptos(c4);
-		e30.addConceptos(c1);
-		e30.addConceptos(c5);
+		List<Concepto> listaConc = new ArrayList<Concepto>();
+		listaConc.add(c1);
+		listaConc.add(c2);
+		listaConc.add(c3);
+		listaConc.add(c4);
+		listaConc.add(c5);
 
 		List<Ejercicio> listaEjercicio = new ArrayList<Ejercicio>();
-		listaEjercicio.add(e1);
-		listaEjercicio.add(e2);
-		listaEjercicio.add(e3);
-		listaEjercicio.add(e4);
-		listaEjercicio.add(e5);
-		listaEjercicio.add(e6);
-		listaEjercicio.add(e7);
-		listaEjercicio.add(e8);
-		listaEjercicio.add(e9);
-		listaEjercicio.add(e10);
-		listaEjercicio.add(e11);
-		listaEjercicio.add(e12);
-		listaEjercicio.add(e13);
-		listaEjercicio.add(e14);
-		listaEjercicio.add(e15);
-		listaEjercicio.add(e16);
-		listaEjercicio.add(e17);
-		listaEjercicio.add(e18);
-		listaEjercicio.add(e19);
-		listaEjercicio.add(e20);
-		listaEjercicio.add(e21);
-		listaEjercicio.add(e22);
-		listaEjercicio.add(e23);
-		listaEjercicio.add(e24);
-		listaEjercicio.add(e25);
-		listaEjercicio.add(e26);
-		listaEjercicio.add(e27);
-		listaEjercicio.add(e28);
-		listaEjercicio.add(e29);
-		listaEjercicio.add(e30);
-
+		List<Ejercicio> listaEje = new ArrayList<Ejercicio>();
+		for (int i = 0; i < 5; i++) {
+			listaEje = creadorCombinadoDeEjercicios(5, listaConc, asig.getId(), i);
+			if(!listaEje.isEmpty()){
+				listaEjercicio.addAll(listaEje);
+			}
+		
+		}
+		//listaEjercicio = creadorCombinadoDeEjercicios(5, listaConc, asig.getId(), 5);
+		
+		if(listaEjercicio.isEmpty())
+			System.out.println(" NO CREO NINGUN EJERCICIO");
+		
 		for (Ejercicio e : listaEjercicio) {
 			Respuesta r1 = new Respuesta();
 			Respuesta r2 = new Respuesta();
@@ -557,17 +289,6 @@ public class SimulacionService extends
 			ejercicioService.insertarSimulacion(e, httpRequest);
 		}
 
-		System.out.println("Ejercicio 1: " + e1.getId());
-		System.out.println("Ejercicio 2: " + e2.getId());
-		System.out.println("Ejercicio 3: " + e3.getId());
-		System.out.println("Ejercicio 4: " + e4.getId());
-		System.out.println("Ejercicio 5: " + e5.getId());
-		System.out.println("Ejercicio 6: " + e6.getId());
-		System.out.println("Ejercicio 7: " + e7.getId());
-		System.out.println("Ejercicio 8: " + e8.getId());
-		System.out.println("Ejercicio 9: " + e9.getId());
-		System.out.println("Ejercicio 10: " + e10.getId());
-		System.out.println("Ejercicio 30: " + e30.getId());
 
 		/** Creacion de asignatura **/
 
@@ -583,7 +304,184 @@ public class SimulacionService extends
 		/** crea la red de la asignatura ***/
 		adm.calcularProbabilidades(asig);
 
+		crearMateriales(httpRequest, asig.getId());
+
 		return asig;
+
+	}
+
+	/***
+	 * Esta funcion devuelve un lista de ejercicios que estan definidos por una
+	 * escala como la que sigue. cantidadConcepto | adivinanza | dificultad 1 |
+	 * bajo | facil 2 | medio | facil 3 | medio | normal 4 | alto | normal 5 |
+	 * alto | dificil
+	 * 
+	 * @param num
+	 *            . Es el numero de concepto para hacer la combinacion
+	 * @param conceptos
+	 *            . Es la lista de conceptos
+	 * @param idAsignatura
+	 *            . id de la asignatura
+	 * @param  numeroDelFor. un for externo por si se quiera hacer varias veces.        
+	 *            
+	 * @return listaDeEjercicios
+	 * ***/
+	public List<Ejercicio> creadorCombinadoDeEjercicios(int num, List<Concepto> conceptos,
+			Long idAsignatura, int numeroDelFor) {
+
+		List<Ejercicio> listaRetorno = new ArrayList<Ejercicio>();
+		Double bajoAdivinanza = new Double(0.1);
+		Double medioAdivinanza = new Double(0.2);
+		Double altoAdivinanza = new Double(0.3);
+
+		Double facilDificultad = new Double(1);
+		Double normalDificultad = new Double(2);
+		Double dificilDificultad = new Double(3);
+
+		for (int i = 0; i < Math.pow(2, num); i++) {
+			int arreglo[] = new int[num];
+			int temp = i;
+			for (int l = 0; l < arreglo.length; l++) {
+				arreglo[l] = temp % 2;
+				temp /= 2;
+			}
+			String res = "";
+			// posicion dentro del arraydeConceptos
+			List<Integer> posicion = new ArrayList<Integer>();
+			for (int j = 0; j < arreglo.length; j++) {
+				if (arreglo[j] == 1) {
+					res += "[" + (j + 1) + "]";
+					posicion.add(j);
+				}
+			}
+
+			int combinacion = i + 1;
+			int cantidadCon = posicion.size();
+
+			// un concepto
+			if (cantidadCon == 1) {
+				int secuencia = combinacion + (numeroDelFor * 32);
+				Ejercicio e = cargaUnEjercicio(posicion, conceptos, secuencia,
+						bajoAdivinanza, facilDificultad, idAsignatura);
+				listaRetorno.add(e);
+
+			}
+			// dos conceptos
+			if (cantidadCon == 2) {
+
+				int secuencia = combinacion + (numeroDelFor * 32);
+				Ejercicio e = cargaUnEjercicio(posicion, conceptos, secuencia,
+						medioAdivinanza, facilDificultad, idAsignatura);
+				listaRetorno.add(e);
+
+			}
+			// tres conceptos
+			if (cantidadCon == 3) {
+
+				int secuencia = combinacion + (numeroDelFor * 32);
+				Ejercicio e = cargaUnEjercicio(posicion, conceptos, secuencia,
+						medioAdivinanza, normalDificultad, idAsignatura);
+				listaRetorno.add(e);
+
+			}
+			// cuatro conceptos
+			if (cantidadCon == 4) {
+
+				int secuencia = combinacion + (numeroDelFor * 32);
+				Ejercicio e = cargaUnEjercicio(posicion, conceptos, secuencia,
+						altoAdivinanza, normalDificultad, idAsignatura);
+				listaRetorno.add(e);
+
+			}
+			// cinco conceptos
+			if (cantidadCon == 5) {
+
+				int secuencia = combinacion + (numeroDelFor * 32);
+				Ejercicio e = cargaUnEjercicio(posicion, conceptos, secuencia,
+						altoAdivinanza, dificilDificultad, idAsignatura);
+				listaRetorno.add(e);
+
+			}
+
+		}
+		
+		return listaRetorno;
+
+	}
+
+	/** Carga un ejercicio ***/
+	private Ejercicio cargaUnEjercicio(List<Integer> posicion,
+			List<Concepto> lista, int secuencia, Double adivinanza,
+			Double dificultad, Long idAsignatura) {
+
+		// ejercicio
+		Ejercicio e = new Ejercicio();
+		e.setAdivinanza(adivinanza);// bajo
+		e.setNivelDificultad(dificultad);// facil
+		e.setEnunciado("ejercicio" + secuencia);
+		e.setIdAsignatura(idAsignatura);
+		for (Integer ppp : posicion) {
+			// System.out.println("Concepto: " + lista.get(ppp));
+			e.addConceptos(lista.get(ppp));
+		}
+		
+		return e;
+
+	}
+
+	/**
+	 * Crea 54 materiales para la lista de conceptos ahi adentro.
+	 **/
+	private void crearMateriales(HttpServletRequest httpRequest, Long asig)
+			throws AppException {
+
+		/**
+		 * Creacion de material ** 12 por cada concepto
+		 **/
+		List<String> lista = new ArrayList<String>();
+		lista.add("suma");
+		lista.add("division");
+		lista.add("potencia");
+
+		for (String c : lista) {
+
+			for (int i = 0; i < 54; i++) {
+				if (i < 18) {
+					String nivel = "bajo";
+					String estilo = "visual";
+					String url = "https://www.youtube.com/watch?v=-4pe1ui" + i
+							+ "b" + i + "g";
+					crearMaterial(httpRequest, nivel, estilo, c, asig, url);
+				} else if (i >= 18 && i <= 36) {
+					String nivel = "medio";
+					String estilo = "visual";
+					String url = "https://www.youtube.com/watch?v=-4pe1ui" + i
+							+ "b" + i + "g";
+					crearMaterial(httpRequest, nivel, estilo, c, asig, url);
+
+				} else if (i > 36) {
+					String nivel = "alto";
+					String estilo = "visual";
+					String url = "https://www.youtube.com/watch?v=-4pe1ui" + i
+							+ "b" + i + "g";
+					crearMaterial(httpRequest, nivel, estilo, c, asig, url);
+				}
+
+			}
+		}
+
+	}
+
+	private void crearMaterial(HttpServletRequest httpRequest, String nivel,
+			String estilo, String c, Long asig, String url) throws AppException {
+		Material material = new Material();
+		material.setConcepto(c);
+		material.setEstilo(estilo);
+		material.setIdAsignatura(asig);
+		material.setNivel(nivel);
+		material.setUrlMaterial(url);
+
+		materialService.insertar(material, httpRequest);
 
 	}
 
@@ -855,13 +753,17 @@ public class SimulacionService extends
 	 *             ***
 	 * 
 	 */
-	public String simulacionTutor(HttpServletRequest httpRequest)
-			throws AppException {
+	public String simulacionTutor(HttpServletRequest httpRequest, Long idAsig,
+			Long idAlu, Long idTarea, Long idArchivo) throws AppException {
+
+		/** Arranca el motor de reglas. Va a obtener el archivo 1 **/
+		String archivo = drlService.obtenerArchivo(idArchivo);
+		HerramientasDrools hd = drlService.iniciarDrools(archivo);
 
 		/* Obtenemos la tarea 1* */
-		Long id_tarea = new Long(1);
+		// Long idTarea = new Long(7);
 		Tarea tarea = new Tarea();
-		tarea = tareaService.obtener(id_tarea);
+		tarea = tareaService.obtener(idTarea);
 		if (tarea != null) {
 			System.out.println("Conseguimos tarea");
 		} else {
@@ -879,14 +781,15 @@ public class SimulacionService extends
 		}
 		String nombreConcepto = null;
 		Double valorNodo = null;
-		Long idAsig = new Long(1);
-		Long idAlu = new Long(1);
+		// Long idAsig = new Long(4);
+		// Long idAlu = new Long(37);
 
-		Double valorFijadoProfesor = new Double(0.75);
+		Double valorFijadoProfesor = new Double(0.70);
 		List<Concepto> conceptosAEvaluar = new ArrayList<Concepto>();
 
 		/**
 		 * Se determina que conceptos no conoce Por el criterio de
+		 * valorFijadoProfesor
 		 **/
 		for (Concepto c : listaConcepto) {
 			nombreConcepto = c.getNombre();
@@ -900,55 +803,418 @@ public class SimulacionService extends
 
 		}
 		if (conceptosAEvaluar != null) {
-			evaluarTutor(conceptosAEvaluar, idAlu, idAsig, id_tarea);
+
+			evaluarTutor(conceptosAEvaluar, idAlu, idAsig, idTarea,
+					httpRequest, hd);
 		}
 
 		return "termineTutor";
 
 	}
 
+	/**
+	 * Aqui esta el tutor en si. Evalua a un alumno en el test.
+	 * 
+	 * @throws AppException
+	 */
 	private void evaluarTutor(List<Concepto> lista, Long idAlu, Long idAsig,
-			Long idTarea) {
+			Long idTarea, HttpServletRequest httpRequest, HerramientasDrools hd)
+			throws AppException {
 
-		
+		// List<String> listaR = new ArrayList<String>();
 		String nombreConcepto = null;
 		Double valorNodo = null;
-		int x = 1; // bandera para controlar la cantidad de intentos. 
-		int cantidadIntentos = 5;  // esto deberia ser tarea.getCantidadIntentos.
+		/** Concepto umbral definido aqui. **/
+		Double conceptoUmbral = new Double("0.70");
+		int x = 1; // bandera para controlar la cantidad de intentos.
+		int cantidadIntentos = 7; // esto deberia ser
+									// tarea.getCantidadIntentos.
 		boolean pasoPorMaterial = false;
 		String respuestaEjercicio = null;
-		Boolean respuesta = null;// respuesta true si respondio bien y false si respondio mal
+		Boolean respuesta = null;// respuesta true si respondio bien y false si
+									// respondio mal
+
+		
+		
+		/** Creacion de sesionMaterial ***/
+		SesionMaterial sesionMaterial = null;
+		sesionMaterial = sesionMaterialService.registrarSesionMaterial(idAlu, idTarea, httpRequest);
+		Long idSesionMaterial = sesionMaterial.getId();
+		System.out.println("##########sesion Material creada ######");
+		
+		
+		/*** Se crea una lista de respuesta **/
+		// listaR = respuestasGeneradas(numero);
+		// int contador = 0;
+
 		/**
 		 * Por cada concepto traer un ejercicio
 		 **/
 		for (Concepto c : lista) {
 
-			/**Traemos el valor del nodo**/
+			/** Traemos el valor del nodo **/
 			nombreConcepto = c.getNombre();
 			valorNodo = adm
 					.getValorNodoRedDouble(nombreConcepto, idAsig, idAlu);
 
-			/**bandera para controlar la cantidad de intentos**/
+			/** bandera para controlar la cantidad de intentos **/
 			x = 1;
-			/**Paso por material. Bandera para controlar el tema de registrar
-			 * los logs**/
+			/**
+			 * Paso por material. Bandera para controlar el tema de registrar
+			 * los logs
+			 **/
 			pasoPorMaterial = false;
+
+			// random para que las respuestas sean aleatorias.
+			Random aleatorio = new Random(System.currentTimeMillis());
+
+			/**
+			 * Se crea una evidencia por concepto y se setea su concepto, su
+			 * nivel actual en este concepto
+			 * **/
+			Evidencia e = new Evidencia();
+			e.setConcepto(nombreConcepto);
+			e.setNivelEvidencia(valorNodo);
+			/** estaticos aun **/
+			e.setEstilo("visual");
+			e.setIdAsignatura(idAsig);
+
+
+			
+			/** OJOOOO .... SE DEBE BORRAR AL FINALIZAR LAS PRUEBAS
+			 * PRUEBA
+			 * Se crea un log que guarda toda la ruta del alumno. Ya existe
+			 * evidencia. pero es para las reglas. 
+			 * Este log es temporal para revisar 
+			 * el comportamiento del tutor en si. 
+			 * #######################################################
+			 * **/
+			Log log = new Log();
+			log.setConcepto(nombreConcepto);
+			log.setAlumno(idAlu);
+			log.setAsignatura(idAsig);
+			log.setTarea(idTarea);
+			log.addSecuencia(nombreConcepto);
+			log.addSecuencia(valorNodo.toString());
+
+			
 			
 			/**
-			 * Esta funcion trae el siguiente ejercicio en base a su utilidad
-			 * sobre el concepto c y no sobre la asignatura
+			 * Mientras el valor del nodo sea menor al umbral requerido
+			 * valorNodo < conceptoUmbral &&
 			 **/
-			Ejercicio ejercicio = admAlumno.getSiguienteEjercicioPorConcepto(
-					idTarea, idAlu, idAsig, c);
-			System.out.println("Ejercicio: " + ejercicio.toString());
+			while (valorNodo < conceptoUmbral && x <= cantidadIntentos) {
+				/**
+				 * Esta funcion trae el siguiente ejercicio en base a su
+				 * utilidad sobre el concepto c y no sobre la asignatura
+				 **/
+				Ejercicio ejercicio = admAlumno
+						.getSiguienteEjercicioPorConcepto(idTarea, idAlu,
+								idAsig, c);
+
+				if (ejercicio == null) {
+					System.out.println("ejercicio nulo, Hacemos un break porque no existe mas ningun ejercicio"
+							+ "######################################################");
+					break;
+				}
+				// res respuestaEjercicio =
+				// ejercicio.getRespuesta().getDescripcion();
+				/**
+				 * Respuesta aleatoria con una semilla presente estatica if
+				 * (listaR.get(contador) == "T") { respuestaEjercicio =
+				 * ejercicio.getRespuesta().getDescripcion(); } else {
+				 * respuestaEjercicio = "respuestaMALA"; }
+				 */
+
+				int intAletorio = aleatorio.nextInt(2);
+				if (intAletorio == 1) {
+
+					respuestaEjercicio = ejercicio.getRespuesta()
+							.getDescripcion();
+				} else {
+					respuestaEjercicio = "respuestaMALA";
+				}
+
+				aleatorio.setSeed(System.currentTimeMillis());
+
+				respuesta = admAlumno.responderEjercicioConcepto(ejercicio,
+						respuestaEjercicio, idAlu, idAsig, idTarea);
+
+				// se registra el ejercicio en la evidencia
+				e.addEjercicio(ejercicio.getId());
+				
+				Material material = null;
+				Boolean noEsRegla = false;
+				
+				if (respuesta && pasoPorMaterial) {
+
+					registrarLog(e, httpRequest);
+					x--;
+					pasoPorMaterial = false;
+					// Aqui si se registra un nuevo valor de nodo
+					e.setNivelEvidencia(valorNodo);
+
+				} else if (!respuesta) {
+					// e.formatearEvidencia();
+
+					material = aplicarReglaMaterial(e, hd, idTarea,
+							idAlu, noEsRegla);
+					mostrarMaterial(material);
+					e.addMaterial(material.getId());
+					pasoPorMaterial = true;
+				}
+
+				// se recalcula el valor del nodo pase o no por un material.
+				valorNodo = adm.getValorNodoRedDouble(nombreConcepto, idAsig,
+						idAlu);
+
+				/***
+				 * verifica que exista otro estilo de aprendizaje Por ahora no
+				 * tiene
+				 **/
+				if (x == cantidadIntentos && tieneSegundoEstilo(idAlu)) {
+					cambiarEstilo(idAlu);
+					// x = 0;
+				}
+
+				// aumenta la cantidad de intentos
+				x++;
+				System.out.println("##############################");
+				System.out
+						.println("\nEjercicio Visto: " + ejercicio.toString());
+				System.out.println("Respuesta del ejercicio: " + respuesta);
+				System.out.println("Valor Concepto: "+ valorNodo);
+				System.out.println("##############################\n");
+				
+				
+				log.addSecuencia("E"+ejercicio.getId());
+				log.addSecuencia(respuesta.toString());
+				log.addSecuencia(valorNodo.toString());
+				log.addSecuencia("#");
+				
+				/***aca recolecta la informacion**/
+				if(material !=  null){
+					log.addSecuencia("M"+material.getId());
+					log.addSecuencia(noEsRegla.toString());
+				}
+				/** Contador Para respuestasGeneradas **/
+				// contador++
+			}
+
+			if (x > cantidadIntentos) {
+
+				informarProfesor(valorNodo, nombreConcepto);
+				log.addSecuencia("NoSUPERADO");
+			} else {
+				System.out.println("##############################");
+				System.out.println("Concepto Superado: ");
+				System.out.println("Concepto: " + nombreConcepto + ", Valor: "
+						+ valorNodo);
+				System.out.println("##############################\n");
+				log.addSecuencia("SUPERADO");
+
+			}
 			
-			//responde bien
-			respuestaEjercicio = ejercicio.getRespuesta().getDescripcion();
-			
-			respuesta = admAlumno.responderEjercicioConcepto(ejercicio, respuestaEjercicio, idAlu, idAsig, idTarea);		
-			System.out.println("\nRespuesta del ejercicio: " +  respuesta);
+		
+			// se guarda en la base de datos.
+			Log l01 = new Log(log);
+			logService.insertar(l01, httpRequest);
 
 		}
+		
+		
+		
+		/**Terminamos la sesion***/
+		sesionMaterial.setEstadoTerminado(true);
+		sesionMaterialService.modificar(sesionMaterial.getId(), sesionMaterial, httpRequest);
+
+	}
+
+	/** Retorna si tiene segundo estilo **/
+	private Boolean tieneSegundoEstilo(Long idAlu) {
+		return false;
+	}
+
+	/** Retorna si tiene segundo estilo **/
+	private void informarProfesor(Double valor, String nombre) {
+
+		System.out.println("##############################");
+		System.out.println("Concepto NO superado: ");
+		System.out.println("Concepto: " + nombre + ", Valor: " + valor);
+		System.out.println("##############################\n");
+	}
+
+	/** cambia de estilo **/
+	private void cambiarEstilo(long idAlu) {
+
+	}
+
+	/**
+	 * Registra una evidencia y reinicia la evidencia por llamarlo asi
+	 * 
+	 * @Param evidencia
+	 * @Param http
+	 * **/
+	private void registrarLog(Evidencia e, HttpServletRequest httpRequest)
+			throws AppException {
+
+		e.formatearEvidencia();
+		Evidencia e01 = new Evidencia(e);
+
+		evidenciaService.insertar(e01, httpRequest);
+
+	}
+
+	/**
+	 * Obtiene un material si existe una regla por la evidencia del alumno en
+	 * caso de no obtener un material por regla. obtiene un material aleatorio
+	 * basado en concepto, nivel y estilo que aun no se haya visto el alumno
+	 * 
+	 * @Param evidencia e
+	 * @Param hd. Instancia del drools
+	 * @Return {@link Class} Material
+	 ***/
+	private Material aplicarReglaMaterial(Evidencia e, HerramientasDrools hd,
+			Long idTarea, Long idAlu, Boolean noEsRegla) throws AppException {
+
+		Material material = new Material();
+
+		// iniciamos sesion y le tiramos el material
+		hd.iniciarSession();
+		Regla r = new Regla();
+		r.setConcepto(e.getConcepto());
+		r.setNivel(e.getNivel());
+		r.setEstilo(e.getEstilo());
+		r.setSecuenciaEjercicios(e.getSecuenciaEjercicio());
+		r.setSecuenciaVideos(e.getSecuenciaMaterial());
+
+		hd.ejecutarRegla(r);
+		hd.terminarSession();
+
+		/** Aqui abrimos la sesion anterior **/
+		SesionMaterial sesionMaterialAnterior = sesionMaterialService
+				.sesionMaterialAnterior(idAlu, idTarea);
+
+		/**
+		 * Si consigo un material entra aqui. - Si el material ya se mostro. Que
+		 * se hace??????????????? se busca otra regla. o se asume que funciona y
+		 * se guarda en materiales mostrados - Ahora se muestra el material que
+		 * genera la regla por mas que ya se haya mostrado
+		 * ***/
+		if (r.getMaterialAMostrar() != null) {
+			String[] parts = r.getMaterialAMostrar().split("M");
+			String part2 = parts[1]; // 654321
+			Long idMaterial = new Long(part2);
+			material = materialService.obtener(idMaterial);
+			System.out.println("#####################################");
+			System.out.println("Material de la regla: " + material.getId());
+			System.out.println("#####################################\n");
+			noEsRegla = true;
+			/***
+			 * Si la regla no consiguio material entonces se busca un material
+			 * que no haya sido seleccionado aun es decir que no este en la
+			 * sesion anterior
+			 ***/
+		} else {
+			// material = materialService.obtener(new Long(1));
+			List<Material> materiales = sesionMaterialAnterior
+					.getListaMaterial();
+			material = materialService.materialesDisponibles(materiales, r);
+			System.out.println("#####################################");
+			System.out.println("Material al azar: " + material.getId());
+			System.out.println("#####################################\n");
+		
+		}
+
+		/**
+		 * Una vez mostrado el material por la regla o al azar se guarda en la
+		 * sesionMaterialAnterior
+		 ***/
+		try {
+
+			sesionMaterialService.insertarMaterialVisto(
+					sesionMaterialAnterior.getId(), sesionMaterialAnterior,
+					material);
+		} catch (AppException ex) {
+			System.out.println("No se pudo insertar el material");
+			ex.printStackTrace();
+		}
+
+		return material;
+	}
+
+	private void mostrarMaterial(Material material) {
+		System.out.println("##############################");
+		System.out.println("Material Mostrado: " + material.getId() + "  ");
+		System.out.println("##############################\n");
+	}
+
+	/**
+	 * Lista de respuestas posibles para tres conceptos. T,T,T
+	 **/
+	private List<String> respuestasGeneradas(int numero) {
+
+		List<String> d = new ArrayList<String>();
+
+		switch (numero) {
+
+		case 1:
+			d.add("T");
+			d.add("T");
+			d.add("T");
+			break;
+
+		case 2:
+			d.add("T");
+			d.add("T");
+			d.add("F");
+			break;
+
+		case 3:
+			d.add("T");
+			d.add("F");
+			d.add("T");
+			break;
+
+		case 4:
+			d.add("T");
+			d.add("F");
+			d.add("F");
+			break;
+
+		case 5:
+			d.add("F");
+			d.add("T");
+			d.add("T");
+			break;
+
+		case 6:
+			d.add("F");
+			d.add("T");
+			d.add("F");
+			break;
+
+		case 7:
+			d.add("F");
+			d.add("F");
+			d.add("T");
+			break;
+
+		case 8:
+			d.add("F");
+			d.add("F");
+			d.add("F");
+			break;
+
+		default:
+			d.add("F");
+			d.add("F");
+			d.add("F");
+			break;
+
+		}
+
+		return d;
 
 	}
 
