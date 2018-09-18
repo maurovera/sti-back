@@ -170,9 +170,6 @@ public class Sesion extends BaseEntity implements Serializable {
 		this.listaEjercicio = listaEjercicio;
 	}
 
-	public Integer getCantidadEjerciciosResueltos() {
-		return cantidadEjerciciosResueltos;
-	}
 	
 	public void addEjercicioResuelto(Ejercicio ejercicio){
 		this.listaEjercicio.add(ejercicio);
