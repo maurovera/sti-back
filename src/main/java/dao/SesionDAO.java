@@ -3,10 +3,8 @@ package dao;
 import javax.ejb.Stateless;
 import javax.persistence.Query;
 
-import utils.AppException;
-import model.Asignatura;
-import model.Curso;
 import model.Sesion;
+import utils.AppException;
 import base.BaseDAO;
 
 @Stateless
@@ -61,6 +59,29 @@ public class SesionDAO extends BaseDAO<Sesion> {
 		em.merge(dto);
 	
 	}
+	
+	
+	/* Modificamos la sesion agregandole un material visto.
+	 * Se repite la modificacion mas arriba. pero es a modo 
+	 * de ser organizado
+	 *  o en caso en el service cambiamos.
+	 * 
+	 * @param id
+	 * @param dto
+	 * @throws AppException
+	 */
+	public void insertarMaterialVisto(Long id, Sesion dto)
+			throws AppException {
+		/**
+		 * Inscribirse al curso.
+		 ***/
+		System.out.println("Insertar material visto DAO");
 
+		Sesion entity = (Sesion) em.find(getEntity(), id);
+		if (entity == null) {
+			throw new AppException(404, "Not Found");
+		}
 
+		em.merge(dto);
+	}
 }
