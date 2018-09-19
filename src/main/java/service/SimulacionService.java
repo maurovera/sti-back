@@ -24,7 +24,6 @@ import model.Log;
 import model.Material;
 import model.Respuesta;
 import model.Sesion;
-import model.SesionMaterial;
 import model.Simulacion;
 import model.Tarea;
 import model.Tema;
@@ -88,8 +87,7 @@ public class SimulacionService extends
 	@Inject
 	private MaterialService materialService;
 
-	@Inject
-	private SesionMaterialService sesionMaterialService;
+	
 
 	// private SessionService session;
 	final private long userId = 1;
@@ -836,11 +834,12 @@ public class SimulacionService extends
 
 		
 		
-		/** Creacion de sesionMaterial ***/
-		SesionMaterial sesionMaterial = null;
-		sesionMaterial = sesionMaterialService.registrarSesionMaterial(idAlu, idTarea, httpRequest);
-		Long idSesionMaterial = sesionMaterial.getId();
-		System.out.println("##########sesion Material creada ######");
+		/** Creacion de sesion que contiene los ejercicios y los materiales
+		 **/
+		Sesion sesion = null;
+		sesion = sesionService.registrarSesion(idAlu, idTarea, httpRequest);
+		//Long idSesion = sesion.getId();
+		System.out.println("##########sesion para Material creada ######");
 		
 		
 		/*** Se crea una lista de respuesta **/
@@ -1024,9 +1023,9 @@ public class SimulacionService extends
 		
 		
 		
-		/**Terminamos la sesion***/
-		sesionMaterial.setEstadoTerminado(true);
-		sesionMaterialService.modificar(sesionMaterial.getId(), sesionMaterial, httpRequest);
+		/**Terminamos la sesion que tiene materiales y ejercicios***/
+		sesion.setEstadoTerminado(true);
+		sesionService.modificar(sesion.getId(), sesion, httpRequest);
 
 	}
 
@@ -1078,22 +1077,37 @@ public class SimulacionService extends
 			Long idTarea, Long idAlu, Boolean noEsRegla) throws AppException {
 
 		Material material = new Material();
+		
+		/**Copiamos la evidencia en otro y formateamos
+		 * Le paso un uno para que copie tambien los array de la clase
+		 **/
+		Evidencia evide = new Evidencia(e, 1);
+		evide.formatearEvidenciaParaRegla();
 
 		// iniciamos sesion y le tiramos el material
 		hd.iniciarSession();
 		Regla r = new Regla();
-		r.setConcepto(e.getConcepto());
-		r.setNivel(e.getNivel());
-		r.setEstilo(e.getEstilo());
-		r.setSecuenciaEjercicios(e.getSecuenciaEjercicio());
-		r.setSecuenciaVideos(e.getSecuenciaMaterial());
+		r.setConcepto(evide.getConcepto());
+		r.setNivel(evide.getNivel());
+		r.setEstilo(evide.getEstilo());
+		r.setSecuenciaEjercicios(evide.getSecuenciaEjercicio());
+		r.setSecuenciaVideos(evide.getSecuenciaMaterial());
+		
+		System.out.println("######################### Concepto: "+ evide.getConcepto() );
+		System.out.println("######################### nivel: "+ evide.getNivel() );
+		System.out.println("######################### estilo: "+ evide.getEstilo() );
+		System.out.println("######################### secuenciaEjercicio: "+ evide.getSecuenciaEjercicio() );
+		System.out.println("######################### secuenciaMaterial: "+ evide.getSecuenciaMaterial() );
+		
 
 		hd.ejecutarRegla(r);
 		hd.terminarSession();
+		System.out.println("######################### material a mostrar: "+ r.getMaterialAMostrar() );
+
 
 		/** Aqui abrimos la sesion anterior **/
-		SesionMaterial sesionMaterialAnterior = sesionMaterialService
-				.sesionMaterialAnterior(idAlu, idTarea);
+		Sesion sesionAnterior = sesionService
+				.sesionAnterior(idAlu, idTarea);
 
 		/**
 		 * Si consigo un material entra aqui. - Si el material ya se mostro. Que
@@ -1117,7 +1131,7 @@ public class SimulacionService extends
 			 ***/
 		} else {
 			// material = materialService.obtener(new Long(1));
-			List<Material> materiales = sesionMaterialAnterior
+			List<Material> materiales = sesionAnterior
 					.getListaMaterial();
 			material = materialService.materialesDisponibles(materiales, r);
 			System.out.println("#####################################");
@@ -1132,8 +1146,10 @@ public class SimulacionService extends
 		 ***/
 		try {
 
-			sesionMaterialService.insertarMaterialVisto(
-					sesionMaterialAnterior.getId(), sesionMaterialAnterior,
+			/**Insertamos un material a la sesion
+			 **/
+			sesionService.insertarMaterialVisto(
+					sesionAnterior.getId(), sesionAnterior,
 					material);
 		} catch (AppException ex) {
 			System.out.println("No se pudo insertar el material");

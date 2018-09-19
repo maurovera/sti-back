@@ -26,6 +26,9 @@ local.properties
 # Locally stored "Eclipse launch configurations"
 *.launch
 src/main/resources/redes/*.*
+src/main/resources/archivos/*.*
+src/main/resources/archivoLog/*.*
+src/main/resources/archivoWeka/*.*
 *~
 .tern-project
 

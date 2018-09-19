@@ -1,13 +1,11 @@
 package service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 
 import model.Material;
-import model.Tarea;
 import utils.AppException;
 import utils.Regla;
 import base.BaseServiceImpl;

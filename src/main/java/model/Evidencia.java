@@ -60,12 +60,10 @@ public class Evidencia extends BaseEntity implements Serializable {
 	@Column(name = "ejer_valido")
 	private String ejercicioValido;
 
-	
-	public Evidencia(){
-		
+	public Evidencia() {
+
 	}
-	
-	
+
 	public Evidencia(Evidencia e) {
 		super();
 		this.setConcepto(e.getConcepto());
@@ -76,6 +74,20 @@ public class Evidencia extends BaseEntity implements Serializable {
 		this.setMaterialAMostrar(e.getMaterialAMostrar());
 		this.setEjercicioValido(e.getEjercicioValido());
 		this.setIdAsignatura(e.getIdAsignatura());
+	}
+
+	public Evidencia(Evidencia e, int numero) {
+		super();
+		this.setConcepto(e.getConcepto());
+		this.setSecuenciaEjercicio(e.getSecuenciaEjercicio());
+		this.setSecuenciaMaterial(e.getSecuenciaMaterial());
+		this.setNivel(e.getNivel());
+		this.setEstilo(e.getEstilo());
+		this.setMaterialAMostrar(e.getMaterialAMostrar());
+		this.setEjercicioValido(e.getEjercicioValido());
+		this.setIdAsignatura(e.getIdAsignatura());
+		this.setSecEje(e.getSecEje());
+		this.setSecMaterial(e.getSecMaterial());
 	}
 
 	@Transient
@@ -164,7 +176,6 @@ public class Evidencia extends BaseEntity implements Serializable {
 		this.ejercicioValido = ejercicioValido;
 	}
 
-
 	public void addMaterial(Long idMaterial) {
 		this.secMaterial.add(idMaterial);
 	}
@@ -173,25 +184,23 @@ public class Evidencia extends BaseEntity implements Serializable {
 		this.secEje.add(idEjercicio);
 	}
 
-	
-	/**Setea el nivel***/
-	public void setNivelEvidencia(Double nivel){
-		
+	/** Setea el nivel ***/
+	public void setNivelEvidencia(Double nivel) {
+
 		Double bajo = new Double("0.1");
 		Double medio = new Double("0.5");
 		Double alto = new Double("0.9");
-		if(nivel <= bajo ){
+		if (nivel <= bajo) {
 			this.setNivel("bajo");
-		}else if(nivel > bajo && nivel <=medio){
+		} else if (nivel > bajo && nivel <= medio) {
 			this.setNivel("medio");
-			
-		}else{
+
+		} else {
 			this.setNivel("alto");
 		}
-			
+
 	}
-	
-	
+
 	private void ordenar() {
 		Collections.sort(this.secEje);
 		Collections.sort(this.secMaterial);
@@ -205,14 +214,14 @@ public class Evidencia extends BaseEntity implements Serializable {
 		int longitudMaterial = this.secMaterial.size();
 		int ultimoEje = longitudEje - 1;
 		int ultimoMaterial = longitudMaterial - 1;
-		/**Se setea el material valido y el ejercicio valido*/
+		/** Se setea el material valido y el ejercicio valido */
 		String materialAMostrar = "M" + this.secMaterial.get(ultimoMaterial);
 		this.setMaterialAMostrar(materialAMostrar);
-		String ejerValido = "E" + this.secEje.get(ultimoEje);	
+		String ejerValido = "E" + this.secEje.get(ultimoEje);
 		this.setEjercicioValido(ejerValido);
-		/***Se ordena la lista para guardarla **/
+		/*** Se ordena la lista para guardarla **/
 		ordenar();
-		
+
 		for (int i = 0; i < longitudEje; i++) {
 
 			String nombre = "E" + this.secEje.get(i);
@@ -222,7 +231,7 @@ public class Evidencia extends BaseEntity implements Serializable {
 			} else {
 				listaEjercicio += nombre;
 			}
-			
+
 		}
 		this.setSecuenciaEjercicio(listaEjercicio);
 
@@ -235,13 +244,61 @@ public class Evidencia extends BaseEntity implements Serializable {
 			} else {
 				listaMaterial += nombre;
 			}
-			
+
 		}
 		this.setSecuenciaMaterial(listaMaterial);
 
 	}
-	
-	
+
+	public void formatearEvidenciaParaRegla() {
+
+		String listaEjercicio = new String();
+		String listaMaterial = new String();
+		int longitudEje = this.secEje.size();
+		int longitudMaterial = this.secMaterial.size();
+		int ultimoEje = longitudEje - 1;
+		int ultimoMaterial = longitudMaterial - 1;
+		/** Se setea el material valido y el ejercicio valido */
+		if (ultimoMaterial >= 0) {
+			String materialAMostrar = "M"
+					+ this.secMaterial.get(ultimoMaterial);
+			this.setMaterialAMostrar(materialAMostrar);
+		}
+
+		if (ultimoEje >= 0) {
+			String ejerValido = "E" + this.secEje.get(ultimoEje);
+			this.setEjercicioValido(ejerValido);
+		}
+		/*** Se ordena la lista para guardarla **/
+		ordenar();
+
+		for (int i = 0; i < longitudEje; i++) {
+
+			String nombre = "E" + this.secEje.get(i);
+
+			if (i < ultimoEje) {
+				listaEjercicio += nombre + "_";
+			} else {
+				listaEjercicio += nombre;
+			}
+
+		}
+		this.setSecuenciaEjercicio(listaEjercicio);
+
+		for (int i = 0; i < longitudMaterial; i++) {
+
+			String nombre = "M" + this.secMaterial.get(i);
+
+			if (i < ultimoMaterial) {
+				listaMaterial += nombre + "_";
+			} else {
+				listaMaterial += nombre;
+			}
+
+		}
+		this.setSecuenciaMaterial(listaMaterial);
+
+	}
 
 	public List<Long> getSecMaterial() {
 		return secMaterial;
@@ -262,8 +319,8 @@ public class Evidencia extends BaseEntity implements Serializable {
 	@Override
 	public String toString() {
 		String retorno = getConcepto() + "," + getNivel() + "," + getEstilo()
-				+ "," + getMaterialAMostrar() + "," + getSecuenciaMaterial() + ","
-				+ getSecuenciaEjercicio() + "," + getEjercicioValido();
+				+ "," + getMaterialAMostrar() + "," + getSecuenciaMaterial()
+				+ "," + getSecuenciaEjercicio() + "," + getEjercicioValido();
 		return retorno;
 
 	}

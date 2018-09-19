@@ -80,6 +80,16 @@ public class Sesion extends BaseEntity implements Serializable {
 			inverseJoinColumns = { @JoinColumn(name = "id_ejercicio", 
 			referencedColumnName = "id_ejercicio") })
 	private List<Ejercicio> listaEjercicio = new ArrayList<Ejercicio>();
+	
+	
+	@ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.MERGE,
+			CascadeType.DETACH, CascadeType.REFRESH })
+	@JoinTable(name = "sesion_material", 
+			joinColumns = { @JoinColumn(name = "id_sesion", 
+			referencedColumnName = "id_sesion") }, 
+			inverseJoinColumns = { @JoinColumn(name = "id_material", 
+			referencedColumnName = "id_material") })
+	private List<Material> listaMaterial = new ArrayList<Material>();
 
 	public Sesion() {
 	}
@@ -173,6 +183,19 @@ public class Sesion extends BaseEntity implements Serializable {
 	
 	public void addEjercicioResuelto(Ejercicio ejercicio){
 		this.listaEjercicio.add(ejercicio);
+	}
+	
+
+	public void addMaterialVisto(Material material){
+		this.listaMaterial.add(material);
+	}
+	
+	public List<Material> getListaMaterial() {
+		return listaMaterial;
+	}
+
+	public void setListaMaterial(List<Material> listaMaterial) {
+		this.listaMaterial = listaMaterial;
 	}
 	
 

@@ -39,7 +39,7 @@ public class DrlService extends BaseServiceImpl<Drl, DrlDAO> {
 	public Drl insertarDrl(Drl entity, HttpServletRequest httpRequest)
 			throws AppException {
 		try {
-			System.out.println("implements de servicio tema");
+			System.out.println("implements de servicio insertar drl");
 			// Usuario user = getCurrentUser();
 			entity.setFechaCreacion(new Date());
 			entity.setUsuarioCreacion(userId);
@@ -73,8 +73,16 @@ public class DrlService extends BaseServiceImpl<Drl, DrlDAO> {
 	 * que se obtiene de evidencias y luego transformarlo en
 	 * reglas drl. en otras palabras para el motor de regla. 
 	 * 
+	 * Busca en la tabla evidencias todas las evdencias correspondientes
+	 * a la asignatura y curso. estos son metidos al weka
+	 * en cual corre el algoritmo nnge y luego las parsea en reglas
+	 * drl con la clase herramientaWeka y la clase herramientaDrools
+	 * este retorna la direccion del archivo que luego se carga en la base
+	 * de datos con reglas drl
+	 * Este archivo queda en una clase llamada drl que contiene el archivo
+	 * drl que luego se usa en el drools
 	 * @param id asignatura y idCurso
-	 * @return un clase drl nueva
+	 * @return un clase drl nueva y retorna la direccion del archivo en si. 
 	 * @throws AppException 
 	 **/
 	public String guardarReglasDrl(
