@@ -151,7 +151,8 @@ public class HerramientasWeka {
 		// Nombre de la regla y prioridad.
 
 		r.append("rule 'regla_" + regla.getMaterialAMostrar() +"_"+ secuencia + "' \n"
-				+ "salience " + regla.getPrioridad() + "\n");
+				+ "salience 1\n");
+				//+ "salience " + regla.getPrioridad() + "\n");
 
 		// la parte de antecesor
 		r.append("when\n");
@@ -198,6 +199,8 @@ public class HerramientasWeka {
 		r.append("ImprimirRegla.writeTODO('" + regla.getMaterialAMostrar() + "','"
 				+ regla.getEjercioValido() + "');\n");
 		r.append("regla.setResultado('"+regla.getMaterialAMostrar() + "');\n" );
+		r.append("regla.addRespuestaRegla('" + regla.getMaterialAMostrar() + "','"
+				+ regla.getPrioridad() + "');\n");
 		r.append("end\n\n");
 
 	}
