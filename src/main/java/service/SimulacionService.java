@@ -896,7 +896,7 @@ public class SimulacionService extends
 			log.addSecuencia(nombreConcepto);
 			log.addSecuencia(valorNodo.toString());
 
-			
+			//########################################################333
 			
 			/**
 			 * Mientras el valor del nodo sea menor al umbral requerido
@@ -947,7 +947,7 @@ public class SimulacionService extends
 				
 				if (respuesta && pasoPorMaterial) {
 
-					registrarLog(e, httpRequest);
+					registrarEvidencia(e, httpRequest);
 					x--;
 					pasoPorMaterial = false;
 					// Aqui si se registra un nuevo valor de nodo
@@ -1054,7 +1054,7 @@ public class SimulacionService extends
 	 * @Param evidencia
 	 * @Param http
 	 * **/
-	private void registrarLog(Evidencia e, HttpServletRequest httpRequest)
+	private void registrarEvidencia(Evidencia e, HttpServletRequest httpRequest)
 			throws AppException {
 
 		e.formatearEvidencia();
