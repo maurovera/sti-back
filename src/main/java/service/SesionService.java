@@ -83,7 +83,7 @@ public class SesionService extends BaseServiceImpl<Sesion, SesionDAO> {
 
 	}
 
-	
+
 	/**
 	 * Inserta un ejercicio resuelto
 	 **/
@@ -91,7 +91,7 @@ public class SesionService extends BaseServiceImpl<Sesion, SesionDAO> {
 			Ejercicio ejercicioResuelto) throws AppException {
 		try {
 			
-			System.out.println("Insertar ejercicio resuelto service");
+			System.out.println("Insertar ejercicio resuelto service: "+ ejercicioResuelto.getId());
 			sesion.setFechaModificacion(new Date());
 			sesion.setUsuarioModificacion(userId);
 			sesion.setIpModificacion("127.1.1.1");// por el momento esto porque no se llama de afuera

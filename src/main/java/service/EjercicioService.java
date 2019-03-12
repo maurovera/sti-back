@@ -26,7 +26,6 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 	@Inject
 	private EjercicioDAO dao;
 
-	
 	@Inject
 	AdministracionBase adm;
 
@@ -118,15 +117,13 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 		}
 	}
 
-	
-	
-	/***insert simulado de ejercicio
-	 * Utilizado solamente en simulacionService**/
-	public Ejercicio insertarSimulacion(Ejercicio entity, HttpServletRequest httpRequest)
-			throws AppException {
+	/***
+	 * insert simulado de ejercicio Utilizado solamente en simulacionService
+	 **/
+	public Ejercicio insertarSimulacion(Ejercicio entity,
+			HttpServletRequest httpRequest) throws AppException {
 		try {
 			System.out.println("implements de servicio Ejercicio simulacion");
-
 
 			getDao().insert(entity);
 
@@ -136,10 +133,6 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 		}
 	}
 
-	
-	
-	
-	
 	/**
 	 * @{@inheritDoc
 	 */
@@ -202,47 +195,84 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 		return res;
 	}
 
-
-	
-	/***Traer el siguiente Ejercicio correspondiente al test adaptativo
-	 * @param idTarea: tarea al cual corresponde
-	 * @param idAlumno: alumno de la tarea
-	 * @param idAsignatura: asignatura al cual corresponde 
-	 * @param respuesta: respuesta del alumno al ejercicio
+	/***
+	 * Traer el siguiente Ejercicio correspondiente al test adaptativo
+	 * 
+	 * @param idTarea
+	 *            : tarea al cual corresponde
+	 * @param idAlumno
+	 *            : alumno de la tarea
+	 * @param idAsignatura
+	 *            : asignatura al cual corresponde
+	 * @param respuesta
+	 *            : respuesta del alumno al ejercicio
 	 * @return Ejercicio
 	 **/
-	public Ejercicio siguienteEjercicio(Long idTarea, Long idAlumno, 
-			Long idAsignatura, String respuesta, Long idEjercicioAnterior)throws AppException 
+	public Ejercicio siguienteEjercicio(Long idTarea, Long idAlumno,
+			Long idAsignatura, String respuesta, Long idEjercicioAnterior)
+			throws AppException {
+		try {
+			String siguienteEjercicio = null;// en un comienzo te devuelve un
+												// string
+			Tarea tarea = tareaService.obtener(idTarea);
+			Alumno alumno = alumnoService.obtener(idAlumno);
+			Asignatura asig = asignaturaService.obtener(idAsignatura);
+			/** Primer ejercicio **/
+			Ejercicio ejercicioAnterior = null;
+			if (idEjercicioAnterior != 0)
+				ejercicioAnterior = dao.get(idEjercicioAnterior);
+
+			/*** Se obtiene el siguiente ejercicio ***/
+			siguienteEjercicio = admAlumno.getSiguienteEjercicio(tarea, alumno,
+					ejercicioAnterior, idAsignatura, respuesta, asig);
+			if (siguienteEjercicio == null)
+				siguienteEjercicio = "No hay nada";
+
+			System.out.println("#####################Ejercicio: "
+					+ siguienteEjercicio);
+
+			// traigo el ejercicio y le tiro la respuesta
+			String[] ejercicioString = siguienteEjercicio.split("#");
+			Long idEje = Long.valueOf(ejercicioString[0]);
+			Ejercicio ejercicioNuevo = dao.get(idEje);
+
+			return ejercicioNuevo;
+
+		} catch (Exception e) {
+			throw new AppException(500, e.getMessage());
+		}
+	}
+
+	/***
+	 * Responde el ejercicio y devuelve la respuesta correspondiente
+	 * 
+	 * @param idEjercicio
+	 *            : ejercicio que respondera
+	 * @param idTarea
+	 *            : tarea al cual corresponde
+	 * @param idAlumno
+	 *            : alumno de la tarea
+	 * @param idAsignatura
+	 *            : asignatura al cual corresponde
+	 * @param respuesta
+	 *            : respuesta del alumno al ejercicio
+	 * @return respuestaEjercicio
+	 **/
+	public Boolean responderEjercicio(Long idTarea, Long idAlumno, 
+			Long idAsignatura, String respuesta, Long idEjercicio)throws AppException 
 	{
 			try {
-				String siguienteEjercicio = null;// en un comienzo te devuelve un string
-				Tarea tarea = tareaService.obtener(idTarea);
-				Alumno alumno = alumnoService.obtener(idAlumno);
-				Asignatura asig = asignaturaService.obtener(idAsignatura);
-				/**Primer ejercicio**/
-				Ejercicio ejercicioAnterior = null;
-				if(idEjercicioAnterior != 0)
-					ejercicioAnterior = dao.get(idEjercicioAnterior);
+				Boolean retorno = null;
 				
-				/***Se obtiene el siguiente ejercicio***/	
-				siguienteEjercicio = admAlumno.getSiguienteEjercicio(tarea, alumno, ejercicioAnterior,
-						idAsignatura, respuesta, asig);
-				if (siguienteEjercicio == null)
-					siguienteEjercicio = "No hay nada";
-
-				System.out.println("#####################Ejercicio: " + siguienteEjercicio);
-				
-				// traigo el ejercicio y le tiro la respuesta
-				String[] ejercicioString = siguienteEjercicio.split("#");
-				Long idEje = Long.valueOf(ejercicioString[0]);
-				Ejercicio ejercicioNuevo = dao.get(idEje);
-				
-				return ejercicioNuevo;
+				retorno = admAlumno.responderEjercicioServicio(idEjercicio, respuesta, idAlumno, idAsignatura, idTarea);
+								
+				if(retorno == null)
+					System.out.println("respondio mal y no se que paso. error interno en responder ejercicio servicio");
+					
+				return retorno;
 				
 			} catch (Exception e) {
 				throw new AppException(500, e.getMessage());
 			}
 	}
-	
-
 }

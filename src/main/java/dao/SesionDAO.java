@@ -1,5 +1,7 @@
 package dao;
 
+import java.util.List;
+
 import javax.ejb.Stateless;
 import javax.persistence.Query;
 
@@ -18,22 +20,24 @@ public class SesionDAO extends BaseDAO<Sesion> {
 		return Sesion.class;
 	}
 
-	/** Trae la sesion anterior del alumno en cuanto a la tarea en si **/
+	/** Trae la sesion anterior del alumno en cuanto a la tarea en si 
+	 * Replanear esta funcion porque ndoikoi**/
 	public Sesion sesionAnterior(Long idAlumno, Long idTarea) throws AppException  {
 		System.out.println("Sesion anterior dao");
 		
 		// Query para traer la sesion anterior
-
+		Sesion sesionAnterior = null;
 		Query query = em.createQuery("Select s from Sesion s where s.alumno.id = :alumno and s.tarea.id = :tarea  order by s.id desc");
 		query.setParameter("alumno", idAlumno);
 		query.setParameter("tarea", idTarea);
 		query.setMaxResults(1);
-		Sesion sesionAnterior = (Sesion) query.getSingleResult();
+		//Sesion sesionAnterior = (Sesion) query.getSingleResult();
+		List results = query.getResultList();
 		
-		//if (sesionAnterior == null) {
-			//throw new AppException(404, "Not Found");
-		//}
-		
+		if (!results.isEmpty()){
+			
+			sesionAnterior = (Sesion) results.get(0);
+		}
 		
 		return sesionAnterior;
 

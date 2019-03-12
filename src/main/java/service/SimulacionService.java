@@ -80,14 +80,12 @@ public class SimulacionService extends
 
 	@Inject
 	private LogService logService;
-	
+
 	@Inject
 	private DrlService drlService;
 
 	@Inject
 	private MaterialService materialService;
-
-	
 
 	// private SessionService session;
 	final private long userId = 1;
@@ -96,6 +94,84 @@ public class SimulacionService extends
 	public SimulacionDAO getDao() {
 
 		return dao;
+	}
+
+	public String simulacionAsignaturaCompleta(HttpServletRequest httpRequest)
+			throws AppException {
+
+		// Creacion de Asignatura
+		Asignatura asig = crearAsignatura(httpRequest);
+		// una sola vez se calcula la probabilidad quue serian los pesos
+		// asignados
+		adm.calcularProbabilidades(asig);
+		// Creacion de curso asociado al alumno y la tarea y los conceptos
+		List<Concepto> conceptos01 = new ArrayList<Concepto>();
+		List<Concepto> conceptos02 = new ArrayList<Concepto>();
+
+		Concepto c1 = asig.getListaTemas().get(0).getListaConceptos().get(0);
+		Concepto c2 = asig.getListaTemas().get(0).getListaConceptos().get(1);
+		Concepto c3 = asig.getListaTemas().get(0).getListaConceptos().get(2);
+		Concepto c4 = asig.getListaTemas().get(1).getListaConceptos().get(0);
+		Concepto c5 = asig.getListaTemas().get(1).getListaConceptos().get(1);
+
+		conceptos01.add(c1);
+		conceptos01.add(c3);
+		conceptos01.add(c5);
+
+		conceptos02.add(c2);
+		conceptos02.add(c4);
+
+		Curso c = CrearCurso(httpRequest, asig, conceptos01, conceptos02);
+
+		// creacion de varios alumnos inscritos al curso C
+		List<Alumno> listaAlumnos = new ArrayList<Alumno>();
+		listaAlumnos = generacionAlumnos(httpRequest, asig, c);
+		System.out.println("##########alumnos creados######"
+				+ listaAlumnos.size());
+
+		// La tarea a hacerse
+		List<Tarea> listaTareas = cursoService.listaTarea(c.getId());
+		Tarea tareaAResolver = listaTareas.get(0);
+		System.out.println("Tarea A Resolver : " + tareaAResolver.getNombre());
+
+		return "asignaturaCompleta";
+
+	}
+
+	/**
+	 * Simulacion de carga de alumnos y que hagan la primera prueba
+	 ***/
+	public String simulacionAlumnosPrueba(HttpServletRequest httpRequest,
+			Integer inicio, Integer fin) throws AppException {
+
+		Long numero = new Long(1);
+		Asignatura asig = asignaturaService.obtener(numero);
+		Curso c = cursoService.obtener(numero);
+		// creacion de varios alumnos inscritos al curso C
+		List<Alumno> listaAlumnos = new ArrayList<Alumno>();
+		listaAlumnos = generadorAlumnosPrueba(httpRequest, asig, c, inicio, fin);
+		// listaAlumnos = generacion, asignatura, curso)(httpRequest, asig, c);
+		System.out.println("##########alumnos creados######\n" + "Desde: "
+				+ inicio + " Hasta: " + fin);
+		String retorno = "##########alumnos creados######\n" + "Desde: "
+				+ inicio + " Hasta: " + fin;
+		// La tarea a hacerse
+		List<Tarea> listaTareas = cursoService.listaTarea(c.getId());
+		Tarea tareaAResolver = listaTareas.get(0);
+		System.out.println("Tarea A Resolver : " + tareaAResolver.getNombre());
+
+		int cont = inicio;
+
+		for (Alumno alumno : listaAlumnos) {
+			simularAlumno(alumno, tareaAResolver, asig, httpRequest);
+			++cont;
+			System.out.println("---------------alumno simulado nro: " + cont
+					+ ".....Nombre: " + alumno.getNombres()
+					+ "----------------------");
+		}
+
+		return retorno;
+
 	}
 
 	public String simulacion(HttpServletRequest httpRequest)
@@ -237,17 +313,19 @@ public class SimulacionService extends
 		List<Ejercicio> listaEjercicio = new ArrayList<Ejercicio>();
 		List<Ejercicio> listaEje = new ArrayList<Ejercicio>();
 		for (int i = 0; i < 5; i++) {
-			listaEje = creadorCombinadoDeEjercicios(5, listaConc, asig.getId(), i);
-			if(!listaEje.isEmpty()){
+			listaEje = creadorCombinadoDeEjercicios(5, listaConc, asig.getId(),
+					i);
+			if (!listaEje.isEmpty()) {
 				listaEjercicio.addAll(listaEje);
 			}
-		
+
 		}
-		//listaEjercicio = creadorCombinadoDeEjercicios(5, listaConc, asig.getId(), 5);
-		
-		if(listaEjercicio.isEmpty())
+		// listaEjercicio = creadorCombinadoDeEjercicios(5, listaConc,
+		// asig.getId(), 5);
+
+		if (listaEjercicio.isEmpty())
 			System.out.println(" NO CREO NINGUN EJERCICIO");
-		
+
 		for (Ejercicio e : listaEjercicio) {
 			Respuesta r1 = new Respuesta();
 			Respuesta r2 = new Respuesta();
@@ -287,7 +365,6 @@ public class SimulacionService extends
 			ejercicioService.insertarSimulacion(e, httpRequest);
 		}
 
-
 		/** Creacion de asignatura **/
 
 		// aqui ya no se persiste un carajo
@@ -320,12 +397,13 @@ public class SimulacionService extends
 	 *            . Es la lista de conceptos
 	 * @param idAsignatura
 	 *            . id de la asignatura
-	 * @param  numeroDelFor. un for externo por si se quiera hacer varias veces.        
-	 *            
+	 * @param numeroDelFor
+	 *            . un for externo por si se quiera hacer varias veces.
+	 * 
 	 * @return listaDeEjercicios
 	 * ***/
-	public List<Ejercicio> creadorCombinadoDeEjercicios(int num, List<Concepto> conceptos,
-			Long idAsignatura, int numeroDelFor) {
+	public List<Ejercicio> creadorCombinadoDeEjercicios(int num,
+			List<Concepto> conceptos, Long idAsignatura, int numeroDelFor) {
 
 		List<Ejercicio> listaRetorno = new ArrayList<Ejercicio>();
 		Double bajoAdivinanza = new Double(0.1);
@@ -402,7 +480,7 @@ public class SimulacionService extends
 			}
 
 		}
-		
+
 		return listaRetorno;
 
 	}
@@ -422,7 +500,7 @@ public class SimulacionService extends
 			// System.out.println("Concepto: " + lista.get(ppp));
 			e.addConceptos(lista.get(ppp));
 		}
-		
+
 		return e;
 
 	}
@@ -581,6 +659,33 @@ public class SimulacionService extends
 			alumnos.add(alumno);
 		}
 
+		return alumnos;
+	}
+
+	/** Generador de alumnos para un curso x **/
+	public List<Alumno> generadorAlumnosPrueba(HttpServletRequest httpRequest,
+			Asignatura asignatura, Curso curso, Integer inicio, Integer fin)
+			throws AppException {
+
+		// int cantidadAlumnos = 12 + cantidad;
+		Integer cantidadAlumnos = inicio + fin;
+		Double tipo;
+		List<Alumno> alumnos = new ArrayList<Alumno>();
+
+		for (int i = inicio; i < cantidadAlumnos; i++) {
+
+			if (i <= inicio + 10) {
+				tipo = TipoAlumno.NIVEL_CONOCIMIENTO_BAJO;
+			} else if (i > inicio + 10 && i <= inicio + 19) {
+				tipo = TipoAlumno.NIVEL_CONOCIMIENTO_MEDIO;
+			} else {
+				tipo = TipoAlumno.NIVEL_CONOCIMIENTO_ALTO;
+			}
+			Alumno alumno = crearAlumno(httpRequest, asignatura, curso, i, tipo);
+
+			alumnos.add(alumno);
+		}
+		System.out.println("generador de alumnos");
 		return alumnos;
 	}
 
@@ -751,6 +856,27 @@ public class SimulacionService extends
 	 *             ***
 	 * 
 	 */
+
+	/** Simulacion de varios alumnos en simulador de tutor */
+	public String simulacionTutorVarios(HttpServletRequest httpRequest,
+			Long idAsig, Long idTarea, Long idArchivo, Integer inicio,
+			Integer fin) throws AppException {
+
+		int numeroAlumno = inicio;
+		while (numeroAlumno < fin) {
+			Long aluNumero = new Long(numeroAlumno);
+			String resi = simulacionTutor(httpRequest, idAsig, aluNumero,
+					idTarea, idArchivo);
+			numeroAlumno++;
+		}
+
+		return "fin de varios alumnos simulados en tutor 2 ";
+
+	}
+
+	/**
+	 * Simula un solo alumno en una interaccion del tutor que son 7 intentos
+	 **/
 	public String simulacionTutor(HttpServletRequest httpRequest, Long idAsig,
 			Long idAlu, Long idTarea, Long idArchivo) throws AppException {
 
@@ -800,13 +926,31 @@ public class SimulacionService extends
 			}
 
 		}
-		if (conceptosAEvaluar != null) {
 
+		/**
+		 * Aqui le vamos a meter un cambio. Que sera un for con los doce alumnos
+		 **/
+		/*
+		 * if (conceptosAEvaluar != null) { int numeroAlumno = 219;
+		 * while(numeroAlumno < 237){ Long aluNumero = new Long(numeroAlumno);
+		 * evaluarTutor(conceptosAEvaluar, aluNumero, idAsig, idTarea,
+		 * httpRequest, hd); numeroAlumno++; }
+		 * 
+		 * }
+		 */
+		String alumnoEvaluado = new String();
+
+		if (conceptosAEvaluar != null) {
+			System.out.println("Hay conceptos a evaluar\n");
 			evaluarTutor(conceptosAEvaluar, idAlu, idAsig, idTarea,
 					httpRequest, hd);
+			alumnoEvaluado = "alumno evaluado: " + idAlu.toString();
+		} else {
+			System.out.println("No hay conceptos a evaluar\n");
+			alumnoEvaluado = "alumno no evaluado: " + idAlu.toString();
 		}
 
-		return "termineTutor";
+		return alumnoEvaluado;
 
 	}
 
@@ -832,16 +976,14 @@ public class SimulacionService extends
 		Boolean respuesta = null;// respuesta true si respondio bien y false si
 									// respondio mal
 
-		
-		
-		/** Creacion de sesion que contiene los ejercicios y los materiales
+		/**
+		 * Creacion de sesion que contiene los ejercicios y los materiales
 		 **/
-		Sesion sesion = null;
-		sesion = sesionService.registrarSesion(idAlu, idTarea, httpRequest);
-		//Long idSesion = sesion.getId();
-		System.out.println("##########sesion para Material creada ######");
-		
-		
+		// Sesion sesion = null;
+		// sesion = sesionService.registrarSesion(idAlu, idTarea, httpRequest);
+		// Long idSesion = sesion.getId();
+		// System.out.println("##########sesion para Material creada ######");
+
 		/*** Se crea una lista de respuesta **/
 		// listaR = respuestasGeneradas(numero);
 		// int contador = 0;
@@ -878,14 +1020,11 @@ public class SimulacionService extends
 			e.setEstilo("visual");
 			e.setIdAsignatura(idAsig);
 
-
-			
-			/** OJOOOO .... SE DEBE BORRAR AL FINALIZAR LAS PRUEBAS
-			 * PRUEBA
-			 * Se crea un log que guarda toda la ruta del alumno. Ya existe
-			 * evidencia. pero es para las reglas. 
-			 * Este log es temporal para revisar 
-			 * el comportamiento del tutor en si. 
+			/**
+			 * OJOOOO .... SE DEBE BORRAR AL FINALIZAR LAS PRUEBAS PRUEBA Se
+			 * crea un log que guarda toda la ruta del alumno. Ya existe
+			 * evidencia. pero es para las reglas. Este log es temporal para
+			 * revisar el comportamiento del tutor en si.
 			 * #######################################################
 			 * **/
 			Log log = new Log();
@@ -893,11 +1032,14 @@ public class SimulacionService extends
 			log.setAlumno(idAlu);
 			log.setAsignatura(idAsig);
 			log.setTarea(idTarea);
+			log.addSecuencia("alumno: ");
+			log.addSecuencia(idAlu.toString());
+			log.addSecuencia("\n");
 			log.addSecuencia(nombreConcepto);
 			log.addSecuencia(valorNodo.toString());
 
-			//########################################################333
-			
+			// ########################################################333
+
 			/**
 			 * Mientras el valor del nodo sea menor al umbral requerido
 			 * valorNodo < conceptoUmbral &&
@@ -912,8 +1054,9 @@ public class SimulacionService extends
 								idAsig, c);
 
 				if (ejercicio == null) {
-					System.out.println("ejercicio nulo, Hacemos un break porque no existe mas ningun ejercicio"
-							+ "######################################################");
+					System.out
+							.println("ejercicio nulo, Hacemos un break porque no existe mas ningun ejercicio"
+									+ "######################################################");
 					break;
 				}
 				// res respuestaEjercicio =
@@ -941,10 +1084,10 @@ public class SimulacionService extends
 
 				// se registra el ejercicio en la evidencia
 				e.addEjercicio(ejercicio.getId());
-				
+
 				Material material = null;
-				Boolean noEsRegla = false;
-				
+				// Boolean noEsRegla = false;
+
 				if (respuesta && pasoPorMaterial) {
 
 					registrarEvidencia(e, httpRequest);
@@ -956,8 +1099,7 @@ public class SimulacionService extends
 				} else if (!respuesta) {
 					// e.formatearEvidencia();
 
-					material = aplicarReglaMaterial(e, hd, idTarea,
-							idAlu, noEsRegla);
+					material = aplicarReglaMaterial(e, hd, idTarea, idAlu);
 					mostrarMaterial(material);
 					e.addMaterial(material.getId());
 					pasoPorMaterial = true;
@@ -982,19 +1124,18 @@ public class SimulacionService extends
 				System.out
 						.println("\nEjercicio Visto: " + ejercicio.toString());
 				System.out.println("Respuesta del ejercicio: " + respuesta);
-				System.out.println("Valor Concepto: "+ valorNodo);
+				System.out.println("Valor Concepto: " + valorNodo);
 				System.out.println("##############################\n");
-				
-				
-				log.addSecuencia("E"+ejercicio.getId());
+
+				log.addSecuencia("E" + ejercicio.getId());
 				log.addSecuencia(respuesta.toString());
 				log.addSecuencia(valorNodo.toString());
 				log.addSecuencia("#");
-				
-				/***aca recolecta la informacion**/
-				if(material !=  null){
-					log.addSecuencia("M"+material.getId());
-					log.addSecuencia(noEsRegla.toString());
+				log.addSecuencia("\n");
+				/*** aca recolecta la informacion **/
+				if (material != null) {
+					log.addSecuencia("M" + material.getId());
+					log.addSecuencia(material.getEsRegla().toString());
 				}
 				/** Contador Para respuestasGeneradas **/
 				// contador++
@@ -1013,19 +1154,16 @@ public class SimulacionService extends
 				log.addSecuencia("SUPERADO");
 
 			}
-			
-		
+
 			// se guarda en la base de datos.
 			Log l01 = new Log(log);
 			logService.insertar(l01, httpRequest);
 
 		}
-		
-		
-		
-		/**Terminamos la sesion que tiene materiales y ejercicios***/
-		sesion.setEstadoTerminado(true);
-		sesionService.modificar(sesion.getId(), sesion, httpRequest);
+
+		/** Terminamos la sesion que tiene materiales y ejercicios ***/
+		// sesion.setEstadoTerminado(true);
+		// sesionService.modificar(sesion.getId(), sesion, httpRequest);
 
 	}
 
@@ -1057,9 +1195,9 @@ public class SimulacionService extends
 	private void registrarEvidencia(Evidencia e, HttpServletRequest httpRequest)
 			throws AppException {
 
-		e.formatearEvidencia();
-		Evidencia e01 = new Evidencia(e);
-
+		// e.formatearEvidencia();
+		Evidencia e01 = new Evidencia(e, 1);
+		e01.formatearEvidencia();
 		evidenciaService.insertar(e01, httpRequest);
 
 	}
@@ -1074,12 +1212,13 @@ public class SimulacionService extends
 	 * @Return {@link Class} Material
 	 ***/
 	private Material aplicarReglaMaterial(Evidencia e, HerramientasDrools hd,
-			Long idTarea, Long idAlu, Boolean noEsRegla) throws AppException {
+			Long idTarea, Long idAlu) throws AppException {
 
 		Material material = new Material();
-		
-		/**Copiamos la evidencia en otro y formateamos
-		 * Le paso un uno para que copie tambien los array de la clase
+
+		/**
+		 * Copiamos la evidencia en otro y formateamos Le paso un uno para que
+		 * copie tambien los array de la clase
 		 **/
 		Evidencia evide = new Evidencia(e, 1);
 		evide.formatearEvidenciaParaRegla();
@@ -1092,22 +1231,25 @@ public class SimulacionService extends
 		r.setEstilo(evide.getEstilo());
 		r.setSecuenciaEjercicios(evide.getSecuenciaEjercicio());
 		r.setSecuenciaVideos(evide.getSecuenciaMaterial());
-		
-		System.out.println("######################### Concepto: "+ evide.getConcepto() );
-		System.out.println("######################### nivel: "+ evide.getNivel() );
-		System.out.println("######################### estilo: "+ evide.getEstilo() );
-		System.out.println("######################### secuenciaEjercicio: "+ evide.getSecuenciaEjercicio() );
-		System.out.println("######################### secuenciaMaterial: "+ evide.getSecuenciaMaterial() );
-		
+
+		System.out.println("######################### Concepto: "
+				+ evide.getConcepto());
+		System.out.println("######################### nivel: "
+				+ evide.getNivel());
+		System.out.println("######################### estilo: "
+				+ evide.getEstilo());
+		System.out.println("######################### secuenciaEjercicio: "
+				+ evide.getSecuenciaEjercicio());
+		System.out.println("######################### secuenciaMaterial: "
+				+ evide.getSecuenciaMaterial());
 
 		hd.ejecutarRegla(r);
 		hd.terminarSession();
-		System.out.println("######################### material a mostrar: "+ r.getMaterialAMostrar() );
-
+		System.out.println("######################### material a mostrar: "
+				+ r.getResultado());
 
 		/** Aqui abrimos la sesion anterior **/
-		Sesion sesionAnterior = sesionService
-				.sesionAnterior(idAlu, idTarea);
+		Sesion sesionAnterior = sesionService.sesionAnterior(idAlu, idTarea);
 
 		/**
 		 * Si consigo un material entra aqui. - Si el material ya se mostro. Que
@@ -1115,15 +1257,16 @@ public class SimulacionService extends
 		 * se guarda en materiales mostrados - Ahora se muestra el material que
 		 * genera la regla por mas que ya se haya mostrado
 		 * ***/
-		if (r.getMaterialAMostrar() != null) {
-			String[] parts = r.getMaterialAMostrar().split("M");
+		if (r.getResultado() != null) {
+			String[] parts = r.getResultado().split("M");
 			String part2 = parts[1]; // 654321
 			Long idMaterial = new Long(part2);
 			material = materialService.obtener(idMaterial);
 			System.out.println("#####################################");
-			System.out.println("Material de la regla: " + material.getId());
+			System.out.println("Material de la regla: M" + material.getId());
 			System.out.println("#####################################\n");
-			noEsRegla = true;
+			material.setEsRegla(true);
+			// noEsRegla = true;
 			/***
 			 * Si la regla no consiguio material entonces se busca un material
 			 * que no haya sido seleccionado aun es decir que no este en la
@@ -1131,13 +1274,17 @@ public class SimulacionService extends
 			 ***/
 		} else {
 			// material = materialService.obtener(new Long(1));
-			List<Material> materiales = sesionAnterior
-					.getListaMaterial();
+			List<Material> materiales = sesionAnterior.getListaMaterial();
 			material = materialService.materialesDisponibles(materiales, r);
+			if (material == null) {
+				System.out.println("ya no tengo material disponible");
+				System.out.println("##############################");
+			}
+
 			System.out.println("#####################################");
-			System.out.println("Material al azar: " + material.getId());
+			System.out.println("Material al azar: M" + material.getId());
 			System.out.println("#####################################\n");
-		
+			material.setEsRegla(false);
 		}
 
 		/**
@@ -1146,11 +1293,11 @@ public class SimulacionService extends
 		 ***/
 		try {
 
-			/**Insertamos un material a la sesion
+			/**
+			 * Insertamos un material a la sesion
 			 **/
-			sesionService.insertarMaterialVisto(
-					sesionAnterior.getId(), sesionAnterior,
-					material);
+			sesionService.insertarMaterialVisto(sesionAnterior.getId(),
+					sesionAnterior, material);
 		} catch (AppException ex) {
 			System.out.println("No se pudo insertar el material");
 			ex.printStackTrace();

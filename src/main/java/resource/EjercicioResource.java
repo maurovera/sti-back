@@ -124,4 +124,29 @@ public class EjercicioResource extends
 		
 	}
 
+	
+	/** Recurso para responder el ejercicio **/
+	@GET
+	@Path("/responderEjercicio")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Boolean responderEjercicio(@QueryParam("idEjercicio") @DefaultValue("0") Long idEjercicio,
+			@QueryParam("respuesta") @DefaultValue("r1") String respuesta,
+			@QueryParam("idAlumno") @DefaultValue("1") Long idAlumno,
+			@QueryParam("idAsignatura") @DefaultValue("1") Long idAsignatura,
+			@QueryParam("idTarea") @DefaultValue("1") Long idTarea) {
+		
+		Boolean retorno = null;
+		try {
+			retorno = getService().responderEjercicio(idTarea, idAlumno, idAsignatura, respuesta, idEjercicio);
+		} catch (Exception e) {
+			throw new WebApplicationException(e.getMessage(),
+					Response.Status.INTERNAL_SERVER_ERROR);
+		}
+		if (retorno == null) {
+			throw new WebApplicationException(Response.Status.NOT_FOUND);
+		}
+		return retorno;
+		
+	}
+	
 }

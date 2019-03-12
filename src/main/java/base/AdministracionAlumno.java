@@ -18,8 +18,12 @@ import model.Ejercicio;
 import model.Material;
 import model.Sesion;
 import model.Tarea;
+import service.AlumnoService;
+import service.AsignaturaService;
 import service.ConceptoService;
+import service.EjercicioService;
 import service.SesionService;
+import service.TareaService;
 import smile.Network;
 import utils.AppException;
 
@@ -28,7 +32,20 @@ public class AdministracionAlumno {
 
 	@Inject
 	SesionService sesionService;
+	
+	@Inject
+	EjercicioService ejercicioService;
+	
+	@Inject
+	TareaService tareaService;
+	
+	@Inject
+	AsignaturaService asignaturaService;
+	
+	@Inject
+	AlumnoService alumnoService;
 
+	
 	@Inject
 	ConceptoService conceptoService;
 
@@ -75,6 +92,92 @@ public class AdministracionAlumno {
 
 	}
 
+	/*** Es la funcion que se utiliza como servicio para responder las preguntas.
+	 * Al responder un ejercicio se guarda en la sesion anterior
+	 * 
+	 * @throws AppException
+	 * @return boolean si responde bien o mal.
+	 ***/
+	public Boolean responderEjercicioServicio(Long idEjercicio, String respuesta,
+			Long idAlumno, Long idAsignatura, Long idTarea) {
+
+		
+		Ejercicio ejercicio = null;
+		try {
+			ejercicio = ejercicioService.obtener(idEjercicio);
+		} catch (AppException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+			System.out.println("no se pudo obtener el ejercicio para responder el ejercicio.");
+		}
+		//Alumno alumno = alumnoService.obtener(idAlumno);
+		
+		Boolean retorno = false;
+		
+		
+		
+		Network net1 = new Network();
+		//Long idAlumno = alumno.getId();
+		//Long idEjercicio = ejercicio.getId();
+		//Long idTarea = tarea.getId();
+
+		String nombreRed = "red_alumno_" + idAlumno + "_asignatura_"
+				+ idAsignatura + ".xdsl";
+		net1.readFile(dir + nombreRed);
+		net1.updateBeliefs();
+		String nombreEjercicio = "E" + idEjercicio;
+		/**
+		 * Aca se envia la respuesta. Si es correcto o no.
+		 ***/
+		if (respuesta.equals(ejercicio.getRespuesta().getDescripcion())) {
+			net1.setEvidence(nombreEjercicio, "Correcto");
+			retorno = true;
+		} else {
+			net1.setEvidence(nombreEjercicio, "Incorrecto");
+			retorno = false;
+		}
+		net1.updateBeliefs();
+
+		List<Concepto> listaConceptos = ejercicio.getListaConceptos();
+		if (listaConceptos != null)
+			System.out
+					.println("hay conceptos. No es nulo. Numero 89 AdministracionAlumno");
+		else
+			System.out
+					.println("No hay concepto. Es nulo la lista de conceptos. ");
+
+		/**
+		 * Observacion importante. Porque todos los conceptos del arbol No
+		 * deberia ser de la tarea nomas
+		 ***/
+		for (Concepto concepto : listaConceptos) {
+			String nombreConcepto = concepto.getNombre();
+			double[] probCalc = net1.getNodeValue(nombreConcepto);
+			// System.out.println("proba " + probCalc.toString());
+			net1.setNodeDefinition(nombreConcepto, probCalc);
+		}
+
+		net1.clearEvidence(nombreEjercicio);
+		net1.updateBeliefs();
+		net1.writeFile(dir + nombreRed);
+
+		// Aqui se reemplaza por sesionAnterior
+		try {
+			Sesion sesionAnterior = sesionService.sesionAnterior(idAlumno,
+					idTarea);
+			sesionService.insertarEjercicioResuelto(sesionAnterior.getId(),
+					sesionAnterior, ejercicio);
+		} catch (AppException e) {
+			System.out
+					.println("No se pudo obtener la sesion o simplemente no se pudo insertar sesion");
+			e.printStackTrace();
+		}
+		
+		return retorno;
+
+	}
+
+	
 	/***
 	 * Al responder un ejercicio se guarda en la sesion anterior
 	 * 
@@ -443,10 +546,12 @@ public class AdministracionAlumno {
 			try {
 				sesionAnterior = sesionService
 						.sesionAnterior(idAlumno, idTarea);
+				System.out.println("tamaño ejercicios: "+sesionAnterior.getListaEjercicio().size());
 			} catch (AppException e) {
 				System.out.println("No se pudo obtener la sesion");
 				e.printStackTrace();
 			}
+			
 
 			/*** inicializacion ***/
 
@@ -524,11 +629,12 @@ public class AdministracionAlumno {
 				if (utilidades == null)
 					utilidades = new ArrayList();
 
-				if (sesionAnterior.getListaEjercicio() == null
-						|| !sesionAnterior.getListaEjercicio().contains(
-								ejercicioConcepto))
+				if (sesionAnterior.getListaEjercicio() != null
+						&& !sesionAnterior.getListaEjercicio().contains(
+								ejercicioConcepto)){
+					
 					utilidades.add(ejercicioConcepto);
-
+				}
 				if (utilidades.size() > 0)
 					hUtilidades.put(utilidadMaxParcial, utilidades);
 

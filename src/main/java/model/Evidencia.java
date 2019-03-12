@@ -232,8 +232,10 @@ public class Evidencia extends BaseEntity implements Serializable {
 		/*** Aca se comprueba si tiene mas de un elemento ***/
 		longitudEje = this.secEje.size();
 		longitudMaterial = this.secMaterial.size();
-		/**** Si es vacio. Se setea a vacio la lista
-		 * si no se concatena todo el restante.***/
+		/****
+		 * Si es vacio. Se setea a vacio la lista si no se concatena todo el
+		 * restante.
+		 ***/
 		if (this.secEje.isEmpty()) {
 			this.setSecuenciaEjercicio("vacio");
 		} else {
@@ -249,8 +251,10 @@ public class Evidencia extends BaseEntity implements Serializable {
 			this.setSecuenciaEjercicio(listaEjercicio);
 		}
 
-		/**Lo mismo para material Si es vacio. Se setea vacio, si no 
-		 * se setea la concatecacion***/
+		/**
+		 * Lo mismo para material Si es vacio. Se setea vacio, si no se setea la
+		 * concatecacion
+		 ***/
 		if (this.secMaterial.isEmpty()) {
 			this.setSecuenciaMaterial("vacio");
 		} else {
@@ -266,19 +270,17 @@ public class Evidencia extends BaseEntity implements Serializable {
 			this.setSecuenciaMaterial(listaMaterial);
 		}
 	}
-	
-	
 
 	public void formatearEvidenciaParaRegla() {
 
-		/**En principio se setea vacio si no tiene nada. 
-		 * Tampoco se le quita el ultimo ejercicios
-		 * ni tampoco se le quita el ultimo material
-		 * porque es para machear con el motor de reglas
-		 * solo necesita concepto,nivel,estilo,secMaterial,secEje
+		/**
+		 * En principio se setea vacio si no tiene nada. Tampoco se le quita el
+		 * ultimo ejercicios ni tampoco se le quita el ultimo material porque es
+		 * para machear con el motor de reglas solo necesita
+		 * concepto,nivel,estilo,secMaterial,secEje
 		 ***/
-		this.setSecuenciaEjercicio("vacio");
-		this.setSecuenciaMaterial("vacio");
+		//this.setSecuenciaEjercicio("vacio");
+		//this.setSecuenciaMaterial("vacio");
 
 		String listaEjercicio = new String();
 		String listaMaterial = new String();
@@ -286,47 +288,50 @@ public class Evidencia extends BaseEntity implements Serializable {
 		int longitudMaterial = this.secMaterial.size();
 		int ultimoEje = longitudEje - 1;
 		int ultimoMaterial = longitudMaterial - 1;
-		/** Se setea el material valido y el ejercicio valido-
-		 * Creo que es medio al pedo si es para la regla nada mas. 
-		 *  */
-		/*if (ultimoMaterial >= 0) {
-			String materialAMostrar = "M"
-					+ this.secMaterial.get(ultimoMaterial);
-			this.setMaterialAMostrar(materialAMostrar);
-		}
-
-		if (ultimoEje >= 0) {
-			String ejerValido = "E" + this.secEje.get(ultimoEje);
-			this.setEjercicioValido(ejerValido);
-		}*/
+		
 		/*** Se ordena la lista para guardarla **/
 		ordenar();
 
-		for (int i = 0; i < longitudEje; i++) {
+		if (this.secEje.isEmpty()) {
+			this.setSecuenciaEjercicio("vacio");
+		} else {
+			ultimoEje = longitudEje - 1;
 
-			String nombre = "E" + this.secEje.get(i);
+			for (int i = 0; i < longitudEje; i++) {
 
-			if (i < ultimoEje) {
-				listaEjercicio += nombre + "_";
-			} else {
-				listaEjercicio += nombre;
+				String nombre = "E" + this.secEje.get(i);
+
+				if (i < ultimoEje) {
+					listaEjercicio += nombre + "_";
+				} else {
+					listaEjercicio += nombre;
+				}
+
 			}
-
+			this.setSecuenciaEjercicio(listaEjercicio);
 		}
-		this.setSecuenciaEjercicio(listaEjercicio);
 
-		for (int i = 0; i < longitudMaterial; i++) {
+		/**
+		 * Lo mismo para material Si es vacio. Se setea vacio, si no se setea la
+		 * concatecacion
+		 ***/
+		if (this.secMaterial.isEmpty()) {
+			this.setSecuenciaMaterial("vacio");
+		} else {
+			ultimoMaterial = longitudMaterial - 1;
+			for (int i = 0; i < longitudMaterial; i++) {
 
-			String nombre = "M" + this.secMaterial.get(i);
+				String nombre = "M" + this.secMaterial.get(i);
 
-			if (i < ultimoMaterial) {
-				listaMaterial += nombre + "_";
-			} else {
-				listaMaterial += nombre;
+				if (i < ultimoMaterial) {
+					listaMaterial += nombre + "_";
+				} else {
+					listaMaterial += nombre;
+				}
+
 			}
-
+			this.setSecuenciaMaterial(listaMaterial);
 		}
-		this.setSecuenciaMaterial(listaMaterial);
 
 	}
 

@@ -8,6 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.DynamicInsert;
 
@@ -52,6 +53,9 @@ public class Material extends BaseEntity implements Serializable {
 
 	@Column(name = "estrategia")
 	private String estrategia;
+	
+	@Transient
+	private Boolean esRegla;
 
 	public Long getId() {
 		return id;
@@ -116,5 +120,16 @@ public class Material extends BaseEntity implements Serializable {
 	public void setEstrategia(String estrategia) {
 		this.estrategia = estrategia;
 	}
+
+	public Boolean getEsRegla() {
+		return esRegla;
+	}
+
+	public void setEsRegla(Boolean esRegla) {
+		this.esRegla = esRegla;
+	}
+	
+	
+	
 
 }

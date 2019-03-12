@@ -36,7 +36,9 @@ public class DrlResource  extends BaseResource<Drl, DrlService>{
 	}
 	
 	
-	
+	/**Desde el archivo crea las reglas nnge luego pasa a las reglas drl y por
+	 * ultimo guarda en la base de datos
+	 * **/
 	@GET
 	@Path("/guardar")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -46,7 +48,7 @@ public class DrlResource  extends BaseResource<Drl, DrlService>{
 			Drl d = new Drl();
 			//d.setArchivoDrl("Hola mundo pude meterllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll todo esto en laklsdflasdknflkasdjnflkjndsflkjnadsflkadsnlkfnasdlkfjnasdlkjfnasdlknfladskjfnlkasdjnflkasdnflkasjndflkajndflkasdjnflkajdnsflkjnadflkjnds base de datos");
 			
-			HerramientasWeka hw = new HerramientasWeka("/home/mauro/datosPrueba/weka_1.csv");
+			HerramientasWeka hw = new HerramientasWeka("/home/mauro/proyectos/tesis/sti-back/src/main/resources/archivoWeka/weka_1sept.csv");
 			hw.ejecutar();
 			System.out.println(hw.getDrl());
 			String drl = hw.getDrl();
@@ -84,17 +86,18 @@ public class DrlResource  extends BaseResource<Drl, DrlService>{
 			
 			hd.iniciarSession();
 			Regla r = new Regla();
-	        r.setConcepto("SUM");
-	        r.setNivel("BAJO");
-	        r.setEstilo("VISUAL");
-	        r.setEjercioValido("E1_E2");
-	        r.setSecuenciaEjercicios("E1_E2");
-	        r.setSecuenciaVideos("VIDEO1");
+			r.setConcepto("division");
+	        r.setNivel("bajo");
+	        r.setEstilo("visual");
+	        r.setSecuenciaEjercicios("E105");
+	        r.setSecuenciaVideos("vacio");
+	        
 	        
 			hd.ejecutarRegla(r);
 			
 			hd.terminarSession();
 			System.out.println("resultado : "+ r.getResultado());
+			System.out.println("termineee cantidad resultados: "+r.getListaRespuestaRegla().size());
 			
 		} catch (Exception e) {
 			throw new WebApplicationException(e.getMessage(),
