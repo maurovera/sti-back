@@ -67,6 +67,9 @@ public class Alumno extends BaseEntity implements Serializable {
 	@ManyToMany(fetch = FetchType.LAZY, mappedBy = "listaAlumno", cascade = {
 			CascadeType.MERGE, CascadeType.REFRESH })
 	private List<Curso> listaCurso;
+	
+	@Column(name = "usuario")
+	private Long usuario;
 
 	public Long getId() {
 		return id;
@@ -150,5 +153,14 @@ public class Alumno extends BaseEntity implements Serializable {
 	public void setTipo(Double tipo) {
 		this.tipo = tipo;
 	}
+
+	public Long getUsuario() {
+		return usuario;
+	}
+
+	public void setUsuario(Long usuario) {
+		this.usuario = usuario;
+	}
+	
 
 }

@@ -8,9 +8,15 @@ package base;
 import java.util.Date;
 import java.util.HashMap;
 
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
+import seguridad.SessionService;
+import seguridad.Usuario;
 import utils.AppException;
+import validator.BeanValidatorUtils;
+import validator.BusinessException;
+
 
 /**
  *
@@ -21,9 +27,10 @@ import utils.AppException;
 public abstract class BaseServiceImpl<G extends BaseEntity, D extends BaseDAO<G>>
 		implements BaseService<G> {
 
-	// @Inject
-	// private SessionService session;
-	final private long userId = 1;
+	@Inject
+	private SessionService session;
+
+	// final private long userId = 1;
 	/**
 	 * Se encarga de retornar la instancia del dato a ser utilizado para las
 	 * operaciones.
@@ -37,20 +44,24 @@ public abstract class BaseServiceImpl<G extends BaseEntity, D extends BaseDAO<G>
 	 *
 	 * @return
 	 */
-	/**
-	 * public Usuario getCurrentUser() { return session.getCurrentUser(); }
-	 */
+
+	public Usuario getCurrentUser() {
+		return session.getCurrentUser();
+	}
 
 	/**
 	 * Se encarga de disaprar los beans validations
 	 *
 	 * @param obj
 	 */
-	/**
-	 * public void validate(G obj) { try { BeanValidatorUtils.validate(obj); }
-	 * catch (IllegalArgumentException | BusinessException e) { throw new
-	 * RuntimeException(e.getMessage()); } }
-	 */
+
+	public void validate(G obj) {
+		try {
+			BeanValidatorUtils.validate(obj);
+		} catch (IllegalArgumentException | BusinessException e) {
+			throw new RuntimeException(e.getMessage());
+		}
+	}
 
 	/**
 	 * @{@inheritDoc
@@ -71,11 +82,11 @@ public abstract class BaseServiceImpl<G extends BaseEntity, D extends BaseDAO<G>
 	public void modificar(Long id, G entity, HttpServletRequest httpRequest)
 			throws AppException {
 		try {
-			// Usuario user = getCurrentUser();
-			entity.setFechaModificacion(new Date());			
-			entity.setUsuarioModificacion(userId);
+			Usuario user = getCurrentUser();
+			entity.setFechaModificacion(new Date());
+			entity.setUsuarioModificacion(user.getId());
 			entity.setIpModificacion(httpRequest.getRemoteAddr());
-			// validate(entity);
+			validate(entity);
 
 			getDao().modify(id, entity);
 		} catch (Exception e) {
@@ -90,12 +101,12 @@ public abstract class BaseServiceImpl<G extends BaseEntity, D extends BaseDAO<G>
 	public G insertar(G entity, HttpServletRequest httpRequest)
 			throws AppException {
 		try {
-			System.out.println("implements de servicio tema");
-			// Usuario user = getCurrentUser();
+			System.out.println("implements de servicio base");
+			Usuario user = getCurrentUser();
 			entity.setFechaCreacion(new Date());
-			entity.setUsuarioCreacion(userId);
+			entity.setUsuarioCreacion(user.getId());
 			entity.setIpCreacion(httpRequest.getRemoteAddr());
-			// validate(entity);
+			validate(entity);
 			getDao().insert(entity);
 			return entity;
 		} catch (Exception e) {
