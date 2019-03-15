@@ -11,6 +11,7 @@ import model.Asignatura;
 import model.Concepto;
 import model.Ejercicio;
 import model.Respuesta;
+import model.Sesion;
 import model.Tarea;
 import utils.AppException;
 import utils.EjercicioView;
@@ -44,6 +45,9 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 
 	@Inject
 	private AlumnoService alumnoService;
+	
+	@Inject
+	private SesionService sesionService;
 
 	// private SessionService session;
 	final private long userId = 1;
@@ -258,21 +262,124 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 	 *            : respuesta del alumno al ejercicio
 	 * @return respuestaEjercicio
 	 **/
-	public Boolean responderEjercicio(Long idTarea, Long idAlumno, 
-			Long idAsignatura, String respuesta, Long idEjercicio)throws AppException 
-	{
-			try {
-				Boolean retorno = null;
-				
-				retorno = admAlumno.responderEjercicioServicio(idEjercicio, respuesta, idAlumno, idAsignatura, idTarea);
-								
-				if(retorno == null)
-					System.out.println("respondio mal y no se que paso. error interno en responder ejercicio servicio");
-					
-				return retorno;
-				
-			} catch (Exception e) {
-				throw new AppException(500, e.getMessage());
-			}
+	public Boolean responderEjercicio(Long idTarea, Long idAlumno,
+			Long idAsignatura, String respuesta, Long idEjercicio,
+			HttpServletRequest httpRequest) throws AppException {
+		try {
+			Boolean retorno = null;
+
+			retorno = admAlumno.responderEjercicioServicio(idEjercicio,
+					respuesta, idAlumno, idAsignatura, idTarea, httpRequest);
+
+			if (retorno == null)
+				System.out
+						.println("respondio mal y no se que paso. error interno en responder ejercicio servicio");
+
+			return retorno;
+
+		} catch (Exception e) {
+			throw new AppException(500, e.getMessage());
+		}
 	}
+
+	// #########Aplicacion de division de traer siguiente ejercicio sin
+	// responder######
+	/***
+	 * Traer el siguiente Ejercicio correspondiente al test adaptativo Seria el
+	 * primer test
+	 * 
+	 * @param idTarea
+	 *            : tarea al cual corresponde
+	 * @param idAlumno
+	 *            : alumno de la tarea
+	 * @param idAsignatura
+	 *            : asignatura al cual corresponde
+	 * @return Ejercicio
+	 **/
+	public Ejercicio siguienteEjercicioPrimerTest(Long idTarea, Long idAlumno,
+			Long idAsignatura) throws AppException {
+		try {
+			Ejercicio siguienteEjercicio = null;
+
+			// datos tarea, alumno, asi
+			Tarea tarea = tareaService.obtener(idTarea);
+			Alumno alumno = alumnoService.obtener(idAlumno);
+			Asignatura asig = asignaturaService.obtener(idAsignatura);
+
+			/*** Se obtiene el siguiente ejercicio ***/
+			siguienteEjercicio = admAlumno.getSiguienteEjercicioPrimerTest(
+					tarea, alumno, idAsignatura, asig);
+
+			System.out.println("\n#####################Ejercicio: "
+					+ siguienteEjercicio + " \n##############");
+
+			return siguienteEjercicio;
+
+		} catch (Exception e) {
+			throw new AppException(500, e.getMessage());
+		}
+	}
+
+	/***
+	 * Responde el ejercicio y devuelve la respuesta correspondiente
+	 * 
+	 * @param idEjercicio
+	 *            : ejercicio que respondera
+	 * @param idTarea
+	 *            : tarea al cual corresponde
+	 * @param idAlumno
+	 *            : alumno de la tarea
+	 * @param idAsignatura
+	 *            : asignatura al cual corresponde
+	 * @param respuesta
+	 *            : respuesta del alumno al ejercicio
+	 * @return respuestaEjercicio
+	 **/
+	public Boolean responderEjercicioPrimerTest(Long idTarea, Long idAlumno,
+			Long idAsignatura, String respuesta, Long idEjercicio,
+			HttpServletRequest httpRequest) throws AppException {
+		try {
+			Boolean retorno = null;
+
+			retorno = admAlumno.responderEjercicioServicio(idEjercicio,
+					respuesta, idAlumno, idAsignatura, idTarea, httpRequest);
+
+			if (retorno == null)
+				System.out
+						.println("respondio mal y no se que paso. error interno en responder ejercicio servicio");
+
+			return retorno;
+
+		} catch (Exception e) {
+			throw new AppException(500, e.getMessage());
+		}
+	}
+
+	/**Retorna el criterio de parada que es la cantidad de ejercicios resueltos**/
+	public Boolean criterio(Long idTarea, Long idAlumno,
+			HttpServletRequest httpRequest) throws AppException {
+		try {
+			Boolean retorno = false;
+			/**Obtenemos la cantidad de ejercicios por tarea
+			 **/
+			Tarea tarea = tareaService.obtener(idTarea);
+			Integer cantidadParada = tarea.getCantidadEjercicioParada();
+			/**Obtenemos la sesion anterior**/
+			Sesion sesion = sesionService.sesionAnterior(idAlumno, idTarea);
+			Integer resuelto = sesion.getcantidadEjerciciosResueltos();
+			
+			if(resuelto >= cantidadParada)
+				retorno = true;
+			
+			if (retorno == null)
+				System.out
+						.println("respondio mal y no se que paso. error interno en responder ejercicio servicio");
+
+			return retorno;
+
+		} catch (Exception e) {
+			throw new AppException(500, e.getMessage());
+		}
+	}
+
 }

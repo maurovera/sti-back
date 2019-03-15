@@ -104,4 +104,17 @@ public class SimulacionResource extends
 		return service.simulacionTutorVarios(httpRequest, idAsig, idTarea,
 				idArchivo, inicio, fin);
 	}
+	
+	
+	/**
+	 * crea alumnos con la asignatura 1 y curso 1 y sin hacer el primer test
+	 * **/
+	@GET
+	@Path("/simulacion06/{inicio}/{fin}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String simulacion06(@PathParam("inicio") Integer inicio, @PathParam("fin") Integer fin) throws NoSuchFieldException, AppException {
+		System.out.println("simulacion de carga de alumnos y sin primer test");
+		return service.simulacionAlumnosSinTest(httpRequest,inicio,fin);
+	}
+	
 }

@@ -5,6 +5,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
@@ -37,10 +38,10 @@ public class SesionResource extends BaseResource<Sesion, SesionService> {
 	 * Se encarga de insertar un nuevo registro. recibe un id_alumno, id_tarea
 	 */
 	@POST
-	@Path("/registrar")
+	@Path("/registrar/{idTarea}/{idAlumno}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Sesion registrarSesion(@QueryParam("idAlumno") Long idAlumno,
-			@QueryParam("idTarea") Long idTarea) {
+	public Sesion registrarSesion(@PathParam("idTarea") Long idTarea,
+			@PathParam("idAlumno") Long idAlumno) {
 		try {
 			System.out.println("base resource de registrar sesion");
 			return getService().registrarSesion(idAlumno, idTarea, httpRequest);

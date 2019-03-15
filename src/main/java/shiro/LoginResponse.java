@@ -2,6 +2,8 @@ package shiro;
 
 import java.util.List;
 
+import javax.persistence.Column;
+
 import utils.Respuesta;
 
 
@@ -11,7 +13,11 @@ public class LoginResponse extends Respuesta {
     private Long userId;
 	private String usuario;
 	private List<String> permisos;
-	
+	private Integer rol;
+    private Long idAlumno;
+    private Long idProfesor;
+    
+    
 	public LoginResponse() {
 	}
 	
@@ -26,6 +32,16 @@ public class LoginResponse extends Respuesta {
 		this.userId = userId;
 		this.usuario = usuario;
 		this.permisos = permisos;
+	}
+	
+	public LoginResponse(Long userId, String usuario, List<String> permisos, Integer rol, Long idAlumno, Long idProfesor) {
+		super(true, null);
+		this.userId = userId;
+		this.usuario = usuario;
+		this.permisos = permisos;
+		this.rol = rol;
+		this.idAlumno = idAlumno;
+		this.idProfesor = idProfesor;
 	}
 
 	public Long getUserId() {
@@ -51,5 +67,31 @@ public class LoginResponse extends Respuesta {
 	public void setPermisos(List<String> permisos) {
 		this.permisos = permisos;
 	}
+
+	public Integer getRol() {
+		return rol;
+	}
+
+	public void setRol(Integer rol) {
+		this.rol = rol;
+	}
+
+	public Long getIdAlumno() {
+		return idAlumno;
+	}
+
+	public void setIdAlumno(Long idAlumno) {
+		this.idAlumno = idAlumno;
+	}
+
+	public Long getIdProfesor() {
+		return idProfesor;
+	}
+
+	public void setIdProfesor(Long idProfesor) {
+		this.idProfesor = idProfesor;
+	}
+	
+	
 	
 }

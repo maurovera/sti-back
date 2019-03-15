@@ -137,6 +137,49 @@ public class SimulacionService extends
 		return "asignaturaCompleta";
 
 	}
+	
+	
+	
+	/**
+	 * Simulacion de carga de alumnos y sin que hagan la primera prueba
+	 * carga el rango de alumno todos al curso uno pero sin hacer la prueba 
+	 * uno
+	 * y tambien se inscriben a la tarea 1
+	 * 
+	 ***/
+	public String simulacionAlumnosSinTest(HttpServletRequest httpRequest,
+			Integer inicio, Integer fin) throws AppException {
+
+		Long numero = new Long(1);
+		Asignatura asig = asignaturaService.obtener(numero);
+		Curso c = cursoService.obtener(numero);
+		// creacion de varios alumnos inscritos al curso C
+		List<Alumno> listaAlumnos = new ArrayList<Alumno>();
+		listaAlumnos = generadorAlumnosPrueba(httpRequest, asig, c, inicio, fin);
+		// listaAlumnos = generacion, asignatura, curso)(httpRequest, asig, c);
+		System.out.println("##########alumnos creados######\n" + "Desde: "
+				+ inicio + " Hasta: " + fin);
+		String retorno = "##########alumnos creados######\n" + "Desde: "
+				+ inicio + " Hasta: " + fin;
+		
+		/* La tarea a hacerse aqui es donde vos le pasas la tarea para que haga.
+		List<Tarea> listaTareas = cursoService.listaTarea(c.getId());
+		Tarea tareaAResolver = listaTareas.get(0);
+		System.out.println("Tarea A Resolver : " + tareaAResolver.getNombre());
+
+		int cont = inicio;
+
+		for (Alumno alumno : listaAlumnos) {
+			simularAlumno(alumno, tareaAResolver, asig, httpRequest);
+			++cont;
+			System.out.println("---------------alumno simulado nro: " + cont
+					+ ".....Nombre: " + alumno.getNombres()
+					+ "----------------------");
+		}*/
+
+		return retorno;
+
+	}
 
 	/**
 	 * Simulacion de carga de alumnos y que hagan la primera prueba
@@ -618,6 +661,17 @@ public class SimulacionService extends
 		alu.setGenero("m");
 		alu.setNombres("nombres_" + secuencia.toString());
 		alu.setTipo(tipo);
+		alu.setEdad(secuencia);
+		alu.setEmail("correo"+secuencia.toString()+"@gmail.com");
+		alu.setRecibirNotificacion(true);
+		alu.setCedula("4250090"+secuencia.toString());
+		alu.setUsername("marzouser"+secuencia.toString());
+		alu.setPassword("marzo");
+		alu.setInterno(true);
+		alu.setPublico(false);
+
+		
+		
 		alumnoService.insertar(alu, httpRequest);
 
 		// Inscripcion al curso por parte del alumno

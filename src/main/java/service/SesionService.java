@@ -11,6 +11,7 @@ import model.Ejercicio;
 import model.Material;
 import model.Sesion;
 import model.Tarea;
+import seguridad.Usuario;
 import utils.AppException;
 import base.BaseServiceImpl;
 import dao.SesionDAO;
@@ -46,11 +47,10 @@ public class SesionService extends BaseServiceImpl<Sesion, SesionDAO> {
 		Sesion sesion = new Sesion();
 		try {
 			
+			Usuario user = getCurrentUser();
 			sesion.setFechaCreacion(new Date());
-			sesion.setUsuarioCreacion(userId);
+			sesion.setUsuarioCreacion(user.getId());
 			sesion.setIpCreacion(httpRequest.getRemoteAddr());
-			
-
 			sesion.setEntrada(new Date(System.currentTimeMillis()));
 			sesion.setEstadoTerminado(false);
 			sesion.setCantidadEjerciciosResueltos(0);
@@ -58,7 +58,8 @@ public class SesionService extends BaseServiceImpl<Sesion, SesionDAO> {
 			Tarea tarea = tareaService.obtener(idTarea);
 			sesion.setAlumno(alumno);
 			sesion.setTarea(tarea);
-
+			System.out.println("llegue aqui antes del validate");
+			validate(sesion);
 			dao.insert(sesion);
 			
 		} catch (Exception e) {
