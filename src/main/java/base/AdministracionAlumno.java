@@ -953,6 +953,7 @@ public class AdministracionAlumno {
 					idTarea);
 			sesionService.insertarEjercicioResuelto(sesionAnterior.getId(),
 					sesionAnterior, ejercicio);
+			/**#######################AQUI SE DEBE ACTUALIZAR LA CANTIdad de ejercicios realizados#######**/
 		} catch (AppException e) {
 			System.out
 					.println("No se pudo obtener la sesion o simplemente no se pudo insertar sesion");

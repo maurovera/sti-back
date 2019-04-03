@@ -23,20 +23,15 @@ public class MaterialService extends BaseServiceImpl<Material, MaterialDAO> {
 		return dao;
 	}
 
-	
-	
-	/**Lista de materiales que estan disponibles**/
-	public Material materialesDisponibles(List<Material> materiales, 
-			Regla regla) throws AppException {
-		
-		//List<Material> lista = new ArrayList<Material>();
+	/** Lista de materiales que estan disponibles **/
+	public Material materialesDisponibles(List<Material> materiales, Regla regla)
+			 {
+
+		// List<Material> lista = new ArrayList<Material>();
 		Material material = null;
-		try {
-			
-			material = getDao().materialesDisponibles(materiales, regla);
-		} catch (Exception e) {
-			throw new AppException(500, e.getMessage());
-		}
+
+		material = getDao().materialesDisponibles(materiales, regla);
+
 		return material;
 	}
 

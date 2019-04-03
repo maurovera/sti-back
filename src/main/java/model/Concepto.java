@@ -43,25 +43,24 @@ public class Concepto extends BaseEntity implements Serializable {
 
 	@Column(name = "peso")
 	private Double peso;
-	
-    
+
 	@JoinColumn(name = "tema", referencedColumnName = "id_tema")
 	@ManyToOne
 	private Tema tema;
 
 	@JsonIgnore
-    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "listaConceptos", cascade = {CascadeType.MERGE, CascadeType.REFRESH} )
+	@ManyToMany(fetch = FetchType.LAZY, mappedBy = "listaConceptos", cascade = {
+			CascadeType.MERGE, CascadeType.REFRESH })
 	private List<Ejercicio> listaEjercicio;
 
 	@JsonIgnore
-    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "listaConceptosTarea", cascade = {CascadeType.MERGE, CascadeType.REFRESH} )
+	@ManyToMany(fetch = FetchType.LAZY, mappedBy = "listaConceptosTarea", cascade = {
+			CascadeType.MERGE, CascadeType.REFRESH })
 	private List<Tarea> listaTarea;
 
-	
-	@Transient 
+	@Transient
 	private Long idAsignatura;
-	
-	
+
 	public Long getIdAsignatura() {
 		return idAsignatura;
 	}
@@ -111,19 +110,18 @@ public class Concepto extends BaseEntity implements Serializable {
 		this.tema = tema;
 	}
 
-	@JsonBackReference(value="ejercicio-concepto")
+	@JsonBackReference(value = "ejercicio-concepto")
 	public List<Ejercicio> getListaEjercicio() {
 		return listaEjercicio;
 	}
 
-	//este puse hoy 7 de abril
+	// este puse hoy 7 de abril
 	@JsonProperty
 	public void setListaEjercicio(List<Ejercicio> listaEjercicio) {
 		this.listaEjercicio = listaEjercicio;
 	}
 
-	
-	@JsonBackReference(value="tarea-concepto")
+	@JsonBackReference(value = "tarea-concepto")
 	public List<Tarea> getListaTarea() {
 		return listaTarea;
 	}
@@ -132,7 +130,19 @@ public class Concepto extends BaseEntity implements Serializable {
 		this.listaTarea = listaTarea;
 	}
 
-	
-	
-	
+	@Override
+	public boolean equals(Object object) {
+		// TODO: Warning - this method won't work in the case the id fields are
+		// not set
+		if (!(object instanceof Concepto)) {
+			return false;
+		}
+		Concepto other = (Concepto) object;
+		if ((this.id == null && other.id != null)
+				|| (this.id != null && !this.id.equals(other.id))) {
+			return false;
+		}
+		return true;
+	}
+
 }

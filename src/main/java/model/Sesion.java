@@ -19,17 +19,19 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
 import org.hibernate.annotations.DynamicInsert;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-
 import base.BaseEntity;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "sesion")
@@ -37,7 +39,7 @@ import base.BaseEntity;
 public class Sesion extends BaseEntity implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id_sesion")
@@ -52,44 +54,41 @@ public class Sesion extends BaseEntity implements Serializable {
 	@Column(name = "salida")
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date salida;
-	
+
 	@Size(max = 10)
 	@Column(name = "estado_animo")
 	private String estadoAnimo;
-	
+
 	@Column(name = "estado_terminado")
 	private Boolean estadoTerminado;
-	
+
 	@JoinColumn(name = "tarea", referencedColumnName = "id_tarea")
 	@ManyToOne
 	private Tarea tarea;
-	
+
 	@JoinColumn(name = "alumno", referencedColumnName = "id_alumno")
 	@ManyToOne
 	private Alumno alumno;
-	
+
 	@Column(name = "cantidad_ejercicios_resueltos")
 	private Integer cantidadEjerciciosResueltos;
-	
-	
+
+	@Column(name = "cantidad_intentos")
+	private Integer cantidadIntentos;
+
 	@ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.MERGE,
 			CascadeType.DETACH, CascadeType.REFRESH })
-	@JoinTable(name = "sesion_ejercicio", 
-			joinColumns = { @JoinColumn(name = "id_sesion", 
-			referencedColumnName = "id_sesion") }, 
-			inverseJoinColumns = { @JoinColumn(name = "id_ejercicio", 
-			referencedColumnName = "id_ejercicio") })
+	@JoinTable(name = "sesion_ejercicio", joinColumns = { @JoinColumn(name = "id_sesion", referencedColumnName = "id_sesion") }, inverseJoinColumns = { @JoinColumn(name = "id_ejercicio", referencedColumnName = "id_ejercicio") })
 	private List<Ejercicio> listaEjercicio = new ArrayList<Ejercicio>();
-	
-	
+
 	@ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.MERGE,
 			CascadeType.DETACH, CascadeType.REFRESH })
-	@JoinTable(name = "sesion_material", 
-			joinColumns = { @JoinColumn(name = "id_sesion", 
-			referencedColumnName = "id_sesion") }, 
-			inverseJoinColumns = { @JoinColumn(name = "id_material", 
-			referencedColumnName = "id_material") })
+	@JoinTable(name = "sesion_material", joinColumns = { @JoinColumn(name = "id_sesion", referencedColumnName = "id_sesion") }, inverseJoinColumns = { @JoinColumn(name = "id_material", referencedColumnName = "id_material") })
 	private List<Material> listaMaterial = new ArrayList<Material>();
+
+	@org.codehaus.jackson.annotate.JsonIgnore
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "sesion", cascade = CascadeType.ALL)
+	private List<SesionConcepto> listaSesionConceptos = new ArrayList<SesionConcepto>();
 
 	public Sesion() {
 	}
@@ -153,7 +152,7 @@ public class Sesion extends BaseEntity implements Serializable {
 		this.estadoTerminado = estadoAnimo;
 	}
 
-	@JsonBackReference(value="tarea-sesion")
+	@JsonBackReference(value = "tarea-sesion")
 	public Tarea getTarea() {
 		return tarea;
 	}
@@ -162,7 +161,7 @@ public class Sesion extends BaseEntity implements Serializable {
 		this.tarea = tarea;
 	}
 
-	@JsonBackReference(value="alumno-sesion")
+	@JsonBackReference(value = "alumno-sesion")
 	public Alumno getAlumno() {
 		return alumno;
 	}
@@ -170,8 +169,8 @@ public class Sesion extends BaseEntity implements Serializable {
 	public void setAlumno(Alumno alumno) {
 		this.alumno = alumno;
 	}
-	
-	//@JsonBackReference(value="ejercicios-sesion")
+
+	// @JsonBackReference(value="ejercicios-sesion")
 	public List<Ejercicio> getListaEjercicio() {
 		return listaEjercicio;
 	}
@@ -180,16 +179,14 @@ public class Sesion extends BaseEntity implements Serializable {
 		this.listaEjercicio = listaEjercicio;
 	}
 
-	
-	public void addEjercicioResuelto(Ejercicio ejercicio){
+	public void addEjercicioResuelto(Ejercicio ejercicio) {
 		this.listaEjercicio.add(ejercicio);
 	}
-	
 
-	public void addMaterialVisto(Material material){
+	public void addMaterialVisto(Material material) {
 		this.listaMaterial.add(material);
 	}
-	
+
 	public List<Material> getListaMaterial() {
 		return listaMaterial;
 	}
@@ -197,7 +194,28 @@ public class Sesion extends BaseEntity implements Serializable {
 	public void setListaMaterial(List<Material> listaMaterial) {
 		this.listaMaterial = listaMaterial;
 	}
+
+	public Integer getCantidadIntentos() {
+		return cantidadIntentos;
+	}
+
+	public void setCantidadIntentos(Integer cantidadIntentos) {
+		this.cantidadIntentos = cantidadIntentos;
+	}
 	
+	public void addTema(SesionConcepto sesionConcepto){
+		this.listaSesionConceptos.add(sesionConcepto);
+	}
+	
+	
+	@JsonIgnore
+	public List<SesionConcepto> getListaSesionConceptos() {
+		return listaSesionConceptos;
+	}
+
+	public void setListaSesionConceptos(List<SesionConcepto> listaSesionConceptos) {
+		this.listaSesionConceptos = listaSesionConceptos;
+	}
 
 	@Override
 	public int hashCode() {
@@ -213,8 +231,7 @@ public class Sesion extends BaseEntity implements Serializable {
 		}
 		Sesion other = (Sesion) object;
 		if ((this.id == null && other.id != null)
-				|| (this.id != null && !this.id
-						.equals(other.id))) {
+				|| (this.id != null && !this.id.equals(other.id))) {
 			return false;
 		}
 		return true;

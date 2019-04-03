@@ -69,6 +69,11 @@ public class Tarea extends BaseEntity implements Serializable {
 	@Column(name = "cantidad_ejercicio_parada")
     private Integer cantidadEjercicioParada;
 	
+	@Column(name = "total_intentos")
+    private Integer totalIntentos;
+	
+	@Column(name = "margen_conocimiento")
+    private Double margenConocimiento;
 
     @JoinTable(name = "tarea_concepto", joinColumns = {
             @JoinColumn(name = "id_tarea", referencedColumnName = "id_tarea")}, inverseJoinColumns = {
@@ -199,6 +204,24 @@ public class Tarea extends BaseEntity implements Serializable {
 	public void setCantidadEjercicioParada(Integer cantidadEjercicioParada) {
 		this.cantidadEjercicioParada = cantidadEjercicioParada;
 	}
+
+	public Integer getTotalIntentos() {
+		return totalIntentos;
+	}
+
+	public void setTotalIntentos(Integer totalIntentos) {
+		this.totalIntentos = totalIntentos;
+	}
+
+	public Double getMargenConocimiento() {
+		return margenConocimiento;
+	}
+
+	public void setMargenConocimiento(Double margenConocimiento) {
+		this.margenConocimiento = margenConocimiento;
+	}
+	
+	
 	
 	
 	

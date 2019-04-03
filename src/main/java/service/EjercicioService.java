@@ -1,6 +1,8 @@
 package service;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -8,13 +10,20 @@ import javax.servlet.http.HttpServletRequest;
 
 import model.Alumno;
 import model.Asignatura;
+import model.Camino;
 import model.Concepto;
 import model.Ejercicio;
+import model.Evidencia;
+import model.Material;
 import model.Respuesta;
 import model.Sesion;
+import model.SesionConcepto;
 import model.Tarea;
 import utils.AppException;
 import utils.EjercicioView;
+import utils.HerramientasDrools;
+import utils.Regla;
+import utils.RespuestaCriterio;
 import base.AdministracionAlumno;
 import base.AdministracionBase;
 import base.BaseServiceImpl;
@@ -45,9 +54,24 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 
 	@Inject
 	private AlumnoService alumnoService;
-	
+
 	@Inject
 	private SesionService sesionService;
+
+	@Inject
+	private SesionConceptoService sesionConceptoService;
+
+	@Inject
+	private EvidenciaService evidenciaService;
+
+	@Inject
+	private DrlService drlService;
+
+	@Inject
+	private MaterialService materialService;
+
+	@Inject
+	private CaminoService caminoService;
 
 	// private SessionService session;
 	final private long userId = 1;
@@ -355,22 +379,23 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 		}
 	}
 
-	/**Retorna el criterio de parada que es la cantidad de ejercicios resueltos**/
+	/** Retorna el criterio de parada que es la cantidad de ejercicios resueltos **/
 	public Boolean criterio(Long idTarea, Long idAlumno,
 			HttpServletRequest httpRequest) throws AppException {
 		try {
 			Boolean retorno = false;
-			/**Obtenemos la cantidad de ejercicios por tarea
+			/**
+			 * Obtenemos la cantidad de ejercicios por tarea
 			 **/
 			Tarea tarea = tareaService.obtener(idTarea);
 			Integer cantidadParada = tarea.getCantidadEjercicioParada();
-			/**Obtenemos la sesion anterior**/
+			/** Obtenemos la sesion anterior **/
 			Sesion sesion = sesionService.sesionAnterior(idAlumno, idTarea);
 			Integer resuelto = sesion.getcantidadEjerciciosResueltos();
-			
-			if(resuelto >= cantidadParada)
+
+			if (resuelto >= cantidadParada)
 				retorno = true;
-			
+
 			if (retorno == null)
 				System.out
 						.println("respondio mal y no se que paso. error interno en responder ejercicio servicio");
@@ -380,6 +405,413 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 		} catch (Exception e) {
 			throw new AppException(500, e.getMessage());
 		}
+	}
+
+	/**
+	 * Retorna el criterio de parada para el tutor o segundo examne donde se
+	 * controla si tiene conceptos o si ya no puede seguir porque se acabo sus
+	 * oportunidades
+	 **/
+	public RespuestaCriterio criterioTutor(Long idAsignatura, Long idTarea,
+			Long idAlumno, HttpServletRequest httpRequest) throws AppException {
+
+		RespuestaCriterio respuesta = new RespuestaCriterio();
+		/**
+		 * Lista de conceptos que no superan el margen requerido
+		 **/
+		List<Concepto> lista = listaAEvaluar(idTarea, idAsignatura, idAlumno);
+		if (lista.isEmpty() || lista == null) {
+			respuesta.setExitoso(true);
+			respuesta
+					.setMensaje("no existe conceptos a evaluar, todos aprobados");
+
+			/** Lista con conceptos aun a evaluar **/
+		} else {
+
+			/**
+			 * Obtenemos la cantidad de ejercicios por tarea
+			 **/
+			Tarea tarea = tareaService.obtener(idTarea);
+			/** Obtenemos la sesion anterior y su lista se SesionConcepto **/
+			Sesion sesion = sesionService.sesionAnterior(idAlumno, idTarea);
+			List<SesionConcepto> listaSesionConcepto = sesion
+					.getListaSesionConceptos();
+
+			/**
+			 * Cantidad de intentos por el alumno. Este no se usa porque es tipo
+			 * la cantidad de intentos por sesion en total Ayuda a la primera
+			 * vez. Es el cargador de sesionConceptos de la sesion misma por
+			 * conceptos que no conoce el alumno por tarea por asignatura
+			 **/
+			Integer resuelto = sesion.getCantidadIntentos();
+			System.out.println("cantidad de intentos : " + resuelto);
+			if (resuelto == null || resuelto == 0) {
+				System.out.println("entre en resueltos cero");
+				/** cargamos los conceptos en sesion */
+				Long conceptoUno = cargarConceptosEnSesion(sesion, lista, tarea, httpRequest);
+				respuesta.setExitoso(false);
+				respuesta
+						.setMensaje("no  se intento ninguna vez,"
+								+ " se cargan los conceptos, o los conceptos que faltan");
+				respuesta.setConcepto(conceptoUno);
+				/** si ya se cargaron todos entonces se controla **/
+				/** La lista de conceptos a evaluar que es lista */
+			
+			}else{ 
+				/** La lista de conceptos a evaluar que es lista */
+				respuesta = comprobarIntentosYMargen(listaSesionConcepto);
+			}
+
+		}
+
+		/**
+		 * Aqui entra camino Se va a ir agregando camino solo por los conceptos
+		 * que no se conocen Si respuesta es no exitosa. osea existen conceptos
+		 * a evaluar
+		 * **/
+		if (respuesta.getConcepto() != null) {
+			Long idCon = respuesta.getConcepto();
+			Camino camino = caminoService.caminoAnterior(idAlumno, idTarea,
+					idCon, idAsignatura, httpRequest);
+			Boolean esEjercicio = camino.getEsEjercicio();
+			respuesta.setEsEjercicio(esEjercicio);
+			System.out.println("esEjercicio es: "+respuesta.getEsEjercicio());
+		}
+
+		return respuesta;
+
+	}
+
+	private RespuestaCriterio comprobarIntentosYMargen(
+			List<SesionConcepto> lista) {
+		RespuestaCriterio respuesta = new RespuestaCriterio();
+		Boolean parar = true;
+		for (SesionConcepto seCo : lista) {
+
+			if (!seCo.getResuelto() && seCo.getIntentos() < seCo.getTotal()) {
+				parar = false;
+				respuesta.setConcepto(seCo.getIdConcepto());
+				break;
+			}
+		}
+
+		respuesta.setExitoso(parar);
+		if (!parar)
+			respuesta.setMensaje("aun no se resolvio y la cantidad de"
+					+ " intentos por concepto aun no alcanzo el limite");
+		else
+			respuesta
+					.setMensaje("Ya se resolvio o la cantidad de intentos de todos llego a su limite");
+
+		return respuesta;
+
+	}
+
+	/**
+	 * Carga los conceptos en sesionConcepto la primera vez y carga mas si
+	 * encuentra otros que no estan Para criterioTutor
+	 * **/
+	private Long cargarConceptosEnSesion(Sesion sesion, List<Concepto> lista,
+			Tarea tarea, HttpServletRequest httpRequest) throws AppException {
+
+		List<SesionConcepto> sesionConcepto = sesion.getListaSesionConceptos();
+		
+		if (sesionConcepto == null || sesionConcepto.isEmpty()) {
+			System.out.println("cargamos todo los conceptos");
+			for (Concepto concepto : lista) {
+				Long id = concepto.getId();
+				SesionConcepto variable = new SesionConcepto();
+				variable.setIdConcepto(id);
+				variable.setIntentos(0);
+				variable.setMargen(tarea.getMargenConocimiento());
+				variable.setResuelto(false);
+				variable.setSesion(sesion);
+				variable.setTotal(tarea.getTotalIntentos());
+				sesionConceptoService.insertar(variable, httpRequest);
+
+			}
+		} else {
+			// cargamos las listas long
+			List<Long> listaSesion1 = new ArrayList<Long>();
+			for (SesionConcepto sesionConcepto2 : sesionConcepto)
+				listaSesion1.add(sesionConcepto2.getIdConcepto());
+
+			// cargamos las listas2 long
+			List<Long> listaConcepto2 = new ArrayList<Long>();
+			for (Concepto lc : lista)
+				listaConcepto2.add(lc.getId());
+
+			List<Long> cargador = new ArrayList<Long>();
+			cargador = noContiene(listaSesion1, listaConcepto2);
+			if (!cargador.isEmpty()) {
+				for (Long idCargado : cargador) {
+					SesionConcepto variable = new SesionConcepto();
+					variable.setIdConcepto(idCargado);
+					variable.setIntentos(0);
+					variable.setMargen(tarea.getMargenConocimiento());
+					variable.setResuelto(false);
+					variable.setSesion(sesion);
+					variable.setTotal(tarea.getTotalIntentos());
+					sesionConceptoService.insertar(variable, httpRequest);
+				}
+			}
+		}
+		/**Se retorna el id del primer concepto de la lista **/
+		return lista.get(0).getId();
+	}
+
+	/**
+	 * compara dos lista y devuelve lo que no tiene es decir devuelve los
+	 * conceptos que falta en la lista sesion Para cargarConceptoSesion
+	 **/
+	private List<Long> noContiene(List<Long> listaSesion, List<Long> conceptos) {
+		List<Long> lista = new ArrayList<Long>();
+		Boolean tiene = false;
+		for (Long concepto : conceptos) {
+			for (Long sesion : listaSesion) {
+				if (concepto == sesion)
+					tiene = true;
+			}
+			if (!tiene) {
+				lista.add(concepto);
+				tiene = false;
+			}
+		}
+		return lista;
+	}
+
+	/**
+	 * Devuelve una lista a evaluar si existe conceptos por debajo del criterio
+	 * del profesor ParaRespuestaCriterio
+	 **/
+	private List<Concepto> listaAEvaluar(Long idTarea, Long idAsig, Long idAlu)
+			throws AppException {
+
+		/** Obtenemos la tarea **/
+		Tarea tarea = new Tarea();
+		tarea = tareaService.obtener(idTarea);
+		if (tarea != null) {
+			System.out.println("Conseguimos tarea");
+		} else {
+			System.out.println("No conseguimos la tarea");
+		}
+
+		/** Lista de conceptos de la tarea a tutorizar */
+		List<Concepto> listaConcepto = new ArrayList<Concepto>();
+		listaConcepto = tarea.getListaConceptosTarea();
+		if (listaConcepto != null) {
+			System.out
+					.println("Traje la lista de conceptos de la tarea sin drama");
+		} else {
+			System.out.println("No tiene conceptos la tarea.");
+		}
+
+		String nombreConcepto = null;
+		Double valorNodo = null;
+
+		Double valorFijadoProfesor = tarea.getMargenConocimiento();
+
+		List<Concepto> conceptosAEvaluar = new ArrayList<Concepto>();
+
+		/**
+		 * Se determina que conceptos no conoce Por el criterio de
+		 * valorFijadoProfesor
+		 **/
+		for (Concepto c : listaConcepto) {
+			nombreConcepto = c.getNombre();
+			valorNodo = adm
+					.getValorNodoRedDouble(nombreConcepto, idAsig, idAlu);
+			if (valorNodo < valorFijadoProfesor) {
+				conceptosAEvaluar.add(c);
+				System.out.println("Entro Concepto:" + c.getNombre()
+						+ ", valor: " + valorNodo);
+			}
+
+		}
+
+		System.out.println("Conceptos a evaluar:\n");
+		if (conceptosAEvaluar != null) {
+			for (Concepto concepto : conceptosAEvaluar) {
+				System.out.println("- " + concepto.getNombre());
+			}
+
+		}
+
+		return conceptosAEvaluar;
+
+	}
+
+	/*********************************************************************/
+	/***
+	 * siguiente ejercicio tutor
+	 * 
+	 * @throws AppException
+	 **/
+	public Ejercicio siguienteEjercicioTutor(Long idConcepto, Long idAsig,
+			Long idAlu, Long idTarea) throws AppException {
+
+		String nombreConcepto = null;
+		Double valorNodo = null;
+
+		Concepto c = conceptoService.obtener(idConcepto);
+		/** Traemos el valor del nodo y su nombre **/
+		nombreConcepto = c.getNombre();
+		valorNodo = adm.getValorNodoRedDouble(nombreConcepto, idAsig, idAlu);
+
+		/**
+		 * Esta funcion trae el siguiente ejercicio en base a su utilidad sobre
+		 * el concepto c y no sobre la asignatura
+		 **/
+		Ejercicio ejercicio = admAlumno.getSiguienteEjercicioPorConcepto(
+				idTarea, idAlu, idAsig, c);
+
+		if (ejercicio == null) {
+			System.out.println("ejercicio nulo, avisar al profesor");
+		} else {
+			System.out.println("Ejercicio :" + ejercicio.toString()
+					+ "\n#######");
+		}
+
+		return ejercicio;
+
+	}
+
+	/***
+	 * siguiente material
+	 * 
+	 * @throws AppException
+	 **/
+	public Material siguienteMaterial(Long idArchivo, Long idAlu, Long idAsig,
+			Long idConcepto, Long idTarea, HttpServletRequest httpRequest)
+			throws AppException {
+
+		/** Aqui inicia el motor drools. Esto no deberia estar aqui. **/
+		String archivo = drlService.obtenerArchivo(idArchivo);
+		HerramientasDrools hd = drlService.iniciarDrools(archivo);
+		/**
+		 * Trae un camino anterior o un camino nuevo para busqueda de materiales
+		 **/
+		Camino camino = caminoService.caminoAnterior(idAlu, idTarea,
+				idConcepto, idAsig, httpRequest);
+
+		Material material = new Material();
+
+		material = aplicarReglaMaterial(camino, hd, idTarea, idAlu);
+		if (material == null)
+			System.out.println("salte porque no existe material disponible");
+
+		return material;
+
+	}
+
+	/**
+	 * Obtiene un material si existe una regla por la evidencia del alumno en
+	 * caso de no obtener un material por regla. obtiene un material aleatorio
+	 * basado en concepto, nivel y estilo que aun no se haya visto el alumno
+	 * 
+	 * @Param evidencia e
+	 * @Param hd. Instancia del drools
+	 * @Return {@link Class} Material
+	 ***/
+	private Material aplicarReglaMaterial(Camino camino, HerramientasDrools hd,
+			Long idTarea, Long idAlu) throws AppException {
+
+		Material material = new Material();
+
+		/**
+		 * Copiamos la evidencia en otro y formateamos Le paso un uno para que
+		 * copie tambien los array de la clase
+		 **/
+		camino.cargarMaterialYEjercicio();
+		Evidencia evide = new Evidencia(camino);
+		evide.formatearEvidenciaParaRegla();
+
+		// iniciamos sesion y le tiramos el material
+		hd.iniciarSession();
+		Regla r = new Regla();
+		r.setConcepto(evide.getConcepto());
+		r.setNivel(evide.getNivel());
+		r.setEstilo(evide.getEstilo());
+		r.setSecuenciaEjercicios(evide.getSecuenciaEjercicio());
+		r.setSecuenciaVideos(evide.getSecuenciaMaterial());
+
+		System.out.println("######################### Concepto: "
+				+ evide.getConcepto());
+		System.out.println("######################### nivel: "
+				+ evide.getNivel());
+		System.out.println("######################### estilo: "
+				+ evide.getEstilo());
+		System.out.println("######################### secuenciaEjercicio: "
+				+ evide.getSecuenciaEjercicio());
+		System.out.println("######################### secuenciaMaterial: "
+				+ evide.getSecuenciaMaterial());
+
+		hd.ejecutarRegla(r);
+		hd.terminarSession();
+		System.out.println("######################### material a mostrar: "
+				+ r.getResultado());
+
+		/** Aqui abrimos la sesion anterior **/
+		Sesion sesionAnterior = sesionService.sesionAnterior(idAlu, idTarea);
+
+		/**
+		 * Si consigo un material entra aqui. - Si el material ya se mostro. Que
+		 * se hace??????????????? se busca otra regla. o se asume que funciona y
+		 * se guarda en materiales mostrados - Ahora se muestra el material que
+		 * genera la regla por mas que ya se haya mostrado Falta =controlar que
+		 * no repita ya el material guardado ya sea regla o al azar.
+		 * ***/
+		if (r.getResultado() != null) {
+			String[] parts = r.getResultado().split("M");
+			String part2 = parts[1]; // 654321
+			Long idMaterial = new Long(part2);
+			material = materialService.obtener(idMaterial);
+			System.out.println("#####################################");
+			System.out.println("Material de la regla: M" + material.getId());
+			System.out.println("#####################################\n");
+			material.setEsRegla(true);
+			// noEsRegla = true;
+			/***
+			 * Si la regla no consiguio material entonces se busca un material
+			 * que no haya sido seleccionado aun es decir que no este en la
+			 * sesion anterior
+			 ***/
+		} else {
+			// material = materialService.obtener(new Long(1));
+			List<Material> materiales = sesionAnterior.getListaMaterial();
+			/**
+			 * Atencion. Aqui suele fallar. y trae material nulo. Cuando trae
+			 * material nulo es cuando falla. OJOOOO REVISAR
+			 **/
+			material = materialService.materialesDisponibles(materiales, r);
+			if (material == null) {
+				System.out.println("ya no tengo material disponible");
+				System.out.println("##############################");
+
+			} else {
+				System.out.println("#####################################");
+				System.out.println("Material al azar: M" + material.getId());
+				System.out.println("#####################################\n");
+				material.setEsRegla(false);
+			}
+
+		}
+
+		return material;
+	}
+
+	/**
+	 * tipo aqui hay que ver que onda si es material o ejercicio el criterio de
+	 * parada es ver si lleno el cupo nada mas pero aqui se tiene que ver - si
+	 * es material o no - manejar las evidencias - ver en que momento guardar la
+	 * evidencia y recuperarlo.
+	 ***/
+	public void materialOEjercicio() {
+
+		/** Arranca el motor de reglas. Va a obtener el archivo 1 **/
+		// String archivo = drlService.obtenerArchivo(idArchivo);
+		// HerramientasDrools hd = drlService.iniciarDrools(archivo);
+
 	}
 
 }

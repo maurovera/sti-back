@@ -137,14 +137,11 @@ public class SimulacionService extends
 		return "asignaturaCompleta";
 
 	}
-	
-	
-	
+
 	/**
-	 * Simulacion de carga de alumnos y sin que hagan la primera prueba
-	 * carga el rango de alumno todos al curso uno pero sin hacer la prueba 
-	 * uno
-	 * y tambien se inscriben a la tarea 1
+	 * Simulacion de carga de alumnos y sin que hagan la primera prueba carga el
+	 * rango de alumno todos al curso uno pero sin hacer la prueba uno y tambien
+	 * se inscriben a la tarea 1
 	 * 
 	 ***/
 	public String simulacionAlumnosSinTest(HttpServletRequest httpRequest,
@@ -161,21 +158,21 @@ public class SimulacionService extends
 				+ inicio + " Hasta: " + fin);
 		String retorno = "##########alumnos creados######\n" + "Desde: "
 				+ inicio + " Hasta: " + fin;
-		
-		/* La tarea a hacerse aqui es donde vos le pasas la tarea para que haga.
-		List<Tarea> listaTareas = cursoService.listaTarea(c.getId());
-		Tarea tareaAResolver = listaTareas.get(0);
-		System.out.println("Tarea A Resolver : " + tareaAResolver.getNombre());
 
-		int cont = inicio;
-
-		for (Alumno alumno : listaAlumnos) {
-			simularAlumno(alumno, tareaAResolver, asig, httpRequest);
-			++cont;
-			System.out.println("---------------alumno simulado nro: " + cont
-					+ ".....Nombre: " + alumno.getNombres()
-					+ "----------------------");
-		}*/
+		/*
+		 * La tarea a hacerse aqui es donde vos le pasas la tarea para que haga.
+		 * List<Tarea> listaTareas = cursoService.listaTarea(c.getId()); Tarea
+		 * tareaAResolver = listaTareas.get(0);
+		 * System.out.println("Tarea A Resolver : " +
+		 * tareaAResolver.getNombre());
+		 * 
+		 * int cont = inicio;
+		 * 
+		 * for (Alumno alumno : listaAlumnos) { simularAlumno(alumno,
+		 * tareaAResolver, asig, httpRequest); ++cont;
+		 * System.out.println("---------------alumno simulado nro: " + cont +
+		 * ".....Nombre: " + alumno.getNombres() + "----------------------"); }
+		 */
 
 		return retorno;
 
@@ -662,16 +659,14 @@ public class SimulacionService extends
 		alu.setNombres("nombres_" + secuencia.toString());
 		alu.setTipo(tipo);
 		alu.setEdad(secuencia);
-		alu.setEmail("correo"+secuencia.toString()+"@gmail.com");
+		alu.setEmail("correo" + secuencia.toString() + "@gmail.com");
 		alu.setRecibirNotificacion(true);
-		alu.setCedula("4250090"+secuencia.toString());
-		alu.setUsername("marzouser"+secuencia.toString());
+		alu.setCedula("4250090" + secuencia.toString());
+		alu.setUsername("marzouser" + secuencia.toString());
 		alu.setPassword("marzo");
 		alu.setInterno(true);
 		alu.setPublico(false);
 
-		
-		
 		alumnoService.insertar(alu, httpRequest);
 
 		// Inscripcion al curso por parte del alumno
@@ -1148,20 +1143,39 @@ public class SimulacionService extends
 					x--;
 					pasoPorMaterial = false;
 					// Aqui si se registra un nuevo valor de nodo
-					e.setNivelEvidencia(valorNodo);
+					/**
+					 * Aqui le re agrego el calculo del valor de nodo por
+					 * concepto y le reasigno
+					 **/
+					// System.out.println("recalculo de nodo valor de concepto");
+					// valorNodo = adm.getValorNodoRedDouble(nombreConcepto,
+					// idAsig, idAlu);
+					// e.setNivelEvidencia(valorNodo);
 
 				} else if (!respuesta) {
 					// e.formatearEvidencia();
 
 					material = aplicarReglaMaterial(e, hd, idTarea, idAlu);
-					mostrarMaterial(material);
-					e.addMaterial(material.getId());
-					pasoPorMaterial = true;
+					if(material == null){
+						System.out.println("salte porque no existe material disponible");
+						break;
+					}else{
+						mostrarMaterial(material);
+						e.addMaterial(material.getId());
+						pasoPorMaterial = true;
+					}
+						
+					
+					
 				}
 
 				// se recalcula el valor del nodo pase o no por un material.
+				/**
+				 * Seria el valor nuevo ya
+				 **/
 				valorNodo = adm.getValorNodoRedDouble(nombreConcepto, idAsig,
 						idAlu);
+				e.setNivelEvidencia(valorNodo);
 
 				/***
 				 * verifica que exista otro estilo de aprendizaje Por ahora no
@@ -1190,6 +1204,8 @@ public class SimulacionService extends
 				if (material != null) {
 					log.addSecuencia("M" + material.getId());
 					log.addSecuencia(material.getEsRegla().toString());
+					log.addSecuencia(material.getNivel().toString());
+					log.addSecuencia(material.getEstilo().toString());
 				}
 				/** Contador Para respuestasGeneradas **/
 				// contador++
@@ -1309,7 +1325,8 @@ public class SimulacionService extends
 		 * Si consigo un material entra aqui. - Si el material ya se mostro. Que
 		 * se hace??????????????? se busca otra regla. o se asume que funciona y
 		 * se guarda en materiales mostrados - Ahora se muestra el material que
-		 * genera la regla por mas que ya se haya mostrado
+		 * genera la regla por mas que ya se haya mostrado Falta =controlar que
+		 * no repita ya el material guardado ya sea regla o al azar.
 		 * ***/
 		if (r.getResultado() != null) {
 			String[] parts = r.getResultado().split("M");
@@ -1329,32 +1346,41 @@ public class SimulacionService extends
 		} else {
 			// material = materialService.obtener(new Long(1));
 			List<Material> materiales = sesionAnterior.getListaMaterial();
+			/**
+			 * Atencion. Aqui suele fallar. y trae material nulo. Cuando trae
+			 * material nulo es cuando falla. OJOOOO REVISAR
+			 **/
 			material = materialService.materialesDisponibles(materiales, r);
 			if (material == null) {
 				System.out.println("ya no tengo material disponible");
 				System.out.println("##############################");
+
+			} else {
+				System.out.println("#####################################");
+				System.out.println("Material al azar: M" + material.getId());
+				System.out.println("#####################################\n");
+				material.setEsRegla(false);
 			}
 
-			System.out.println("#####################################");
-			System.out.println("Material al azar: M" + material.getId());
-			System.out.println("#####################################\n");
-			material.setEsRegla(false);
 		}
-
-		/**
-		 * Una vez mostrado el material por la regla o al azar se guarda en la
-		 * sesionMaterialAnterior
-		 ***/
-		try {
-
+		/**Solo si el material es no nulo se inserta**/
+		if (material != null) {
 			/**
-			 * Insertamos un material a la sesion
-			 **/
-			sesionService.insertarMaterialVisto(sesionAnterior.getId(),
-					sesionAnterior, material);
-		} catch (AppException ex) {
-			System.out.println("No se pudo insertar el material");
-			ex.printStackTrace();
+			 * Una vez mostrado el material por la regla o al azar se guarda en
+			 * la sesionMaterialAnterior
+			 ***/
+			try {
+
+				/**
+				 * Insertamos un material a la sesion
+				 **/
+				sesionService.insertarMaterialVisto(sesionAnterior.getId(),
+						sesionAnterior, material);
+			} catch (AppException ex) {
+				System.out.println("No se pudo insertar el material");
+				ex.printStackTrace();
+			}
+
 		}
 
 		return material;

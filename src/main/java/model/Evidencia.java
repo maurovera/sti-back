@@ -89,6 +89,21 @@ public class Evidencia extends BaseEntity implements Serializable {
 		this.setSecEje(e.getSecEje());
 		this.setSecMaterial(e.getSecMaterial());
 	}
+	
+	public Evidencia(Camino camino) {
+		super();
+		this.setConcepto(camino.getNombreConcepto());
+		this.setSecuenciaEjercicio(camino.getSecuenciaEjercicio());
+		this.setSecuenciaMaterial(camino.getSecuenciaMaterial());
+		this.setNivel(camino.getNivel());
+		this.setEstilo(camino.getEstilo());
+		this.setMaterialAMostrar(camino.getMaterialAMostrar());
+		this.setEjercicioValido(camino.getEjercicioValido());
+		this.setIdAsignatura(camino.getIdAsignatura());
+		this.setSecEje(camino.getSecEje());
+		this.setSecMaterial(camino.getSecMaterial());
+	}
+	
 
 	@Transient
 	private List<Long> secMaterial = new ArrayList<Long>();
@@ -190,9 +205,9 @@ public class Evidencia extends BaseEntity implements Serializable {
 		Double bajo = new Double("0.1");
 		Double medio = new Double("0.5");
 		Double alto = new Double("0.9");
-		if (nivel <= bajo) {
+		if (nivel < medio) {
 			this.setNivel("bajo");
-		} else if (nivel > bajo && nivel <= medio) {
+		} else if (nivel >= medio && nivel < alto) {
 			this.setNivel("medio");
 
 		} else {
@@ -278,6 +293,7 @@ public class Evidencia extends BaseEntity implements Serializable {
 		 * ultimo ejercicios ni tampoco se le quita el ultimo material porque es
 		 * para machear con el motor de reglas solo necesita
 		 * concepto,nivel,estilo,secMaterial,secEje
+		 * De la secuencia si se le quita el ultimop material y el ultimo ejercicio.
 		 ***/
 		//this.setSecuenciaEjercicio("vacio");
 		//this.setSecuenciaMaterial("vacio");
