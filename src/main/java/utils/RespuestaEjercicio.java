@@ -8,6 +8,8 @@ public class RespuestaEjercicio {
 	private Long idAlumno;
 	private Long idAsignatura;
 	private Long idTarea;
+	private Long idConcepto;
+	
 	public Long getIdEjercicio() {
 		return idEjercicio;
 	}
@@ -37,6 +39,13 @@ public class RespuestaEjercicio {
 	}
 	public void setIdTarea(Long idTarea) {
 		this.idTarea = idTarea;
+	}
+	
+	public Long getIdConcepto() {
+		return idConcepto;
+	}
+	public void setIdConcepto(Long idConcepto) {
+		this.idConcepto = idConcepto;
 	}
 	
 	

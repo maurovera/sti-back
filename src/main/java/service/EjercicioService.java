@@ -407,6 +407,8 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 		}
 	}
 
+	// #########################Criterio
+	// tutor#######################################
 	/**
 	 * Retorna el criterio de parada para el tutor o segundo examne donde se
 	 * controla si tiene conceptos o si ya no puede seguir porque se acabo sus
@@ -448,7 +450,8 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 			if (resuelto == null || resuelto == 0) {
 				System.out.println("entre en resueltos cero");
 				/** cargamos los conceptos en sesion */
-				Long conceptoUno = cargarConceptosEnSesion(sesion, lista, tarea, httpRequest);
+				Long conceptoUno = cargarConceptosEnSesion(sesion, lista,
+						tarea, httpRequest);
 				respuesta.setExitoso(false);
 				respuesta
 						.setMensaje("no  se intento ninguna vez,"
@@ -456,8 +459,8 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 				respuesta.setConcepto(conceptoUno);
 				/** si ya se cargaron todos entonces se controla **/
 				/** La lista de conceptos a evaluar que es lista */
-			
-			}else{ 
+
+			} else {
 				/** La lista de conceptos a evaluar que es lista */
 				respuesta = comprobarIntentosYMargen(listaSesionConcepto);
 			}
@@ -475,13 +478,18 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 					idCon, idAsignatura, httpRequest);
 			Boolean esEjercicio = camino.getEsEjercicio();
 			respuesta.setEsEjercicio(esEjercicio);
-			System.out.println("esEjercicio es: "+respuesta.getEsEjercicio());
+			System.out.println("esEjercicio es: " + respuesta.getEsEjercicio());
 		}
 
 		return respuesta;
 
 	}
 
+	/**
+	 * Comprueba si la lista sesionConcepto con sus conceptos ya no alcanzo el
+	 * limite de intentos por concepto o el margen correspondiente. Para
+	 * criterioTutor
+	 **/
 	private RespuestaCriterio comprobarIntentosYMargen(
 			List<SesionConcepto> lista) {
 		RespuestaCriterio respuesta = new RespuestaCriterio();
@@ -515,7 +523,7 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 			Tarea tarea, HttpServletRequest httpRequest) throws AppException {
 
 		List<SesionConcepto> sesionConcepto = sesion.getListaSesionConceptos();
-		
+
 		if (sesionConcepto == null || sesionConcepto.isEmpty()) {
 			System.out.println("cargamos todo los conceptos");
 			for (Concepto concepto : lista) {
@@ -556,7 +564,7 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 				}
 			}
 		}
-		/**Se retorna el id del primer concepto de la lista **/
+		/** Se retorna el id del primer concepto de la lista **/
 		return lista.get(0).getId();
 	}
 
@@ -641,6 +649,8 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 
 	}
 
+	// ############################FIN CRITERIOTUTOR############################
+	// ######################SIGUIENTE EJERCICIO TUTOR#######################
 	/*********************************************************************/
 	/***
 	 * siguiente ejercicio tutor
@@ -676,6 +686,141 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 
 	}
 
+	// ################FIN SIGUIENTE TUTOR##########################
+
+	// ###################RESPONDER TUTOR########################
+	/***
+	 * Responde el ejercicio y devuelve la respuesta correspondiente
+	 * 
+	 * @param idEjercicio
+	 *            : ejercicio que respondera
+	 * @param idTarea
+	 *            : tarea al cual corresponde
+	 * @param idAlumno
+	 *            : alumno de la tarea
+	 * @param idAsignatura
+	 *            : asignatura al cual corresponde
+	 * @param respuesta
+	 *            : respuesta del alumno al ejercicio
+	 * @return respuestaEjercicio
+	 **/
+	public Boolean responderEjercicioTutor(Long idTarea, Long idAlumno,
+			Long idAsignatura, String respuesta, Long idEjercicio,
+			Long idConcepto, HttpServletRequest httpRequest)
+			throws AppException {
+		try {
+			Boolean retorno = null;
+
+			retorno = admAlumno.responderEjercicioServicio(idEjercicio,
+					respuesta, idAlumno, idAsignatura, idTarea, httpRequest);
+
+			if (retorno == null) {
+				System.out
+						.println("respondio mal y no se que paso. error interno en responder ejercicio servicio");
+			} else {
+				/**
+				 * Primer tema es cambiar la cantidad de intentos en sesion
+				 * Queda pendiente estado terminado.
+				 */
+				Sesion sesionAnterior = sesionService.sesionAnterior(idAlumno,
+						idTarea);
+				Integer cantidad = sesionAnterior.getCantidadIntentos() + 1;
+				sesionAnterior.setCantidadIntentos(cantidad);
+				/**
+				 * Traemos la lista de conceptos y actualizamos la cantidad de
+				 * intentos, tambien traemos el camino.
+				 * 
+				 */
+				Camino camino = caminoService.caminoAnterior(idAlumno, idTarea,
+						idConcepto, idAsignatura, httpRequest);
+				/**deberia controlar resuelto*/
+				SesionConcepto sesionConcepto = sesionAnterior
+						.traerSesionConcepto(idConcepto);
+				/** Se aumenta la cantidad de intentos */
+				Integer intentosC = sesionConcepto.getIntentos() + 1;
+				sesionConcepto.setIntentos(intentosC);
+				/** vemos si alcanzo el margen */
+				Concepto c = conceptoService.obtener(idConcepto);
+				String nombreConcepto = c.getNombre();
+				Double valorNodo = adm.getValorNodoRedDouble(nombreConcepto,
+						idAsignatura, idAlumno);
+				/** Si alcanzo el margen se setea resuelto **/
+				if (valorNodo >= sesionConcepto.getMargen()) {
+
+					System.out.println("alcanzo el margen: " + c.getNombre()
+							+ " valor: " + valorNodo);
+					sesionConcepto.setResuelto(true);
+					camino.setParar(true);
+					
+
+				}
+				/**Se setea parar en camino si alcanzo su cantidad de intentos**/
+				if(intentosC >= sesionConcepto.getTotal())
+					camino.setParar(true);
+				
+				
+				/**Si respondio bien*/
+				if(retorno){
+					/**Actualizamos su nivelActual. mirar para no cagarla
+					 * Esta bien porque es un ejercicio que Acerto
+					 * en cambio si falla no se actualiza.*/
+					camino.setNivelInicial(valorNodo);
+					camino.setNivelEvidencia(valorNodo);
+					/**seteamos los campos de camino si acierta el ejercicio**/
+					String anterior = camino.getAnterior();
+					camino.setAnterior(camino.getActual());
+					camino.setActual("E");
+					camino.setEsEjercicio(true);
+					System.out.println("ejercicio: "+ idEjercicio.toString());
+					camino.setSecuenciaEjercicio(idEjercicio.toString());
+					
+					/**preguntamos si anterior es M, si es m se registra una evidencia**/
+					if(anterior == "M")
+						registrarEvidencia(camino, httpRequest);
+					
+				/**Si respondio mal**/		
+				}else{
+					camino.setAnterior(camino.getActual());
+					camino.setActual("M");
+					camino.setEsEjercicio(false);
+					camino.setSecuenciaEjercicio(idEjercicio.toString());
+				}
+				
+				/**Actualizamos su sesionConcepto
+				 * y camino*/
+				sesionConceptoService.modificar(sesionConcepto.getId(), sesionConcepto, httpRequest);
+				caminoService.modificar(camino.getId(), camino, httpRequest);
+				
+
+			}
+
+			return retorno;
+
+		} catch (Exception e) {
+			throw new AppException(500, e.getMessage());
+		}
+	}
+	
+	/**
+	 * Registra una evidencia y reinicia la evidencia por llamarlo asi
+	 * 
+	 * @Param evidencia
+	 * @Param http
+	 * **/
+	private void registrarEvidencia(Camino c, HttpServletRequest httpRequest)
+			throws AppException {
+
+		// e.formatearEvidencia();
+		c.cargarMaterialYEjercicio();
+		Evidencia e01 = new Evidencia(c);
+		e01.formatearEvidencia();
+		evidenciaService.insertar(e01, httpRequest);
+
+	}
+
+	// #####################FIN RESPONDER TUTOR##################
+
+	// ##########################SIGUIENTE MATERIAL##################
 	/***
 	 * siguiente material
 	 * 
@@ -708,6 +853,7 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 	 * Obtiene un material si existe una regla por la evidencia del alumno en
 	 * caso de no obtener un material por regla. obtiene un material aleatorio
 	 * basado en concepto, nivel y estilo que aun no se haya visto el alumno
+	 * Para siguienteMaterial
 	 * 
 	 * @Param evidencia e
 	 * @Param hd. Instancia del drools
@@ -804,7 +950,7 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 	 * tipo aqui hay que ver que onda si es material o ejercicio el criterio de
 	 * parada es ver si lleno el cupo nada mas pero aqui se tiene que ver - si
 	 * es material o no - manejar las evidencias - ver en que momento guardar la
-	 * evidencia y recuperarlo.
+	 * evidencia y recuperarlo. para siguienteMaterial
 	 ***/
 	public void materialOEjercicio() {
 
@@ -813,5 +959,7 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 		// HerramientasDrools hd = drlService.iniciarDrools(archivo);
 
 	}
+
+	// ##############################FIN SIGUIENTE MATERIAL#############
 
 }

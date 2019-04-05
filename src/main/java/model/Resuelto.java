@@ -38,6 +38,8 @@ public class Resuelto extends BaseEntity implements Serializable {
 	private String respuesta;
 	
 	private Boolean esCorrecto;
+	
+	private Long idConcepto;
 
 	public Long getId() {
 		return id;
@@ -109,6 +111,14 @@ public class Resuelto extends BaseEntity implements Serializable {
 
 	public void setEsCorrecto(Boolean esCorrecto) {
 		this.esCorrecto = esCorrecto;
+	}
+
+	public Long getIdConcepto() {
+		return idConcepto;
+	}
+
+	public void setIdConcepto(Long idConcepto) {
+		this.idConcepto = idConcepto;
 	}
 	
 	

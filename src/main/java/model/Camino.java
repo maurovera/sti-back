@@ -182,7 +182,7 @@ public class Camino extends BaseEntity implements Serializable {
 	}
 
 	public void setSecuenciaEjercicio(String secuenciaEjercicio) {
-		this.secuenciaEjercicio += secuenciaMaterial + "-";
+		this.secuenciaEjercicio += secuenciaEjercicio + "-";
 	}
 
 	public String getEjercicioValido() {

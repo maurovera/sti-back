@@ -216,6 +216,16 @@ public class Sesion extends BaseEntity implements Serializable {
 	public void setListaSesionConceptos(List<SesionConcepto> listaSesionConceptos) {
 		this.listaSesionConceptos = listaSesionConceptos;
 	}
+	
+	
+	public SesionConcepto traerSesionConcepto(Long idConcepto){
+		SesionConcepto sc = new SesionConcepto();
+		for (SesionConcepto sesionConcepto : getListaSesionConceptos()) 
+			if(sesionConcepto.getIdConcepto()== idConcepto)
+				sc = sesionConcepto;
+		
+		return sc;
+	}
 
 	@Override
 	public int hashCode() {

@@ -135,33 +135,7 @@ public class EjercicioResource extends
 
 	}
 
-	/** Recurso para responder el ejercicio **/
-	/*
-	 * @GET
-	 * 
-	 * @Path("/responderEjercicio")
-	 * 
-	 * @Produces(MediaType.APPLICATION_JSON) public Boolean responderEjercicio(
-	 * 
-	 * @QueryParam("idEjercicio") @DefaultValue("0") Long idEjercicio,
-	 * 
-	 * @QueryParam("respuesta") @DefaultValue("r1") String respuesta,
-	 * 
-	 * @QueryParam("idAlumno") @DefaultValue("1") Long idAlumno,
-	 * 
-	 * @QueryParam("idAsignatura") @DefaultValue("1") Long idAsignatura,
-	 * 
-	 * @QueryParam("idTarea") @DefaultValue("1") Long idTarea) {
-	 * 
-	 * Boolean retorno = null; try { retorno =
-	 * getService().responderEjercicio(idTarea, idAlumno, idAsignatura,
-	 * respuesta, idEjercicio,httpRequest); } catch (Exception e) { throw new
-	 * WebApplicationException(e.getMessage(),
-	 * Response.Status.INTERNAL_SERVER_ERROR); } if (retorno == null) { throw
-	 * new WebApplicationException(Response.Status.NOT_FOUND); } return retorno;
-	 * 
-	 * }
-	 */
+
 
 	// ####seṕaracion de siguiente y responder
 	/**
@@ -267,6 +241,8 @@ public class EjercicioResource extends
 
 	}
 
+	
+	// ####seṕaracion de siguiente y responder para el tutor
 	/**
 	 * Criterio de parada para tutor o segundo examen o prueba aqui se revisa si
 	 * tiene conceptos disponibles, y si su cantidad de intentos no llego a su
@@ -289,5 +265,102 @@ public class EjercicioResource extends
 		return resultado;
 
 	}
+	
+	
+	
+	/**
+	 * Recurso para traer el siguiente ejercicio del tutor
+	 * 
+	 **/
+	@GET
+	@Path("/siguienteEjercicio/{idAsignatura}/{idTarea}/{idAlumno}/{idConcepto}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Ejercicio siguienteEjercicioSegundoTutor(
+			@PathParam("idAsignatura") Long idAsignatura,
+			@PathParam("idTarea") Long idTarea,
+			@PathParam("idAlumno") Long idAlumno,
+			@PathParam("idConcepto") Long idConcepto) {
+
+		Ejercicio dto = null;
+		try {
+			dto = getService().siguienteEjercicioTutor(idConcepto, idAsignatura, idAlumno, idTarea);
+			System.out.println("el siguiente ejercicio es: " + dto.toString());
+		} catch (Exception e) {
+			throw new WebApplicationException(e.getMessage(),
+					Response.Status.INTERNAL_SERVER_ERROR);
+		}
+		if (dto == null) {
+			throw new WebApplicationException(Response.Status.NOT_FOUND);
+		}
+		return dto;
+
+	}
+	
+	
+	/** Recurso para responder el ejercicio del tutor **/
+	@POST
+	@Path("/responderEjercicioTutor")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Boolean responderEjercicioTutor(
+			RespuestaEjercicio respuestaEjercicio) {
+
+		Boolean retorno = null;
+		try {
+			retorno = getService().responderEjercicioTutor(
+					respuestaEjercicio.getIdTarea(),
+					respuestaEjercicio.getIdAlumno(),
+					respuestaEjercicio.getIdAsignatura(),
+					respuestaEjercicio.getRespuesta(),
+					respuestaEjercicio.getIdEjercicio(),
+					respuestaEjercicio.getIdConcepto(), httpRequest);
+			
+			
+			/**El algoritmo lo hacemos dentro de service de ejercicio
+			 * en cuanto a sesionIntentos, sesionConcepto y camino*/
+			
+			
+			
+			
+			/** Aqui guardamos el log **/
+			Log log = new Log();
+			log.setAlumno(respuestaEjercicio.getIdAlumno());
+			log.setAsignatura(respuestaEjercicio.getIdAsignatura());
+			log.setTarea(respuestaEjercicio.getIdTarea());
+			log.addSecuencia("Respuesta de 1er test.\n Alumno numero: ");
+			log.addSecuencia(respuestaEjercicio.getIdAlumno().toString());
+			log.addSecuencia("\nSegundo test con el concepto: ");
+			log.addSecuencia(respuestaEjercicio.getIdConcepto().toString());
+			log.addSecuencia("\n");
+			log.addSecuencia(respuestaEjercicio.getIdAsignatura().toString());
+			log.addSecuencia(respuestaEjercicio.getIdTarea().toString());
+			log.addSecuencia(respuestaEjercicio.getIdEjercicio().toString());
+			log.addSecuencia(respuestaEjercicio.getRespuesta());
+			log.addSecuencia(retorno.toString());
+			log.addSecuencia("\n");
+			logService.insertar(log, httpRequest);
+			
+			/**Una vez que responde el ejercicio se guarda el ejercicio resuelto**/
+			Resuelto resuelto = new Resuelto();
+			resuelto.setEsMaterial(false);
+			resuelto.setEsCorrecto(retorno);
+			resuelto.setIdAlumno(respuestaEjercicio.getIdAlumno());
+			resuelto.setIdAsignatura(respuestaEjercicio.getIdAsignatura());
+			resuelto.setIdEjercicio(respuestaEjercicio.getIdEjercicio());
+			resuelto.setIdTarea(respuestaEjercicio.getIdTarea());
+			resuelto.setRespuesta(respuestaEjercicio.getRespuesta());
+			resuelto.setIdConcepto(respuestaEjercicio.getIdConcepto());
+			resueltoService.insertar(resuelto, httpRequest);
+
+		} catch (Exception e) {
+			throw new WebApplicationException(e.getMessage(),
+					Response.Status.INTERNAL_SERVER_ERROR);
+		}
+		if (retorno == null) {
+			throw new WebApplicationException(Response.Status.NOT_FOUND);
+		}
+		return retorno;
+
+	}
+
 
 }

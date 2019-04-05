@@ -302,10 +302,7 @@ public class AdministracionAlumno {
 		Boolean retorno = false;
 
 		Network net1 = new Network();
-		// Long idAlumno = alumno.getId();
-		// Long idEjercicio = ejercicio.getId();
-		// Long idTarea = tarea.getId();
-
+	
 		String nombreRed = "red_alumno_" + idAlumno + "_asignatura_"
 				+ idAsignatura + ".xdsl";
 		net1.readFile(dir + nombreRed);
