@@ -16,6 +16,7 @@ import javax.ws.rs.core.Response;
 
 import model.Ejercicio;
 import model.Log;
+import model.Material;
 import model.Resuelto;
 import service.EjercicioService;
 import service.LogService;
@@ -242,7 +243,7 @@ public class EjercicioResource extends
 	}
 
 	
-	// ####seṕaracion de siguiente y responder para el tutor
+	// ####separacion de siguiente y responder para el tutor
 	/**
 	 * Criterio de parada para tutor o segundo examen o prueba aqui se revisa si
 	 * tiene conceptos disponibles, y si su cantidad de intentos no llego a su
@@ -361,6 +362,88 @@ public class EjercicioResource extends
 		return retorno;
 
 	}
+	
+	
+	
+	/**
+	 * Recurso para traer el siguiente material
+	 * 
+	 **/
+	@GET
+	@Path("/siguienteMaterial/{idAsignatura}/{idTarea}/{idAlumno}/{idConcepto}/{idArchivo}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Material siguienteMaterial(
+			@PathParam("idAsignatura") Long idAsignatura,
+			@PathParam("idTarea") Long idTarea,
+			@PathParam("idAlumno") Long idAlumno,
+			@PathParam("idConcepto") Long idConcepto,
+			@PathParam("idArchivo") Long idArchivo) {
+
+		Material dto = null;
+		try {
+			dto = getService().siguienteMaterial(idArchivo, idAlumno, idAsignatura, idConcepto, idTarea, httpRequest);
+			System.out.println("el siguiente Material es: " + dto.toString());
+		} catch (Exception e) {
+			throw new WebApplicationException(e.getMessage(),
+					Response.Status.INTERNAL_SERVER_ERROR);
+		}
+		if (dto == null) {
+			throw new WebApplicationException(Response.Status.NOT_FOUND);
+		}
+		return dto;
+
+	}
+	
+	
+	/** Recurso para responder el material visto.
+	 * para guardar el camino correspondiente **/
+	@POST
+	@Path("/responderMaterial")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Boolean responderMaterial(
+			RespuestaEjercicio respuestaEjercicio) {
+
+		Boolean retorno = null;
+		try {
+			retorno = getService().responderMaterial(
+					respuestaEjercicio.getIdTarea(),
+					respuestaEjercicio.getIdAlumno(),
+					respuestaEjercicio.getIdAsignatura(),
+					respuestaEjercicio.getIdConcepto(),
+					respuestaEjercicio.getIdMaterial(), httpRequest);
+			
+			/** Aqui guardamos el log **/
+			Log log = new Log();
+			log.setAlumno(respuestaEjercicio.getIdAlumno());
+			log.setAsignatura(respuestaEjercicio.getIdAsignatura());
+			log.setTarea(respuestaEjercicio.getIdTarea());
+			
+			log.addSecuencia("Material visto: ");
+			log.addSecuencia(respuestaEjercicio.getIdMaterial().toString());
+			log.addSecuencia("\n");
+			logService.insertar(log, httpRequest);
+			
+			/**Una vez que responde el ejercicio se guarda el ejercicio resuelto**/
+			Resuelto resuelto = new Resuelto();
+			resuelto.setEsMaterial(true);
+			resuelto.setEsCorrecto(false);
+			resuelto.setIdAlumno(respuestaEjercicio.getIdAlumno());
+			resuelto.setIdAsignatura(respuestaEjercicio.getIdAsignatura());
+			resuelto.setIdTarea(respuestaEjercicio.getIdTarea());
+			resuelto.setIdConcepto(respuestaEjercicio.getIdConcepto());
+			resueltoService.insertar(resuelto, httpRequest);
+
+		} catch (Exception e) {
+			throw new WebApplicationException(e.getMessage(),
+					Response.Status.INTERNAL_SERVER_ERROR);
+		}
+		if (retorno == null) {
+			throw new WebApplicationException(Response.Status.NOT_FOUND);
+		}
+		return retorno;
+
+	}
+	
 
 
 }

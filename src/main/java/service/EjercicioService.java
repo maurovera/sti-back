@@ -1,6 +1,8 @@
 package service;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -462,6 +464,7 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 
 			} else {
 				/** La lista de conceptos a evaluar que es lista */
+
 				respuesta = comprobarIntentosYMargen(listaSesionConcepto);
 			}
 
@@ -492,6 +495,23 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 	 **/
 	private RespuestaCriterio comprobarIntentosYMargen(
 			List<SesionConcepto> lista) {
+
+		/**
+		 * Ordenamos la lista a lo salvaje Siempre se ordena de menor a mayor
+		 * con el id del objeto
+		 **/
+		Collections.sort(lista, new Comparator() {
+			@Override
+			public int compare(Object o1, Object o2) {
+				// Aqui esta el truco, ahora comparamos p2 con p1 y no al reves
+				// como antes
+				SesionConcepto p1 = (SesionConcepto) o1;
+				SesionConcepto p2 = (SesionConcepto) o2;
+				return new Integer(p1.getId().intValue())
+						.compareTo(new Integer(p2.getId().intValue()));
+			}
+		});
+
 		RespuestaCriterio respuesta = new RespuestaCriterio();
 		Boolean parar = true;
 		for (SesionConcepto seCo : lista) {
@@ -499,8 +519,11 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 			if (!seCo.getResuelto() && seCo.getIntentos() < seCo.getTotal()) {
 				parar = false;
 				respuesta.setConcepto(seCo.getIdConcepto());
-				break;
+
 			}
+			/** si ya encontro el primero saltar del for **/
+			if (!parar)
+				break;
 		}
 
 		respuesta.setExitoso(parar);
@@ -733,7 +756,7 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 				 */
 				Camino camino = caminoService.caminoAnterior(idAlumno, idTarea,
 						idConcepto, idAsignatura, httpRequest);
-				/**deberia controlar resuelto*/
+				/** deberia controlar resuelto */
 				SesionConcepto sesionConcepto = sesionAnterior
 						.traerSesionConcepto(idConcepto);
 				/** Se aumenta la cantidad de intentos */
@@ -751,46 +774,60 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 							+ " valor: " + valorNodo);
 					sesionConcepto.setResuelto(true);
 					camino.setParar(true);
-					
+					System.out.println("este es tu ultimo ejercicio. Alcanzo el margen requerido: "+ nombreConcepto);
 
 				}
-				/**Se setea parar en camino si alcanzo su cantidad de intentos**/
-				if(intentosC >= sesionConcepto.getTotal())
+				/** Se setea parar en camino si alcanzo su cantidad de intentos **/
+				if (intentosC >= sesionConcepto.getTotal()){
 					camino.setParar(true);
-				
-				
-				/**Si respondio bien*/
-				if(retorno){
-					/**Actualizamos su nivelActual. mirar para no cagarla
-					 * Esta bien porque es un ejercicio que Acerto
-					 * en cambio si falla no se actualiza.*/
+					System.out.println("este es tu ultimo ejercicio. se acabaron las oportunidades"
+							+ "para este concepto: "+ nombreConcepto);
+				}
+					
+
+				/** Si respondio bien */
+				if (retorno) {
+					/**
+					 * Actualizamos su nivelActual. mirar para no cagarla Esta
+					 * bien porque es un ejercicio que Acerto en cambio si falla
+					 * no se actualiza.
+					 */
 					camino.setNivelInicial(valorNodo);
 					camino.setNivelEvidencia(valorNodo);
-					/**seteamos los campos de camino si acierta el ejercicio**/
+					/** seteamos los campos de camino si acierta el ejercicio **/
 					String anterior = camino.getAnterior();
+					
 					camino.setAnterior(camino.getActual());
 					camino.setActual("E");
 					camino.setEsEjercicio(true);
-					System.out.println("ejercicio: "+ idEjercicio.toString());
+					System.out.println("ejercicio: " + idEjercicio.toString());
 					camino.setSecuenciaEjercicio(idEjercicio.toString());
-					
-					/**preguntamos si anterior es M, si es m se registra una evidencia**/
-					if(anterior == "M")
+
+					/**
+					 * preguntamos si anterior es M, si es m se registra una
+					 * evidencia
+					 **/
+					String mate = "M";
+					if (anterior.equals(mate) ){
+						System.out.println("registramos evidencia");
 						registrarEvidencia(camino, httpRequest);
-					
-				/**Si respondio mal**/		
-				}else{
+					}
+						
+
+					/** Si respondio mal **/
+				} else {
 					camino.setAnterior(camino.getActual());
 					camino.setActual("M");
 					camino.setEsEjercicio(false);
 					camino.setSecuenciaEjercicio(idEjercicio.toString());
 				}
-				
-				/**Actualizamos su sesionConcepto
-				 * y camino*/
-				sesionConceptoService.modificar(sesionConcepto.getId(), sesionConcepto, httpRequest);
+
+				/**
+				 * Actualizamos su sesionConcepto y camino
+				 */
+				sesionConceptoService.modificar(sesionConcepto.getId(),
+						sesionConcepto, httpRequest);
 				caminoService.modificar(camino.getId(), camino, httpRequest);
-				
 
 			}
 
@@ -800,7 +837,7 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 			throw new AppException(500, e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Registra una evidencia y reinicia la evidencia por llamarlo asi
 	 * 
@@ -810,7 +847,8 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 	private void registrarEvidencia(Camino c, HttpServletRequest httpRequest)
 			throws AppException {
 
-		// e.formatearEvidencia();
+		/**Entre en registro evidencia*/
+		System.out.println("entre en registrarEvidencia a ver si guarda");
 		c.cargarMaterialYEjercicio();
 		Evidencia e01 = new Evidencia(c);
 		e01.formatearEvidencia();
@@ -839,6 +877,7 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 		Camino camino = caminoService.caminoAnterior(idAlu, idTarea,
 				idConcepto, idAsig, httpRequest);
 
+		// material a devolver
 		Material material = new Material();
 
 		material = aplicarReglaMaterial(camino, hd, idTarea, idAlu);
@@ -923,7 +962,7 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 			 * sesion anterior
 			 ***/
 		} else {
-			// material = materialService.obtener(new Long(1));
+
 			List<Material> materiales = sesionAnterior.getListaMaterial();
 			/**
 			 * Atencion. Aqui suele fallar. y trae material nulo. Cuando trae
@@ -961,5 +1000,68 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 	}
 
 	// ##############################FIN SIGUIENTE MATERIAL#############
+
+	// ###################RESPONDER MATERIAL########################
+	/***
+	 * Responde el Material visto
+	 **/
+	public Boolean responderMaterial(Long idTarea, Long idAlumno, Long idAsignatura,
+			Long idConcepto, Long idMaterial, HttpServletRequest httpRequest)
+			throws AppException {
+		try {
+			Boolean retorno = true;
+
+			/** Traemos la sesion */
+			Sesion sesionAnterior = sesionService.sesionAnterior(idAlumno,
+					idTarea);
+			/** Traemos el material **/
+			Material material = materialService.obtener(idMaterial);
+
+			/** Solo si el material es no nulo se inserta **/
+			if (material != null) {
+				/**
+				 * Una vez mostrado el material por la regla o al azar se guarda
+				 * en la sesionMaterialAnterior
+				 */
+				try {
+
+					/** Insertamos un material a la sesion */
+					sesionService.insertarMaterialVisto(sesionAnterior.getId(),
+							sesionAnterior, material);
+				} catch (AppException ex) {
+					System.out.println("No se pudo insertar el material");
+					ex.printStackTrace();
+				}
+
+			}
+			/**
+			 * Traemos el camino y actualizamos
+			 */
+			Camino camino = caminoService.caminoAnterior(idAlumno, idTarea,
+					idConcepto, idAsignatura, httpRequest);
+			/** trae el concepto para quitar su nombre y su nivel */
+			Concepto c = conceptoService.obtener(idConcepto);
+			String nombreConcepto = c.getNombre();
+			Double valorNodo = adm.getValorNodoRedDouble(nombreConcepto,
+					idAsignatura, idAlumno);
+
+			/** Se actualiza su nivel */
+			camino.setNivelInicial(valorNodo);
+			camino.setNivelEvidencia(valorNodo);
+			camino.setAnterior(camino.getActual());
+			camino.setActual("E");
+			camino.setEsEjercicio(true);
+			camino.setSecuenciaMaterial(idMaterial.toString());
+
+			caminoService.modificar(camino.getId(), camino, httpRequest);
+
+			return retorno;
+
+		} catch (Exception e) {
+			throw new AppException(500, e.getMessage());
+		}
+	}
+
+	// #####################FIN RESPONDER MATERIAL##################
 
 }

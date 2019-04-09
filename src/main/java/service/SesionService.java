@@ -54,6 +54,7 @@ public class SesionService extends BaseServiceImpl<Sesion, SesionDAO> {
 			sesion.setEntrada(new Date(System.currentTimeMillis()));
 			sesion.setEstadoTerminado(false);
 			sesion.setCantidadEjerciciosResueltos(0);
+			sesion.setCantidadIntentos(0);
 			Alumno alumno = alumnoService.obtener(idAlumno);
 			Tarea tarea = tareaService.obtener(idTarea);
 			sesion.setAlumno(alumno);

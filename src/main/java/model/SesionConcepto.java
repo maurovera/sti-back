@@ -14,15 +14,15 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.DynamicInsert;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-
 import base.BaseEntity;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "sesion_concepto")
 @DynamicInsert
-public class SesionConcepto extends BaseEntity implements Serializable{
-	
+public class SesionConcepto extends BaseEntity implements Serializable {
+
 	/**
 	 * 
 	 */
@@ -32,18 +32,18 @@ public class SesionConcepto extends BaseEntity implements Serializable{
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id_sesion_concepto")
 	private Long id;
-	
+
 	@Column(name = "concepto")
 	private Long idConcepto;
-	
+
 	private Integer intentos;
-	
+
 	private Boolean resuelto;
-	
+
 	private Double margen;
-	
+
 	private Integer Total;
-	
+
 	@JoinColumn(name = "sesion", referencedColumnName = "id_sesion")
 	@ManyToOne
 	private Sesion sesion;
@@ -55,8 +55,6 @@ public class SesionConcepto extends BaseEntity implements Serializable{
 	public void setId(Long id) {
 		this.id = id;
 	}
-
-
 
 	public Long getIdConcepto() {
 		return idConcepto;
@@ -106,21 +104,18 @@ public class SesionConcepto extends BaseEntity implements Serializable{
 	public void setSesion(Sesion sesion) {
 		this.sesion = sesion;
 	}
-	
-	/**retorna 0 si no existe osino el valor del concepto*/
-	public Long existeConcepto(List<Concepto> lista){
+
+	/** retorna 0 si no existe osino el valor del concepto */
+	public Long existeConcepto(List<Concepto> lista) {
 		Long valorActual = this.getIdConcepto();
 		Long retorno = new Long(0);
 		for (Concepto concepto : lista) {
-			if(concepto.getId() == valorActual)
+			if (concepto.getId() == valorActual)
 				retorno = valorActual;
 		}
 		return retorno;
 	}
-	
-	
-	
-	
+
 	
 
 }
