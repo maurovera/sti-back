@@ -39,7 +39,7 @@ public class EjercicioResource extends
 
 	@Inject
 	private LogService logService;
-	
+
 	@Inject
 	private ResueltoService resueltoService;
 
@@ -110,9 +110,9 @@ public class EjercicioResource extends
 		return getService().listarEjercicio();
 	}
 
-	/** Recurso para traer el siguiente ejercicio **/
+	/** Recurso para traer el siguiente ejercicio borrar **/
 	@GET
-	@Path("/siguienteEjercicio")
+	@Path("/siguienteEjercicioMalo")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Ejercicio siguienteEjercicio(
 			@QueryParam("idTarea") @DefaultValue("1") Long idTarea,
@@ -136,20 +136,33 @@ public class EjercicioResource extends
 
 	}
 
-
-
 	// ####seṕaracion de siguiente y responder
 	/**
 	 * Recurso para traer el siguiente ejercicio. Tiene que ser query para ser
 	 * del front
 	 **/
+
+	/*
+	 * @GET
+	 * 
+	 * @Path("/siguiente/{idAsignatura}/{idTarea}/{idAlumno}")
+	 * 
+	 * @Produces(MediaType.APPLICATION_JSON) public Ejercicio
+	 * siguienteEjercicioPrimerTest(
+	 * 
+	 * @PathParam("idAsignatura") Long idAsignatura,
+	 * 
+	 * @PathParam("idTarea") Long idTarea,
+	 * 
+	 * @PathParam("idAlumno") Long idAlumno) {
+	 */
 	@GET
-	@Path("/siguiente/{idAsignatura}/{idTarea}/{idAlumno}")
+	@Path("/siguiente")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Ejercicio siguienteEjercicioPrimerTest(
-			@PathParam("idAsignatura") Long idAsignatura,
-			@PathParam("idTarea") Long idTarea,
-			@PathParam("idAlumno") Long idAlumno) {
+			@QueryParam("idAsignatura") Long idAsignatura,
+			@QueryParam("idTarea") Long idTarea,
+			@QueryParam("idAlumno") Long idAlumno) {
 
 		Ejercicio dto = null;
 		try {
@@ -167,15 +180,16 @@ public class EjercicioResource extends
 
 	}
 
-	/** Recurso para responder el ejercicio del primer test **/
+	/** Recurso para responder el ejercicio del primer test 
+	 * @throws AppException **/
 	@POST
 	@Path("/responder")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Boolean responderEjercicioPrimerTest(
-			RespuestaEjercicio respuestaEjercicio) {
+			RespuestaEjercicio respuestaEjercicio) throws AppException {
 
 		Boolean retorno = null;
-		try {
+		
 			retorno = getService().responderEjercicio(
 					respuestaEjercicio.getIdTarea(),
 					respuestaEjercicio.getIdAlumno(),
@@ -198,8 +212,10 @@ public class EjercicioResource extends
 			log.addSecuencia(retorno.toString());
 			log.addSecuencia("\n");
 			logService.insertar(log, httpRequest);
-			
-			/**Una vez que responde el ejercicio se guarda el ejercicio resuelto**/
+
+			/**
+			 * Una vez que responde el ejercicio se guarda el ejercicio resuelto
+			 **/
 			Resuelto resuelto = new Resuelto();
 			resuelto.setEsMaterial(false);
 			resuelto.setEsCorrecto(retorno);
@@ -210,81 +226,86 @@ public class EjercicioResource extends
 			resuelto.setRespuesta(respuestaEjercicio.getRespuesta());
 			resueltoService.insertar(resuelto, httpRequest);
 
-		} catch (Exception e) {
-			throw new WebApplicationException(e.getMessage(),
-					Response.Status.INTERNAL_SERVER_ERROR);
-		}
-		if (retorno == null) {
-			throw new WebApplicationException(Response.Status.NOT_FOUND);
-		}
+		
+		
 		return retorno;
 
 	}
 
+	// @GET
+	// @Path("/criterio/{idTarea}/{idAlumno}")
+	// @Produces(MediaType.APPLICATION_JSON)
+	// public Boolean criterioParada(@PathParam("idTarea") Long idTarea,
+	// @PathParam("idAlumno") Long idAlumno) {
 	@GET
-	@Path("/criterio/{idTarea}/{idAlumno}")
+	@Path("/criterio")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Boolean criterioParada(@PathParam("idTarea") Long idTarea,
-			@PathParam("idAlumno") Long idAlumno) {
+	public Boolean criterioParada(@QueryParam("idAlumno") Long idAlumno,
+			@QueryParam("idTarea") Long idTarea) throws AppException {
 
 		Boolean criterio = false;
-		try {
+		
 			criterio = getService().criterio(idTarea, idAlumno, httpRequest);
 			if (criterio)
 				System.out.println("parar el tema");
 			else
 				System.out.println("continuar con otro ejercicios");
-		} catch (Exception e) {
-			throw new WebApplicationException(e.getMessage(),
-					Response.Status.INTERNAL_SERVER_ERROR);
-		}
+		
 		return criterio;
 
 	}
 
-	
 	// ####separacion de siguiente y responder para el tutor
 	/**
 	 * Criterio de parada para tutor o segundo examen o prueba aqui se revisa si
 	 * tiene conceptos disponibles, y si su cantidad de intentos no llego a su
 	 * fin
-	 * @throws AppException 
+	 * 
+	 * @throws AppException
 	 **/
-	@GET
+	/*@GET
 	@Path("/criterioTutor/{idAsignatura}/{idTarea}/{idAlumno}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public RespuestaCriterio criterioParadaTutor(
 			@PathParam("idAsignatura") Long idAsignatura,
 			@PathParam("idTarea") Long idTarea,
-			@PathParam("idAlumno") Long idAlumno) throws AppException {
+			@PathParam("idAlumno") Long idAlumno) throws AppException {*/
 
+	@GET
+	@Path("/criterioTutor")
+	@Produces(MediaType.APPLICATION_JSON)
+	public RespuestaCriterio criterioParadaTutor(
+			@QueryParam("idAsignatura") Long idAsignatura,
+			@QueryParam("idTarea") Long idTarea,
+			@QueryParam("idAlumno") Long idAlumno) throws AppException {
 		RespuestaCriterio resultado = new RespuestaCriterio();
-
+		
+		System.out.println("estoy en criterioTutor Resource");
 		resultado = getService().criterioTutor(idAsignatura, idTarea, idAlumno,
 				httpRequest);
-
+		System.out.println("fin de criterio tutor");
 		return resultado;
 
 	}
-	
-	
-	
+
 	/**
 	 * Recurso para traer el siguiente ejercicio del tutor
-	 * 
+	 * se cambia pathParam por queryParam y se borra los datos del link
 	 **/
 	@GET
-	@Path("/siguienteEjercicio/{idAsignatura}/{idTarea}/{idAlumno}/{idConcepto}")
+	@Path("/siguienteEjercicio")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Ejercicio siguienteEjercicioSegundoTutor(
-			@PathParam("idAsignatura") Long idAsignatura,
-			@PathParam("idTarea") Long idTarea,
-			@PathParam("idAlumno") Long idAlumno,
-			@PathParam("idConcepto") Long idConcepto) {
+			@QueryParam("idAsignatura") Long idAsignatura,
+			@QueryParam("idTarea") Long idTarea,
+			@QueryParam("idAlumno") Long idAlumno,
+			@QueryParam("idConcepto") Long idConcepto) {
 
+		System.out.println("estoy en siguientEjercicio resource");
 		Ejercicio dto = null;
 		try {
-			dto = getService().siguienteEjercicioTutor(idConcepto, idAsignatura, idAlumno, idTarea);
+			dto = getService().siguienteEjercicioTutor(idConcepto,
+					idAsignatura, idAlumno, idTarea);
 			System.out.println("el siguiente ejercicio es: " + dto.toString());
 		} catch (Exception e) {
 			throw new WebApplicationException(e.getMessage(),
@@ -293,20 +314,22 @@ public class EjercicioResource extends
 		if (dto == null) {
 			throw new WebApplicationException(Response.Status.NOT_FOUND);
 		}
+		
+		System.out.println("fin de ejercicio resource");
 		return dto;
 
 	}
-	
-	
-	/** Recurso para responder el ejercicio del tutor **/
+
+	/** Recurso para responder el ejercicio del tutor 
+	 * @throws AppException **/
 	@POST
 	@Path("/responderEjercicioTutor")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Boolean responderEjercicioTutor(
-			RespuestaEjercicio respuestaEjercicio) {
+	public Boolean responderEjercicioTutor(RespuestaEjercicio respuestaEjercicio) throws AppException {
 
+		System.out.println("estoy en responderEjercicioTutor resource");
 		Boolean retorno = null;
-		try {
+			
 			retorno = getService().responderEjercicioTutor(
 					respuestaEjercicio.getIdTarea(),
 					respuestaEjercicio.getIdAlumno(),
@@ -314,14 +337,12 @@ public class EjercicioResource extends
 					respuestaEjercicio.getRespuesta(),
 					respuestaEjercicio.getIdEjercicio(),
 					respuestaEjercicio.getIdConcepto(), httpRequest);
-			
-			
-			/**El algoritmo lo hacemos dentro de service de ejercicio
-			 * en cuanto a sesionIntentos, sesionConcepto y camino*/
-			
-			
-			
-			
+
+			/**
+			 * El algoritmo lo hacemos dentro de service de ejercicio en cuanto
+			 * a sesionIntentos, sesionConcepto y camino
+			 */
+
 			/** Aqui guardamos el log **/
 			Log log = new Log();
 			log.setAlumno(respuestaEjercicio.getIdAlumno());
@@ -339,8 +360,10 @@ public class EjercicioResource extends
 			log.addSecuencia(retorno.toString());
 			log.addSecuencia("\n");
 			logService.insertar(log, httpRequest);
-			
-			/**Una vez que responde el ejercicio se guarda el ejercicio resuelto**/
+
+			/**
+			 * Una vez que responde el ejercicio se guarda el ejercicio resuelto
+			 **/
 			Resuelto resuelto = new Resuelto();
 			resuelto.setEsMaterial(false);
 			resuelto.setEsCorrecto(retorno);
@@ -352,78 +375,83 @@ public class EjercicioResource extends
 			resuelto.setIdConcepto(respuestaEjercicio.getIdConcepto());
 			resueltoService.insertar(resuelto, httpRequest);
 
-		} catch (Exception e) {
-			throw new WebApplicationException(e.getMessage(),
-					Response.Status.INTERNAL_SERVER_ERROR);
-		}
-		if (retorno == null) {
-			throw new WebApplicationException(Response.Status.NOT_FOUND);
-		}
-		return retorno;
+		
 
+			System.out.println("fin de responder ejercicio tutor resource");
+		return retorno;
 	}
-	
-	
-	
+
 	/**
 	 * Recurso para traer el siguiente material
 	 * 
+	 * @throws AppException
+	 * 
 	 **/
 	@GET
-	@Path("/siguienteMaterial/{idAsignatura}/{idTarea}/{idAlumno}/{idConcepto}/{idArchivo}")
+	@Path("/siguienteMaterial")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Material siguienteMaterial(
-			@PathParam("idAsignatura") Long idAsignatura,
-			@PathParam("idTarea") Long idTarea,
-			@PathParam("idAlumno") Long idAlumno,
-			@PathParam("idConcepto") Long idConcepto,
-			@PathParam("idArchivo") Long idArchivo) {
+			@QueryParam("idAsignatura") Long idAsignatura,
+			@QueryParam("idTarea") Long idTarea,
+			@QueryParam("idAlumno") Long idAlumno,
+			@QueryParam("idConcepto") Long idConcepto,
+			@QueryParam("idArchivo") Long idArchivo) throws AppException {
 
 		Material dto = null;
-		try {
-			dto = getService().siguienteMaterial(idArchivo, idAlumno, idAsignatura, idConcepto, idTarea, httpRequest);
+			System.out.println("estos son los datos que recibe: ");
+			System.out.println("idAsignatura: " + idAsignatura);
+			System.out.println("idTarea: " + idTarea);
+			System.out.println("idAlumno: " + idAlumno);
+			System.out.println("idConcepto: " + idConcepto);
+			System.out.println("idArchivo: " + idArchivo);
+			dto = getService().siguienteMaterial(idArchivo, idAlumno,
+					idAsignatura, idConcepto, idTarea, httpRequest);
 			System.out.println("el siguiente Material es: " + dto.toString());
-		} catch (Exception e) {
-			throw new WebApplicationException(e.getMessage(),
-					Response.Status.INTERNAL_SERVER_ERROR);
-		}
-		if (dto == null) {
-			throw new WebApplicationException(Response.Status.NOT_FOUND);
-		}
+	
 		return dto;
 
 	}
-	
-	
-	/** Recurso para responder el material visto.
-	 * para guardar el camino correspondiente **/
+
+	/**
+	 * Recurso para responder el material visto. para guardar el camino
+	 * correspondiente
+	 * @throws AppException 
+	 **/
 	@POST
 	@Path("/responderMaterial")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Boolean responderMaterial(
-			RespuestaEjercicio respuestaEjercicio) {
+	public Boolean responderMaterial(RespuestaEjercicio respuestaEjercicio) throws AppException {
 
 		Boolean retorno = null;
-		try {
+		
+		System.out.println("responderMaterialRecibe: ");
+		System.out.println("idTarea: "+ respuestaEjercicio.getIdTarea());
+		System.out.println("idAlumno: "+ respuestaEjercicio.getIdAlumno());
+		System.out.println("idAsignatura: "+ respuestaEjercicio.getIdAsignatura());
+		System.out.println("idConcepto: "+ respuestaEjercicio.getIdConcepto());
+		System.out.println("idMaterial: "+ respuestaEjercicio.getIdMaterial());
+	
 			retorno = getService().responderMaterial(
 					respuestaEjercicio.getIdTarea(),
 					respuestaEjercicio.getIdAlumno(),
 					respuestaEjercicio.getIdAsignatura(),
 					respuestaEjercicio.getIdConcepto(),
 					respuestaEjercicio.getIdMaterial(), httpRequest);
-			
+
 			/** Aqui guardamos el log **/
 			Log log = new Log();
 			log.setAlumno(respuestaEjercicio.getIdAlumno());
 			log.setAsignatura(respuestaEjercicio.getIdAsignatura());
 			log.setTarea(respuestaEjercicio.getIdTarea());
-			
+
 			log.addSecuencia("Material visto: ");
 			log.addSecuencia(respuestaEjercicio.getIdMaterial().toString());
 			log.addSecuencia("\n");
 			logService.insertar(log, httpRequest);
-			
-			/**Una vez que responde el ejercicio se guarda el ejercicio resuelto**/
+
+			/**
+			 * Una vez que responde el ejercicio se guarda el ejercicio resuelto
+			 **/
 			Resuelto resuelto = new Resuelto();
 			resuelto.setEsMaterial(true);
 			resuelto.setEsCorrecto(false);
@@ -433,17 +461,9 @@ public class EjercicioResource extends
 			resuelto.setIdConcepto(respuestaEjercicio.getIdConcepto());
 			resueltoService.insertar(resuelto, httpRequest);
 
-		} catch (Exception e) {
-			throw new WebApplicationException(e.getMessage(),
-					Response.Status.INTERNAL_SERVER_ERROR);
-		}
-		if (retorno == null) {
-			throw new WebApplicationException(Response.Status.NOT_FOUND);
-		}
+	
 		return retorno;
 
 	}
-	
-
 
 }

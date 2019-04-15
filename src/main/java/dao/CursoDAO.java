@@ -28,7 +28,7 @@ public class CursoDAO extends BaseDAO<Curso> {
 		return Curso.class;
 	}
 
-	/**
+	/** Borrar reemplazado por cursoDisponible
 	 * Lista de cursos al cual no esta inscripto el alumno con idAlumno.
 	 * 
 	 * @serialData 26062018
@@ -71,6 +71,23 @@ public class CursoDAO extends BaseDAO<Curso> {
 		res.setRows(res1);
 		res.setCount(total);
 		return res;
+
+	}
+
+	/**
+	 * Trae todo los cursos disponibles.
+	 **/
+	public List<Curso> listarTodosLosCursos() {
+		System.out.println("Listar todo los cursos del sistema con el dao");
+		// se construye la respuesta
+		List<Curso> cursos = new ArrayList<Curso>();
+
+		// Query para traer la lista de curso
+		Query query = em.createQuery("SELECT c FROM Curso c ");
+
+		cursos = query.getResultList();
+
+		return cursos;
 
 	}
 
@@ -152,9 +169,8 @@ public class CursoDAO extends BaseDAO<Curso> {
 		List<Tarea> lista = new ArrayList<Tarea>();
 		System.out.println("ListaTarea");
 		// Query para traer la lista de curso
-		Query query = em
-				.createQuery("SELECT t FROM Tarea t "
-						+ "where curso.id =:idCurso");
+		Query query = em.createQuery("SELECT t FROM Tarea t "
+				+ "where curso.id =:idCurso");
 
 		query.setParameter("idCurso", id);
 

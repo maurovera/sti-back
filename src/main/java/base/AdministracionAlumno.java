@@ -286,17 +286,13 @@ public class AdministracionAlumno {
 	 * @return boolean si responde bien o mal.
 	 ***/
 	public Boolean responderEjercicioServicio(Long idEjercicio,
-			String respuesta, Long idAlumno, Long idAsignatura, Long idTarea, HttpServletRequest httpRequest) {
+			String respuesta, Long idAlumno, Long idAsignatura, Long idTarea,
+			HttpServletRequest httpRequest) throws AppException {
 
 		Ejercicio ejercicio = null;
-		try {
-			ejercicio = ejercicioService.obtener(idEjercicio);
-		} catch (AppException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-			System.out
-					.println("no se pudo obtener el ejercicio para responder el ejercicio.");
-		}
+		
+		ejercicio = ejercicioService.obtener(idEjercicio);
+		
 		// Alumno alumno = alumnoService.obtener(idAlumno);
 
 		Boolean retorno = false;

@@ -22,7 +22,7 @@ public class CursoService extends BaseServiceImpl<Curso, CursoDAO> {
 
 	@Inject
 	private CursoDAO dao;
-	
+
 	@Inject
 	private AlumnoService alumnoService;
 
@@ -34,7 +34,7 @@ public class CursoService extends BaseServiceImpl<Curso, CursoDAO> {
 		return dao;
 	}
 
-	/**
+	/** BORRAR
 	 * Lista de curso en el cual el alumno con idAlumno esta inscripto
 	 **/
 	public ListaResponse<CursoView> listarCursoPorAlumno(Long idAlumno) {
@@ -42,7 +42,7 @@ public class CursoService extends BaseServiceImpl<Curso, CursoDAO> {
 		return dao.listarCursoPorAlumno(idAlumno);
 	}
 
-	/**
+	/** BORRAR
 	 * Lista Curso service. Lista de curso disponibles Para la lista de su
 	 * nombre y descripcion y id
 	 **/
@@ -52,6 +52,125 @@ public class CursoService extends BaseServiceImpl<Curso, CursoDAO> {
 		return res;
 	}
 
+	/**
+	 * Lista Curso disponible service. Lista de curso disponibles Para la lista
+	 * de su nombre y descripcion y id
+	 * 
+	 * @throws AppException
+	 **/
+	public ListaResponse<CursoView> listarCursoDisponible(Long idAlumno) throws AppException {
+		System.out.println("listar curso disponible service");
+		/** Lista de cursos view a ser devueltos. */
+		List<CursoView> cursos = new ArrayList<CursoView>();
+		ListaResponse<CursoView> respuesta = new ListaResponse<CursoView>();
+
+		/***Trae todo los cursos sin distincion*/
+		List<Curso> res = getDao().listarTodosLosCursos();
+
+		if (!res.isEmpty()) {
+			for (Curso curso : res) {
+				System.out.println("Curso numero: " + curso.getId() + " - "
+						+ curso.getDescripcion());
+			}
+		} else {
+			System.out.println("curso vacio. No existe ningun curso");
+		}
+
+		/** se obtiene el alumno. */
+		Alumno alumno = alumnoService.obtener(idAlumno);
+
+		/**
+		 * Por cada curso donde el alumno no este es un curso disponible y
+		 * viceversa
+		 */
+		Integer total = 0;
+		for (Curso curso : res) {
+			if (!curso.getListaAlumno().contains(alumno)) {
+				System.out.println("curso que no contiene al alumno es: "
+						+ curso.getId() + "-" + curso.getDescripcion());
+
+				CursoView as = new CursoView();
+				as.setId(curso.getId());
+				as.setAlumno(idAlumno);
+				as.setNombre(curso.getNombre());
+				as.setDescripcion(curso.getDescripcion());
+				cursos.add(as);
+				total++;
+			} else {
+				System.out.println("el alumno :" + idAlumno
+						+ " esta contenido en el curso de: "
+						+ curso.getDescripcion());
+			}
+		}
+		
+		/**parametros de la lista**/
+		respuesta.setRows(cursos);
+		respuesta.setCount(total);
+		
+		return respuesta;
+	}
+
+
+	/**
+	 * Lista de cursos en el que el alumno esta inscripto
+	 * 
+	 * @throws AppException
+	 **/
+	public ListaResponse<CursoView> listarCursoInscriptos(Long idAlumno) throws AppException {
+		System.out.println("listar curso disponible service");
+		/** Lista de cursos view a ser devueltos. */
+		List<CursoView> cursos = new ArrayList<CursoView>();
+		ListaResponse<CursoView> respuesta = new ListaResponse<CursoView>();
+
+		/***Trae todo los cursos sin distincion*/
+		List<Curso> res = getDao().listarTodosLosCursos();
+
+		if (!res.isEmpty()) {
+			for (Curso curso : res) {
+				System.out.println("Curso numero: " + curso.getId() + " - "
+						+ curso.getDescripcion());
+			}
+		} else {
+			System.out.println("curso vacio. No existe ningun curso");
+		}
+
+		/** se obtiene el alumno. */
+		Alumno alumno = alumnoService.obtener(idAlumno);
+
+		/**
+		 * Por cada curso donde el alumno no este es un curso disponible y
+		 * viceversa
+		 */
+		Integer total = 0;
+		for (Curso curso : res) {
+			if (!curso.getListaAlumno().contains(alumno)) {
+				System.out.println("curso que no contiene al alumno es: "
+						+ curso.getId() + "-" + curso.getDescripcion());
+			} else {
+				System.out.println("el alumno :" + idAlumno
+						+ " esta contenido en el curso de: "
+						+ curso.getDescripcion());
+				CursoView as = new CursoView();
+				as.setId(curso.getId());
+				as.setAlumno(idAlumno);
+				as.setNombre(curso.getNombre());
+				as.setDescripcion(curso.getDescripcion());
+				cursos.add(as);
+				total++;
+			}
+		}
+		
+		/**parametros de la lista**/
+		respuesta.setRows(cursos);
+		respuesta.setCount(total);
+		
+		return respuesta;
+	}
+
+	
+	
+	
+	
 	/**
 	 * Agregar alumno
 	 */
@@ -64,7 +183,7 @@ public class CursoService extends BaseServiceImpl<Curso, CursoDAO> {
 			entity.setUsuarioModificacion(userId);
 			entity.setIpModificacion(httpRequest.getRemoteAddr());
 
-			//Se agrega el alumno en cuestion
+			// Se agrega el alumno en cuestion
 			Alumno al = new Alumno();
 			Long idAlumno = entity.getAlumno();
 			al = alumnoService.obtener(idAlumno);
@@ -76,12 +195,11 @@ public class CursoService extends BaseServiceImpl<Curso, CursoDAO> {
 		}
 	}
 
-	
-	/**Tarea una lista de tareas**/
+	/** Tarea una lista de tareas **/
 	public List<Tarea> listaTarea(Long id) throws AppException {
 		List<Tarea> lista = new ArrayList<Tarea>();
 		try {
-			
+
 			lista = getDao().listaTarea(id);
 		} catch (Exception e) {
 			throw new AppException(500, e.getMessage());
@@ -89,5 +207,4 @@ public class CursoService extends BaseServiceImpl<Curso, CursoDAO> {
 		return lista;
 	}
 
-	
 }

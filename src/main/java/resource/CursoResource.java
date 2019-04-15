@@ -1,5 +1,6 @@
 package resource;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -37,6 +38,7 @@ public class CursoResource extends BaseResource<Curso, CursoService> {
 		return service;
 	}
 
+	/**Borrar. Reemplazado por listaCursoDisponible**/
 	@GET
 	@Path("/listaCurso")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -45,7 +47,34 @@ public class CursoResource extends BaseResource<Curso, CursoService> {
 		System.out.println("Listar curso disponible resource");
 		return getService().listarCurso(idAlumno);
 	}
+	
+	/**Trae los curso en el cual el alumno con idAlumno no esta inscripto**/
+	@GET
+	@Path("/listaCursoDisponible")
+	@Produces(MediaType.APPLICATION_JSON)
+	public ListaResponse<CursoView> listarCursoDisponible(
+			@QueryParam("idAlumno") @DefaultValue("74") Long idAlumno) throws NoSuchFieldException, AppException {
+		System.out.println("Listar curso disponible resource");
+		
+		return getService().listarCursoDisponible(idAlumno);
+	}
+	
 
+	
+	/**Trae los curso en el cual el alumno con idAlumno esta inscripto**/
+	@GET
+	@Path("/listaCursoInscripto")
+	@Produces(MediaType.APPLICATION_JSON)
+	public ListaResponse<CursoView> listarCursoInscriptos(
+			@QueryParam("idAlumno") @DefaultValue("45") Long idAlumno) throws NoSuchFieldException, AppException {
+		System.out.println("Listar curso que el alumno esta inscripto resource");
+		return getService().listarCursoInscriptos(idAlumno);
+	}
+	
+	
+	
+	
+	
 	/**
 	 * Prueba lista curso por alumno inscriptos al curso. 
 	 * @param idAlumno

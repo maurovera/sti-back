@@ -364,49 +364,49 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 	public Boolean responderEjercicioPrimerTest(Long idTarea, Long idAlumno,
 			Long idAsignatura, String respuesta, Long idEjercicio,
 			HttpServletRequest httpRequest) throws AppException {
-		try {
-			Boolean retorno = null;
 
-			retorno = admAlumno.responderEjercicioServicio(idEjercicio,
-					respuesta, idAlumno, idAsignatura, idTarea, httpRequest);
+		Boolean retorno = null;
 
-			if (retorno == null)
-				System.out
-						.println("respondio mal y no se que paso. error interno en responder ejercicio servicio");
+		retorno = admAlumno.responderEjercicioServicio(idEjercicio, respuesta,
+				idAlumno, idAsignatura, idTarea, httpRequest);
 
-			return retorno;
+		if (retorno == null)
+			System.out
+					.println("respondio mal y no se que paso. error interno en responder ejercicio servicio");
 
-		} catch (Exception e) {
-			throw new AppException(500, e.getMessage());
-		}
+		return retorno;
+
 	}
 
 	/** Retorna el criterio de parada que es la cantidad de ejercicios resueltos **/
 	public Boolean criterio(Long idTarea, Long idAlumno,
 			HttpServletRequest httpRequest) throws AppException {
-		try {
-			Boolean retorno = false;
-			/**
-			 * Obtenemos la cantidad de ejercicios por tarea
-			 **/
-			Tarea tarea = tareaService.obtener(idTarea);
-			Integer cantidadParada = tarea.getCantidadEjercicioParada();
-			/** Obtenemos la sesion anterior **/
-			Sesion sesion = sesionService.sesionAnterior(idAlumno, idTarea);
-			Integer resuelto = sesion.getcantidadEjerciciosResueltos();
 
-			if (resuelto >= cantidadParada)
-				retorno = true;
+		Boolean retorno = false;
+		/**
+		 * Obtenemos la cantidad de ejercicios por tarea
+		 **/
+		Tarea tarea = tareaService.obtener(idTarea);
+		Integer cantidadParada = tarea.getCantidadEjercicioParada();
+		/** Obtenemos la sesion anterior **/
+		// Sesion sesion = sesionService.sesionAnterior(idAlumno, idTarea);
+		Sesion sesion = sesionService.sesionAnteriorConNuevo(idAlumno, idTarea,
+				httpRequest);
+		if (sesion == null)
+			System.out.println("sesion is null ahora puto de mierda");
 
-			if (retorno == null)
-				System.out
-						.println("respondio mal y no se que paso. error interno en responder ejercicio servicio");
+		Integer resuelto = sesion.getcantidadEjerciciosResueltos();
+		// hacemos cantidadParada en menos 1 porque resuelto empieza en 0
+		cantidadParada -= 1;
+		if (resuelto >= cantidadParada)
+			retorno = true;
 
-			return retorno;
+		if (retorno == null)
+			System.out
+					.println("respondio mal y no se que paso. error interno en responder ejercicio servicio");
 
-		} catch (Exception e) {
-			throw new AppException(500, e.getMessage());
-		}
+		return retorno;
+
 	}
 
 	// #########################Criterio
@@ -731,111 +731,119 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 			Long idAsignatura, String respuesta, Long idEjercicio,
 			Long idConcepto, HttpServletRequest httpRequest)
 			throws AppException {
-		try {
-			Boolean retorno = null;
 
-			retorno = admAlumno.responderEjercicioServicio(idEjercicio,
-					respuesta, idAlumno, idAsignatura, idTarea, httpRequest);
+		Boolean retorno = null;
 
-			if (retorno == null) {
-				System.out
-						.println("respondio mal y no se que paso. error interno en responder ejercicio servicio");
+		retorno = admAlumno.responderEjercicioServicio(idEjercicio, respuesta,
+				idAlumno, idAsignatura, idTarea, httpRequest);
+
+		if (retorno == null) {
+			System.out
+					.println("respondio mal y no se que paso. error interno en responder ejercicio servicio");
+		} else {
+			/**
+			 * Primer tema es cambiar la cantidad de intentos en sesion Queda
+			 * pendiente estado terminado.
+			 */
+			Sesion sesionAnterior = sesionService.sesionAnterior(idAlumno,
+					idTarea);
+			Integer cantidad = sesionAnterior.getCantidadIntentos() + 1;
+			sesionAnterior.setCantidadIntentos(cantidad);
+			/**
+			 * Traemos la lista de conceptos y actualizamos la cantidad de
+			 * intentos, tambien traemos el camino.
+			 * 
+			 */
+			System.out.println("camino anterior recibi: \n" + "idAlumno: "
+					+ idAlumno + " \n " + "idTarea: " + idTarea + " \n "
+					+ "idConcepto: " + idConcepto + " \n " + "idAsignatura: "
+					+ idAsignatura + " \n ");
+			Camino camino = caminoService.caminoAnterior(idAlumno, idTarea,
+					idConcepto, idAsignatura, httpRequest);
+			if (camino == null) {
+				System.out.println("camino anterior es nulo ");
 			} else {
-				/**
-				 * Primer tema es cambiar la cantidad de intentos en sesion
-				 * Queda pendiente estado terminado.
-				 */
-				Sesion sesionAnterior = sesionService.sesionAnterior(idAlumno,
-						idTarea);
-				Integer cantidad = sesionAnterior.getCantidadIntentos() + 1;
-				sesionAnterior.setCantidadIntentos(cantidad);
-				/**
-				 * Traemos la lista de conceptos y actualizamos la cantidad de
-				 * intentos, tambien traemos el camino.
-				 * 
-				 */
-				Camino camino = caminoService.caminoAnterior(idAlumno, idTarea,
-						idConcepto, idAsignatura, httpRequest);
-				/** deberia controlar resuelto */
-				SesionConcepto sesionConcepto = sesionAnterior
-						.traerSesionConcepto(idConcepto);
-				/** Se aumenta la cantidad de intentos */
-				Integer intentosC = sesionConcepto.getIntentos() + 1;
-				sesionConcepto.setIntentos(intentosC);
-				/** vemos si alcanzo el margen */
-				Concepto c = conceptoService.obtener(idConcepto);
-				String nombreConcepto = c.getNombre();
-				Double valorNodo = adm.getValorNodoRedDouble(nombreConcepto,
-						idAsignatura, idAlumno);
-				/** Si alcanzo el margen se setea resuelto **/
-				if (valorNodo >= sesionConcepto.getMargen()) {
-
-					System.out.println("alcanzo el margen: " + c.getNombre()
-							+ " valor: " + valorNodo);
-					sesionConcepto.setResuelto(true);
-					camino.setParar(true);
-					System.out.println("este es tu ultimo ejercicio. Alcanzo el margen requerido: "+ nombreConcepto);
-
-				}
-				/** Se setea parar en camino si alcanzo su cantidad de intentos **/
-				if (intentosC >= sesionConcepto.getTotal()){
-					camino.setParar(true);
-					System.out.println("este es tu ultimo ejercicio. se acabaron las oportunidades"
-							+ "para este concepto: "+ nombreConcepto);
-				}
-					
-
-				/** Si respondio bien */
-				if (retorno) {
-					/**
-					 * Actualizamos su nivelActual. mirar para no cagarla Esta
-					 * bien porque es un ejercicio que Acerto en cambio si falla
-					 * no se actualiza.
-					 */
-					camino.setNivelInicial(valorNodo);
-					camino.setNivelEvidencia(valorNodo);
-					/** seteamos los campos de camino si acierta el ejercicio **/
-					String anterior = camino.getAnterior();
-					
-					camino.setAnterior(camino.getActual());
-					camino.setActual("E");
-					camino.setEsEjercicio(true);
-					System.out.println("ejercicio: " + idEjercicio.toString());
-					camino.setSecuenciaEjercicio(idEjercicio.toString());
-
-					/**
-					 * preguntamos si anterior es M, si es m se registra una
-					 * evidencia
-					 **/
-					String mate = "M";
-					if (anterior.equals(mate) ){
-						System.out.println("registramos evidencia");
-						registrarEvidencia(camino, httpRequest);
-					}
-						
-
-					/** Si respondio mal **/
-				} else {
-					camino.setAnterior(camino.getActual());
-					camino.setActual("M");
-					camino.setEsEjercicio(false);
-					camino.setSecuenciaEjercicio(idEjercicio.toString());
-				}
-
-				/**
-				 * Actualizamos su sesionConcepto y camino
-				 */
-				sesionConceptoService.modificar(sesionConcepto.getId(),
-						sesionConcepto, httpRequest);
-				caminoService.modificar(camino.getId(), camino, httpRequest);
-
+				System.out.println("camino anterior es :  " + camino.getId());
 			}
 
-			return retorno;
+			/** deberia controlar resuelto */
+			SesionConcepto sesionConcepto = sesionAnterior
+					.traerSesionConcepto(idConcepto);
+			/** Se aumenta la cantidad de intentos */
+			Integer intentosC = sesionConcepto.getIntentos() + 1;
+			sesionConcepto.setIntentos(intentosC);
+			/** vemos si alcanzo el margen */
+			Concepto c = conceptoService.obtener(idConcepto);
+			String nombreConcepto = c.getNombre();
+			Double valorNodo = adm.getValorNodoRedDouble(nombreConcepto,
+					idAsignatura, idAlumno);
+			/** Si alcanzo el margen se setea resuelto **/
+			if (valorNodo >= sesionConcepto.getMargen()) {
 
-		} catch (Exception e) {
-			throw new AppException(500, e.getMessage());
+				System.out.println("alcanzo el margen: " + c.getNombre()
+						+ " valor: " + valorNodo);
+				sesionConcepto.setResuelto(true);
+				camino.setParar(true);
+				System.out
+						.println("este es tu ultimo ejercicio. Alcanzo el margen requerido: "
+								+ nombreConcepto);
+
+			}
+			/** Se setea parar en camino si alcanzo su cantidad de intentos **/
+			if (intentosC >= sesionConcepto.getTotal()) {
+				camino.setParar(true);
+				System.out
+						.println("este es tu ultimo ejercicio. se acabaron las oportunidades"
+								+ "para este concepto: " + nombreConcepto);
+			}
+
+			/** Si respondio bien */
+			if (retorno) {
+				/**
+				 * Actualizamos su nivelActual. mirar para no cagarla Esta bien
+				 * porque es un ejercicio que Acerto en cambio si falla no se
+				 * actualiza.
+				 */
+				camino.setNivelInicial(valorNodo);
+				camino.setNivelEvidencia(valorNodo);
+				/** seteamos los campos de camino si acierta el ejercicio **/
+				String anterior = camino.getAnterior();
+
+				camino.setAnterior(camino.getActual());
+				camino.setActual("E");
+				camino.setEsEjercicio(true);
+				System.out.println("ejercicio: " + idEjercicio.toString());
+				camino.setSecuenciaEjercicio(idEjercicio.toString());
+
+				/**
+				 * preguntamos si anterior es M, si es m se registra una
+				 * evidencia
+				 **/
+				String mate = "M";
+				if (anterior.equals(mate)) {
+					System.out.println("registramos evidencia");
+					registrarEvidencia(camino, httpRequest);
+				}
+
+				/** Si respondio mal **/
+			} else {
+				camino.setAnterior(camino.getActual());
+				camino.setActual("M");
+				camino.setEsEjercicio(false);
+				camino.setSecuenciaEjercicio(idEjercicio.toString());
+			}
+
+			/**
+			 * Actualizamos su sesionConcepto y camino
+			 */
+			sesionConceptoService.modificar(sesionConcepto.getId(),
+					sesionConcepto, httpRequest);
+			caminoService.modificar(camino.getId(), camino, httpRequest);
+
 		}
+
+		return retorno;
+
 	}
 
 	/**
@@ -847,7 +855,7 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 	private void registrarEvidencia(Camino c, HttpServletRequest httpRequest)
 			throws AppException {
 
-		/**Entre en registro evidencia*/
+		/** Entre en registro evidencia */
 		System.out.println("entre en registrarEvidencia a ver si guarda");
 		c.cargarMaterialYEjercicio();
 		Evidencia e01 = new Evidencia(c);
@@ -1005,61 +1013,50 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 	/***
 	 * Responde el Material visto
 	 **/
-	public Boolean responderMaterial(Long idTarea, Long idAlumno, Long idAsignatura,
-			Long idConcepto, Long idMaterial, HttpServletRequest httpRequest)
-			throws AppException {
-		try {
-			Boolean retorno = true;
+	public Boolean responderMaterial(Long idTarea, Long idAlumno,
+			Long idAsignatura, Long idConcepto, Long idMaterial,
+			HttpServletRequest httpRequest) throws AppException {
 
-			/** Traemos la sesion */
-			Sesion sesionAnterior = sesionService.sesionAnterior(idAlumno,
-					idTarea);
-			/** Traemos el material **/
-			Material material = materialService.obtener(idMaterial);
+		Boolean retorno = true;
 
-			/** Solo si el material es no nulo se inserta **/
-			if (material != null) {
-				/**
-				 * Una vez mostrado el material por la regla o al azar se guarda
-				 * en la sesionMaterialAnterior
-				 */
-				try {
+		/** Traemos la sesion */
+		Sesion sesionAnterior = sesionService.sesionAnterior(idAlumno, idTarea);
+		/** Traemos el material **/
+		Material material = materialService.obtener(idMaterial);
 
-					/** Insertamos un material a la sesion */
-					sesionService.insertarMaterialVisto(sesionAnterior.getId(),
-							sesionAnterior, material);
-				} catch (AppException ex) {
-					System.out.println("No se pudo insertar el material");
-					ex.printStackTrace();
-				}
-
-			}
+		/** Solo si el material es no nulo se inserta **/
+		if (material != null) {
 			/**
-			 * Traemos el camino y actualizamos
+			 * Una vez mostrado el material por la regla o al azar se guarda en
+			 * la sesionMaterialAnterior
 			 */
-			Camino camino = caminoService.caminoAnterior(idAlumno, idTarea,
-					idConcepto, idAsignatura, httpRequest);
-			/** trae el concepto para quitar su nombre y su nivel */
-			Concepto c = conceptoService.obtener(idConcepto);
-			String nombreConcepto = c.getNombre();
-			Double valorNodo = adm.getValorNodoRedDouble(nombreConcepto,
-					idAsignatura, idAlumno);
+			/** Insertamos un material a la sesion */
+			sesionService.insertarMaterialVisto(sesionAnterior.getId(),
+					sesionAnterior, material);
 
-			/** Se actualiza su nivel */
-			camino.setNivelInicial(valorNodo);
-			camino.setNivelEvidencia(valorNodo);
-			camino.setAnterior(camino.getActual());
-			camino.setActual("E");
-			camino.setEsEjercicio(true);
-			camino.setSecuenciaMaterial(idMaterial.toString());
-
-			caminoService.modificar(camino.getId(), camino, httpRequest);
-
-			return retorno;
-
-		} catch (Exception e) {
-			throw new AppException(500, e.getMessage());
 		}
+		/**
+		 * Traemos el camino y actualizamos
+		 */
+		Camino camino = caminoService.caminoAnterior(idAlumno, idTarea,
+				idConcepto, idAsignatura, httpRequest);
+		/** trae el concepto para quitar su nombre y su nivel */
+		Concepto c = conceptoService.obtener(idConcepto);
+		String nombreConcepto = c.getNombre();
+		Double valorNodo = adm.getValorNodoRedDouble(nombreConcepto,
+				idAsignatura, idAlumno);
+
+		/** Se actualiza su nivel */
+		camino.setNivelInicial(valorNodo);
+		camino.setNivelEvidencia(valorNodo);
+		camino.setAnterior(camino.getActual());
+		camino.setActual("E");
+		camino.setEsEjercicio(true);
+		camino.setSecuenciaMaterial(idMaterial.toString());
+
+		caminoService.modificar(camino.getId(), camino, httpRequest);
+
+		return retorno;
 	}
 
 	// #####################FIN RESPONDER MATERIAL##################

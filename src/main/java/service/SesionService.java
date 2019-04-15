@@ -84,6 +84,24 @@ public class SesionService extends BaseServiceImpl<Sesion, SesionDAO> {
 		}
 
 	}
+	
+	
+	/**
+	 * Queda como sesionMaterialAnterior
+	 * es lo mismo porque trae toda la sesion en si
+	 * **/
+	public Sesion sesionAnteriorConNuevo(Long idAlumno, Long idTarea, HttpServletRequest httpRequest)
+			throws AppException {
+		
+			Sesion sesion =  dao.sesionAnterior(idAlumno, idTarea);
+			if(sesion == null){
+				sesion = registrarSesion(idAlumno, idTarea, httpRequest);			
+			}
+			
+			return sesion;
+		
+	}
+	
 
 
 	/**
