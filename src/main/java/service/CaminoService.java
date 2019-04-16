@@ -64,6 +64,7 @@ public class CaminoService extends BaseServiceImpl<Camino, CaminoDAO> {
 			Double valorNodo = adm
 					.getValorNodoRedDouble(c.getNombre(), idAsig, idAlumno);
 			camino.setNivelEvidencia(valorNodo);
+			camino.setNivelInicial(valorNodo);
 			System.out.println("llegue aqui antes del validate");
 			validate(camino);
 			dao.insert(camino);

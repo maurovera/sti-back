@@ -40,6 +40,15 @@ public class Resuelto extends BaseEntity implements Serializable {
 	private Boolean esCorrecto;
 	
 	private Long idConcepto;
+	
+	@Column(name = "es_primer_test")
+	private Boolean esPrimerTest;
+	
+	@Column(name = "nivel_inicial")
+	private Double nivelInicial;
+	
+	@Column(name = "nivel_final")
+	private Double nivelFinal;
 
 	public Long getId() {
 		return id;
@@ -119,6 +128,30 @@ public class Resuelto extends BaseEntity implements Serializable {
 
 	public void setIdConcepto(Long idConcepto) {
 		this.idConcepto = idConcepto;
+	}
+
+	public Boolean getEsPrimerTest() {
+		return esPrimerTest;
+	}
+
+	public void setEsPrimerTest(Boolean esPrimerTest) {
+		this.esPrimerTest = esPrimerTest;
+	}
+
+	public Double getNivelInicial() {
+		return nivelInicial;
+	}
+
+	public void setNivelInicial(Double nivelInicial) {
+		this.nivelInicial = nivelInicial;
+	}
+
+	public Double getNivelFinal() {
+		return nivelFinal;
+	}
+
+	public void setNivelFinal(Double nivelFinal) {
+		this.nivelFinal = nivelFinal;
 	}
 	
 	

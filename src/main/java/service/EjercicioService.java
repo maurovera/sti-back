@@ -14,14 +14,17 @@ import model.Alumno;
 import model.Asignatura;
 import model.Camino;
 import model.Concepto;
+import model.Curso;
 import model.Ejercicio;
 import model.Evidencia;
 import model.Material;
 import model.Respuesta;
+import model.Resuelto;
 import model.Sesion;
 import model.SesionConcepto;
 import model.Tarea;
 import utils.AppException;
+import utils.CursoView;
 import utils.EjercicioView;
 import utils.HerramientasDrools;
 import utils.Regla;
@@ -804,7 +807,7 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 				 * porque es un ejercicio que Acerto en cambio si falla no se
 				 * actualiza.
 				 */
-				camino.setNivelInicial(valorNodo);
+				//camino.setNivelInicial(valorNodo);
 				camino.setNivelEvidencia(valorNodo);
 				/** seteamos los campos de camino si acierta el ejercicio **/
 				String anterior = camino.getAnterior();
@@ -1047,7 +1050,7 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 				idAsignatura, idAlumno);
 
 		/** Se actualiza su nivel */
-		camino.setNivelInicial(valorNodo);
+		//camino.setNivelInicial(valorNodo);
 		camino.setNivelEvidencia(valorNodo);
 		camino.setAnterior(camino.getActual());
 		camino.setActual("E");
@@ -1060,5 +1063,68 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 	}
 
 	// #####################FIN RESPONDER MATERIAL##################
+	// ################INICIO DE RESULTADOS DEL PRIMER TEST############
+	/**
+	 * Lista los resultados del primer test
+	 * 
+	 * @throws AppException
+	 **/
+	public ListaResponse<Resuelto> listarResueltoTestIncial(Long idAlumno, Long idTarea) throws AppException {
+		System.out.println("listar resueltos en el primer test service");
+		/** Lista de resuelto view a ser devueltos. */
+		
+		ListaResponse<Resuelto> respuesta = new ListaResponse<Resuelto>();
+
+		/***Trae todo los cursos sin distincion*/
+		respuesta = getDao().listarResueltoPrimerTest(idAlumno, idTarea);
+
+				
+		return respuesta;
+	}
+	
+	//####################FIN DE RESULTADOS DEL PRIMER TEST#############
+	
+	// ################INICIO DE RESULTADOS DEL TEST TUTOR############
+		/**
+		 * Lista los resultados del test tutor
+		 * 
+		 * @throws AppException
+		 **/
+		public ListaResponse<Resuelto> listarResueltoTesttutor(Long idAlumno, Long idTarea) throws AppException {
+			System.out.println("listar resueltos en el  test tutor service");
+			/** Lista de resuelto view a ser devueltos. */
+			
+			ListaResponse<Resuelto> respuesta = new ListaResponse<Resuelto>();
+
+			/***Trae todo los cursos sin distincion*/
+			respuesta = getDao().listarResueltoTestTutor(idAlumno, idTarea);
+
+					
+			return respuesta;
+		}
+		
+		//####################FIN DE RESULTADOS DEL TEST TUTOR#############
+		
+		
+		// ################INICIO DE RESULTADOS DEL CAMINO############
+		/**
+		 * Lista los resultados del CAMINO EN EL SEGUNDO TEST
+		 * 
+		 * @throws AppException
+		 **/
+		public ListaResponse<Camino> listarCamino(Long idAlumno, Long idTarea) throws AppException {
+			System.out.println("listar camino del segundo test service");
+			
+			
+			ListaResponse<Camino> respuesta = new ListaResponse<Camino>();
+
+			/***Trae todo los caminos sin distincion*/
+			respuesta = getDao().listarCamino(idAlumno, idTarea);
+
+					
+			return respuesta;
+		}
+		
+		//####################FIN DE RESULTADOS DEL TEST TUTOR#############
 
 }

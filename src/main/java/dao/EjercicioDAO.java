@@ -7,7 +7,9 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.Query;
 
+import model.Camino;
 import model.Ejercicio;
+import model.Resuelto;
 import utils.AppException;
 import utils.EjercicioView;
 import base.AdministracionBase;
@@ -77,6 +79,122 @@ public class EjercicioDAO extends BaseDAO<Ejercicio>{
 
 		int total = 0;
 		if(resultado != null)
+			total = resultado.size();
+
+		res.setRows(res1);
+		res.setCount(total);
+		return res;
+
+	}
+	
+	
+	/**
+	 * Lista de resueltos del test inicial por idAlumno, idTarea y es primer test.
+	 * 
+	 ***/
+	public ListaResponse<Resuelto> listarResueltoPrimerTest(Long idAlumno, Long idTarea) {
+		System.out.println("Lista de resueltos en el primer test");
+		List<Resuelto> res1 = new ArrayList<Resuelto>();
+		ListaResponse<Resuelto> res = new ListaResponse<Resuelto>();
+		// Query para traer la lista de curso
+		Query query = em
+				.createQuery("SELECT r FROM Resuelto r "
+						+ " where"
+						+ " r.idAlumno =:idAlumno and "
+						+ " r.idTarea =:idTarea and "
+						+ " r.esPrimerTest =:primero"
+						);
+
+		query.setParameter("idAlumno", idAlumno);
+		query.setParameter("idTarea", idTarea);
+		query.setParameter("primero", true);
+		
+		List<Resuelto> resultado = query.getResultList();
+
+		for (Resuelto resuelto : resultado) {
+			res1.add(resuelto);
+		}
+		
+
+		int total = 0;
+		if (resultado != null)
+			total = resultado.size();
+
+		res.setRows(res1);
+		res.setCount(total);
+		return res;
+
+	}
+	
+	
+	/**
+	 * Lista de resueltos del test tutor por idAlumno, idTarea y es primer test.
+	 * 
+	 ***/
+	public ListaResponse<Resuelto> listarResueltoTestTutor(Long idAlumno, Long idTarea) {
+		System.out.println("Lista de resueltos en el test tutor");
+		List<Resuelto> res1 = new ArrayList<Resuelto>();
+		ListaResponse<Resuelto> res = new ListaResponse<Resuelto>();
+		// Query para traer la lista de curso
+		Query query = em
+				.createQuery("SELECT r FROM Resuelto r "
+						+ " where"
+						+ " r.idAlumno =:idAlumno and "
+						+ " r.idTarea =:idTarea and "
+						+ " r.esPrimerTest =:primero"
+						);
+
+		query.setParameter("idAlumno", idAlumno);
+		query.setParameter("idTarea", idTarea);
+		query.setParameter("primero", false);
+		
+		List<Resuelto> resultado = query.getResultList();
+
+		for (Resuelto resuelto : resultado) {
+			res1.add(resuelto);
+		}
+		
+
+		int total = 0;
+		if (resultado != null)
+			total = resultado.size();
+
+		res.setRows(res1);
+		res.setCount(total);
+		return res;
+
+	}
+	
+	
+	/**
+	 * Lista de camino del test tutor.
+	 * 
+	 ***/
+	public ListaResponse<Camino> listarCamino(Long idAlumno, Long idTarea) {
+		System.out.println("Lista de camino en el test tutor");
+		List<Camino> res1 = new ArrayList<Camino>();
+		ListaResponse<Camino> res = new ListaResponse<Camino>();
+		// Query para traer la lista de curso
+		Query query = em
+				.createQuery("SELECT c FROM Camino c "
+						+ " where"
+						+ " c.idAlumno =:idAlumno and "
+						+ " c.idTarea =:idTarea"
+						);
+
+		query.setParameter("idAlumno", idAlumno);
+		query.setParameter("idTarea", idTarea);
+		
+		
+		List<Camino> resultado = query.getResultList();
+
+		for (Camino camino : resultado) {
+			res1.add(camino);
+		}
+		
+
+		int total = 0;
+		if (resultado != null)
 			total = resultado.size();
 
 		res.setRows(res1);

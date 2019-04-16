@@ -47,6 +47,9 @@ public class Camino extends BaseEntity implements Serializable {
 
 	@Column(name = "nivel_inicial")
 	private Double nivelInicial;
+	
+	@Column(name = "nivel_final")
+	private Double nivelFinal;
 
 	@Column(name = "nivel")
 	private String nivel;
@@ -287,9 +290,18 @@ public class Camino extends BaseEntity implements Serializable {
 			this.setNivel("alto");
 		}
 		
-	this.setNivelInicial(nivel);	
+	this.setNivelFinal(nivel);	
 
 	}
+
+	public Double getNivelFinal() {
+		return nivelFinal;
+	}
+
+	public void setNivelFinal(Double nivelFinal) {
+		this.nivelFinal = nivelFinal;
+	}
+	
 	
 	
 
