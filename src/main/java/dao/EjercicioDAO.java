@@ -102,7 +102,8 @@ public class EjercicioDAO extends BaseDAO<Ejercicio>{
 						+ " where"
 						+ " r.idAlumno =:idAlumno and "
 						+ " r.idTarea =:idTarea and "
-						+ " r.esPrimerTest =:primero"
+						+ " r.esPrimerTest =:primero "
+						+ " order by r.id"
 						);
 
 		query.setParameter("idAlumno", idAlumno);
@@ -142,6 +143,7 @@ public class EjercicioDAO extends BaseDAO<Ejercicio>{
 						+ " r.idAlumno =:idAlumno and "
 						+ " r.idTarea =:idTarea and "
 						+ " r.esPrimerTest =:primero"
+						+ " order by r.id "
 						);
 
 		query.setParameter("idAlumno", idAlumno);
@@ -179,7 +181,8 @@ public class EjercicioDAO extends BaseDAO<Ejercicio>{
 				.createQuery("SELECT c FROM Camino c "
 						+ " where"
 						+ " c.idAlumno =:idAlumno and "
-						+ " c.idTarea =:idTarea"
+						+ " c.idTarea =:idTarea "
+						+ " order by c.id"
 						);
 
 		query.setParameter("idAlumno", idAlumno);
