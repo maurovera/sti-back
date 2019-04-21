@@ -5,6 +5,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
@@ -14,6 +15,7 @@ import model.Ejercicio;
 import model.Sesion;
 import service.EjercicioService;
 import service.SesionService;
+import utils.AppException;
 import base.BaseResource;
 
 @Path("/sesion")
@@ -37,10 +39,10 @@ public class SesionResource extends BaseResource<Sesion, SesionService> {
 	 * Se encarga de insertar un nuevo registro. recibe un id_alumno, id_tarea
 	 */
 	@POST
-	@Path("/registrar")
+	@Path("/registrar/{idTarea}/{idAlumno}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Sesion registrarSesion(@QueryParam("idAlumno") Long idAlumno,
-			@QueryParam("idTarea") Long idTarea) {
+	public Sesion registrarSesion(@PathParam("idTarea") Long idTarea,
+			@PathParam("idAlumno") Long idAlumno) {
 		try {
 			System.out.println("base resource de registrar sesion");
 			return getService().registrarSesion(idAlumno, idTarea, httpRequest);
@@ -88,36 +90,31 @@ public class SesionResource extends BaseResource<Sesion, SesionService> {
 	/**
 	 * Se encarga comprobar si existe una sesion anterior. En caso que exista
 	 * esa sesion anterior. retorna la sesion anterior. o crea una nueva sesion
+	 * 
+	 * @throws AppException
 	 */
 	@GET
 	@Path("/comprobarSesion")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Sesion comprobarSesion(@QueryParam("idAlumno") Long idAlumno,
-			@QueryParam("idTarea") Long idTarea) {
-		try {
+			@QueryParam("idTarea") Long idTarea) throws AppException {
 
-			System.out.println("comprobarSesion");
-			// datos de la sesion
-			//Long idAlumno = new Long(16);
-			//Long idTarea = new Long(3);
+		System.out.println("comprobarSesion");
 
-			// se llama a la sesion anterior. En caso que exista
-			Sesion sesion = getService().sesionAnterior(idAlumno,
-					idTarea);
-			// si no existe, se registra
-			if (sesion == null) {
-				System.out.println("#####REGISTRO NUEVA SESION");
-				sesion = getService().registrarSesion(idAlumno, idTarea,
-						httpRequest);
-			} else {
-				System.out.println("#########NO REGISTRO SESION ANTERIOR. NO NUEVA");
-			}
-
+		// se llama a la sesion anterior. En caso que exista
+		Sesion sesion = getService().sesionAnterior(idAlumno, idTarea);
+		// si no existe, se registra
+		if (sesion == null) {
+			System.out.println("Registra una nueva sesion");
+			sesion = getService().registrarSesion(idAlumno, idTarea,
+					httpRequest);
 			System.out.println("id de la sesion: " + sesion.getId());
-
-			return sesion;
-		} catch (Exception e) {
-			throw new WebApplicationException(e.getMessage());
+		} else {
+			System.out.println("No se registra una"
+					+ " nueva sesion. La sesion es : " + sesion.getId());
 		}
+
+		return sesion;
+
 	}
 }

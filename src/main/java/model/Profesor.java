@@ -45,6 +45,9 @@ public class Profesor extends BaseEntity implements Serializable {
 	@Size(max = 1)
 	@Column(name = "genero")
     private String genero;
+	
+	@Column(name = "usuario")
+    private Long usuario;
 
 	public Long getId() {
 		return id;
@@ -101,6 +104,16 @@ public class Profesor extends BaseEntity implements Serializable {
 	public void setGenero(String genero) {
 		this.genero = genero;
 	}
+
+	public Long getUsuario() {
+		return usuario;
+	}
+
+	public void setUsuario(Long usuario) {
+		this.usuario = usuario;
+	}
+	
+	
 	
 }
 

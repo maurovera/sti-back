@@ -1,14 +1,11 @@
 package base;
 
-import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-
-import org.hibernate.Hibernate;
 
 import utils.AppException;
 

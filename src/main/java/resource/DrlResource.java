@@ -48,7 +48,7 @@ public class DrlResource  extends BaseResource<Drl, DrlService>{
 			Drl d = new Drl();
 			//d.setArchivoDrl("Hola mundo pude meterllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll todo esto en laklsdflasdknflkasdjnflkjndsflkjnadsflkadsnlkfnasdlkfjnasdlkjfnasdlknfladskjfnlkasdjnflkasdnflkasjndflkajndflkasdjnflkajdnsflkjnadflkjnds base de datos");
 			
-			HerramientasWeka hw = new HerramientasWeka("/home/mauro/proyectos/tesis/sti-back/src/main/resources/archivoWeka/weka_1sept.csv");
+			HerramientasWeka hw = new HerramientasWeka("/home/mauro/proyectos/tesis/sti-back/src/main/resources/archivoWeka/weka_1.csv");
 			hw.ejecutar();
 			System.out.println(hw.getDrl());
 			String drl = hw.getDrl();

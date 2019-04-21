@@ -1,5 +1,6 @@
 package dao;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.ejb.Stateless;
@@ -37,11 +38,11 @@ public class MaterialDAO extends BaseDAO<Material> {
 	 * 
 	 */
 	public Material materialesDisponibles(List<Material> listaMateriales,
-			Regla regla) throws AppException {
+			Regla regla) {
 
 		/** Lista de retorno **/
-		List<Material> listaRetorno = null;
-		Material materialR = null;
+		List<Material> listaRetorno = new ArrayList<Material>();
+		Material materialR = new Material();
 		Query q;
 		/**
 		 * Query que trae la lista de materiales disponibles
@@ -71,17 +72,22 @@ public class MaterialDAO extends BaseDAO<Material> {
 		}
 		
 		listaRetorno = q.getResultList();
-		materialR = listaRetorno.get(0);
-
-
-		if (materialR == null) {
-			throw new AppException(404, "Not Found lista materiales");
+		
+		if (listaRetorno == null || listaRetorno.isEmpty()) {
+			materialR = null;
+			System.out.println("lista retorno vacia o lista retorno nula");
+			//throw new AppException(404, "Not Found lista materiales");
+		}else{
+			System.out.println("lista retorno no nula. ver que valor trae esa mierda: ");
+			materialR = listaRetorno.get(0);
+			System.out.println("material seleccionado: " + materialR.getId());
 		}
 
+	
 		// for (Material m : listaRetorno) {
 		// System.out.println(m.getId());
 		// }
-		System.out.println("material seleccionado: " + materialR.getId());
+		
 		return materialR;
 
 	}
