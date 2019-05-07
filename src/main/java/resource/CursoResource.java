@@ -50,7 +50,7 @@ public class CursoResource extends BaseResource<Curso, CursoService> {
 	
 	/**Trae los curso en el cual el alumno con idAlumno no esta inscripto**/
 	@GET
-	@Path("/listaCursoDisponible")
+	@Path("listaCursoDisponible")
 	@Produces(MediaType.APPLICATION_JSON)
 	public ListaResponse<CursoView> listarCursoDisponible(
 			@QueryParam("idAlumno") @DefaultValue("74") Long idAlumno) throws NoSuchFieldException, AppException {
@@ -63,7 +63,7 @@ public class CursoResource extends BaseResource<Curso, CursoService> {
 	
 	/**Trae los curso en el cual el alumno con idAlumno esta inscripto**/
 	@GET
-	@Path("/listaCursoInscripto")
+	@Path("listaCursoInscripto")
 	@Produces(MediaType.APPLICATION_JSON)
 	public ListaResponse<CursoView> listarCursoInscriptos(
 			@QueryParam("idAlumno") @DefaultValue("45") Long idAlumno) throws NoSuchFieldException, AppException {

@@ -20,10 +20,12 @@ import model.Ejercicio;
 import model.Log;
 import model.Material;
 import model.Resuelto;
+import model.Sesion;
 import service.AsignaturaService;
 import service.EjercicioService;
 import service.LogService;
 import service.ResueltoService;
+import service.SesionService;
 import utils.AppException;
 import utils.EjercicioView;
 import utils.RespuestaCriterio;
@@ -52,6 +54,9 @@ public class EjercicioResource extends
 
 	@Inject
 	private AdministracionBase admService;
+	
+	@Inject
+	private SesionService sesionService;
 
 	@Override
 	public EjercicioService getService() {
@@ -251,7 +256,14 @@ public class EjercicioResource extends
 		resuelto.setIdEjercicio(respuestaEjercicio.getIdEjercicio());
 		resuelto.setIdTarea(respuestaEjercicio.getIdTarea());
 		resuelto.setRespuesta(respuestaEjercicio.getRespuesta());
-		resuelto.setEsPrimerTest(true);
+		
+		Sesion seAnterior = sesionService.sesionAnterior(respuestaEjercicio.getIdAlumno(), respuestaEjercicio.getIdTarea()); 
+		if(seAnterior.getTestFinal())
+			resuelto.setTestFinal(true);
+		else
+			resuelto.setEsPrimerTest(true);
+		
+		
 		resueltoService.insertar(resuelto, httpRequest);
 
 		return retorno;

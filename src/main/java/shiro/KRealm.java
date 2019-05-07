@@ -44,7 +44,7 @@ public class KRealm extends AuthorizingRealm {
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token)
             throws AuthenticationException {
     	
-    	System.out.println("estoy en krealm authenticationinfo");
+    	System.out.println("estoy en krealm authenticationinfo 1");
         
         UsernamePasswordToken upToken = (UsernamePasswordToken) token;
         String username = upToken.getUsername();
@@ -55,7 +55,7 @@ public class KRealm extends AuthorizingRealm {
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection prins) {
 
-    	System.out.println("estoy en krealm authrizationinfo");
+    	System.out.println("estoy en krealm authrizationinfo 2");
         SimpleAuthorizationInfo info = null;        
         
         try {

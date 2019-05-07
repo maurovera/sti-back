@@ -63,6 +63,10 @@ public class Alumno extends BaseEntity implements Serializable {
 	
 	@Column(name = "tipo")
 	private Double tipo;
+	
+
+	@Column(name = "estilo_actual")
+	private String estiloActual;
 
 	
 	/*campos agregados para user**/
@@ -247,7 +251,15 @@ public class Alumno extends BaseEntity implements Serializable {
 		this.publico = publico;
 	}
 	
-	
+
+	public String getEstiloActual() {
+		return estiloActual;
+	}
+
+	public void setEstiloActual(String estiloActual) {
+		this.estiloActual = estiloActual;
+	}
+
 	@Override
 	public boolean equals(Object object) {
 		// TODO: Warning - this method won't work in the case the id fields are

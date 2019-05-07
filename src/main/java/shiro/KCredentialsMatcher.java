@@ -46,17 +46,19 @@ public class KCredentialsMatcher extends SimpleCredentialsMatcher {
             user.setPassword(encryptedToken);
             Context ctx = new InitialContext();
             service = (UsuarioService) ctx.lookup(Constantes.EJB_JNDI_USUARIO_SERVICE);
-            Usuario usuario = service.findByNombrePassword(user);
-            System.out.println("usuario no nulo en context:"+usuario.getId());
+            Usuario usuario = new Usuario();
+            usuario = service.findByNombrePassword(user);
+           
             if (usuario != null) {
+            	System.out.println("usuario no nulo");
                 return true;
             }
-            return false;
 
         } catch (Exception ex) {
             ex.printStackTrace();
             return false;
         }
+		return false;
 
     }
 }

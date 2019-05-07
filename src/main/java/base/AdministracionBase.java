@@ -526,6 +526,24 @@ public class AdministracionBase {
 		// }
 
 	}
+	
+	/**Genera un backup del archivo alumno con su asignatura.
+	 * Este contiene su resultado en test 1 y test 2 */
+	public void backupDelAlumno(Long idAsignatura, Long idAlumno, Long idTarea) {
+		// TODO Auto-generated method stub
+		/** Llama a la red de asignatura para crear el backup**/
+		String nombreRed = "red_alumno_" + idAlumno + 
+				"_asignatura_"+ idAsignatura+".xdsl";
+		Network net = new Network();
+		net.readFile(dir + nombreRed);
+
+		
+		/**Se crea la red del alumno backupeado*/
+		String nombreRedAlumno = "backup_red_alumno_" + idAlumno 
+				+ "_asignatura_" + idAsignatura  
+				+ "_tarea_"+ idTarea +".xdsl";
+		net.writeFile(dir +  "backup/"+ nombreRedAlumno);
+	}
 
 	/** Metodo para el log **/
 	public List<Object> registrarEjercicio(Asignatura asignatura,

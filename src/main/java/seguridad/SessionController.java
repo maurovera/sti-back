@@ -12,12 +12,15 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import model.Alumno;
+
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.session.Session;
 import org.apache.shiro.subject.Subject;
 
+import service.AlumnoService;
 import shiro.Credenciales;
 import shiro.LoginResponse;
 import utils.AppException;
@@ -30,6 +33,9 @@ public class SessionController {
 
 	@EJB
 	UsuarioService usuarioService;
+
+	@EJB
+	AlumnoService alumnoService;
 
 	@EJB
 	RolPermisoService rolPermisoService;
@@ -60,9 +66,22 @@ public class SessionController {
 			if (usuario.getRol() != null) {
 				permisos = rolPermisoService.getPermisos(usuario.getRol());
 			}
+
+			/**
+			 * Obtenemos el logeo del alumno, para profesor siempre retornara
+			 * true.
+			 */
+			Boolean mostrar = true;
+			if (usuario.getIdAlumno() != null) {
+				Alumno alumno = alumnoService.obtener(usuario.getIdAlumno());
+				if (alumno.getEstilo().getId() != null) {
+					mostrar = false;
+				}
+			}
+
 			LoginResponse resp = new LoginResponse(usuario.getId(),
 					usuario.getNombre(), permisos, usuario.getRol(),
-					usuario.getIdAlumno(), usuario.getIdProfesor());
+					usuario.getIdAlumno(), usuario.getIdProfesor(), mostrar);
 			return ok(resp);
 		}
 	}
@@ -86,8 +105,20 @@ public class SessionController {
 	private Response autenticar(Credenciales credenciales) throws AppException {
 
 		try {
-
+			
 			String username = credenciales.getUsername();
+            String password = credenciales.getPassword();
+
+            UsernamePasswordToken token = new UsernamePasswordToken(username, password);
+            Subject currentUser = SecurityUtils.getSubject();
+            currentUser.login(token);
+            Usuario usuario = usuarioService.findByName(username);
+            SecurityUtils.getSubject().getSession().setAttribute("usuario", usuario);
+            token.setRememberMe(true);
+			
+			
+
+			/*String username = credenciales.getUsername();
 			String password = credenciales.getPassword();
 			Subject currentUser = SecurityUtils.getSubject();
 			UsernamePasswordToken token = new UsernamePasswordToken(username,
@@ -95,48 +126,52 @@ public class SessionController {
 			// this is all you have to do to support 'remember me' (no config -
 			// built in!):
 			Usuario usuario = usuarioService.findByName(username);
-			if (usuario != null)
-				System.out.println("usuario salido de service: "
-						+ usuario.getId() + "rol numero: " + usuario.getRol()
-						+ " idalumno: " + usuario.getIdAlumno());
+			if(usuario !=null)
+            	System.out.println("usuario salido de service: "+ usuario.getId());
 
-			/**Aqui guardamos**/
-			Integer rol = usuario.getRol();
-			Long idAlu = usuario.getIdAlumno();
-			Long idProfe = usuario.getIdProfesor();
-			
 			Session session = currentUser.getSession();
 			session.setAttribute("usuario", usuario);
 			token.setRememberMe(true);
 			currentUser.login(token);
-
-			/*
-			 * UsernamePasswordToken token = new UsernamePasswordToken(username,
-			 * password);
-			 * 
-			 * 
-			 * System.out.println("token :"+ token.toString()); Subject
-			 * currentUser = SecurityUtils.getSubject();
-			 * System.out.println("current :"+ currentUser.hashCode());
-			 * currentUser.login(token); Usuario usuario =
-			 * usuarioService.findByName(username); if(usuario == null){
-			 * System.out.println("usuarionulo"); }
-			 * System.out.println("usuario :"+ usuario.getUsername());
-			 * SecurityUtils.getSubject().getSession().setAttribute("usuario",
-			 * usuario); token.setRememberMe(true);
-			 */
-
+			*/
+            
 			Respuesta res = new Respuesta(false, Mensajes.USUARIO_NO_ENCONTRADO);
 			if (usuario != null) {
+
+				Long idAlu = null;
+				Integer rol = null;
+				Long idProfe = null;
+				Boolean mostrar = true;
+
+				System.out.println("usuario salido de service: "
+						+ usuario.getId() + "rol numero: " + usuario.getRol()
+						+ " idalumno: " + usuario.getIdAlumno());
+
+				/** Aqui guardamos **/
+				rol = usuario.getRol();
+				idAlu = usuario.getIdAlumno();
+				idProfe = usuario.getIdProfesor();
+
+				/** siempre sera true para profesor y alumno **/
+
+				if (usuario.getIdAlumno() != null) {
+					Alumno alumno = alumnoService.obtener(idAlu);
+					if (alumno.getEstilo() != null) {
+						mostrar = false;
+					}
+				}
+
 				System.out.println("usuario es distinto de null");
+
 				List<String> permisos = new ArrayList<String>();
 				if (usuario.getRol() != null) {
 					permisos = rolPermisoService.getPermisos(usuario.getRol());
 				}
 				res = new LoginResponse(usuario.getId(), usuario.getNombre(),
-						permisos, rol, idAlu,idProfe);
+						permisos, rol, idAlu, idProfe, mostrar);
 				return ok(res);
 			}
+			
 			return unauthorized(res);
 
 		} catch (IncorrectCredentialsException e) {

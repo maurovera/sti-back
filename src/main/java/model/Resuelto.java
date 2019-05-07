@@ -39,6 +39,8 @@ public class Resuelto extends BaseEntity implements Serializable {
 	
 	private Boolean esCorrecto;
 	
+	private Boolean testFinal;
+	
 	private Long idConcepto;
 	
 	@Column(name = "es_primer_test")
@@ -152,6 +154,14 @@ public class Resuelto extends BaseEntity implements Serializable {
 
 	public void setNivelFinal(Double nivelFinal) {
 		this.nivelFinal = nivelFinal;
+	}
+
+	public Boolean getTestFinal() {
+		return testFinal;
+	}
+
+	public void setTestFinal(Boolean testFinal) {
+		this.testFinal = testFinal;
 	}
 	
 	

@@ -26,10 +26,16 @@ public class SesionDAO extends BaseDAO<Sesion> {
 		System.out.println("Sesion anterior dao");
 		
 		// Query para traer la sesion anterior
+		Boolean estado = new Boolean(false);
 		Sesion sesionAnterior = null;
-		Query query = em.createQuery("Select s from Sesion s where s.alumno.id = :alumno and s.tarea.id = :tarea  order by s.id desc");
+		Query query = em.createQuery("Select s from Sesion s where "
+				+ "s.alumno.id = :alumno and "
+				+ "s.tarea.id = :tarea and " 
+				+ "s.estadoTerminado= :estado "
+				+ " order by s.id desc");
 		query.setParameter("alumno", idAlumno);
 		query.setParameter("tarea", idTarea);
+		query.setParameter("estado", estado);
 		query.setMaxResults(1);
 		//Sesion sesionAnterior = (Sesion) query.getSingleResult();
 		List results = query.getResultList();

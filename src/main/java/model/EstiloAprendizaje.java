@@ -8,6 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.DynamicInsert;
 
@@ -46,6 +47,13 @@ public class EstiloAprendizaje extends BaseEntity implements Serializable {
     @Column(name = "resultado_k")
     private Integer resultadoK;
 
+    @Column(name = "id_alumno")
+    private Long idAlumno; 
+    
+    @Column(name = "usado")
+    private Boolean usado; 
+    
+    
 	public Long getId() {
 		return id;
 	}
@@ -100,6 +108,22 @@ public class EstiloAprendizaje extends BaseEntity implements Serializable {
 
 	public void setResultadoK(Integer resultadoK) {
 		this.resultadoK = resultadoK;
+	}
+
+	public Long getIdAlumno() {
+		return idAlumno;
+	}
+
+	public void setIdAlumno(Long idAlumno) {
+		this.idAlumno = idAlumno;
+	}
+
+	public Boolean getUsado() {
+		return usado;
+	}
+
+	public void setUsado(Boolean usado) {
+		this.usado = usado;
 	}
 
 	

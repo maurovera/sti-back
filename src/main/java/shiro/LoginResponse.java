@@ -16,6 +16,7 @@ public class LoginResponse extends Respuesta {
 	private Integer rol;
     private Long idAlumno;
     private Long idProfesor;
+    private Boolean mostrar;
     
     
 	public LoginResponse() {
@@ -34,7 +35,7 @@ public class LoginResponse extends Respuesta {
 		this.permisos = permisos;
 	}
 	
-	public LoginResponse(Long userId, String usuario, List<String> permisos, Integer rol, Long idAlumno, Long idProfesor) {
+	public LoginResponse(Long userId, String usuario, List<String> permisos, Integer rol, Long idAlumno, Long idProfesor, Boolean mostrar) {
 		super(true, null);
 		this.userId = userId;
 		this.usuario = usuario;
@@ -42,6 +43,7 @@ public class LoginResponse extends Respuesta {
 		this.rol = rol;
 		this.idAlumno = idAlumno;
 		this.idProfesor = idProfesor;
+		this.mostrar = mostrar;
 	}
 
 	public Long getUserId() {
@@ -90,6 +92,14 @@ public class LoginResponse extends Respuesta {
 
 	public void setIdProfesor(Long idProfesor) {
 		this.idProfesor = idProfesor;
+	}
+
+	public Boolean getMostrar() {
+		return mostrar;
+	}
+
+	public void setMostrar(Boolean mostrar) {
+		this.mostrar = mostrar;
 	}
 	
 	

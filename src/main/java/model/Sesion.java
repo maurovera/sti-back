@@ -62,6 +62,9 @@ public class Sesion extends BaseEntity implements Serializable {
 	@Column(name = "estado_terminado")
 	private Boolean estadoTerminado;
 
+	@Column(name = "test_final")
+	private Boolean testFinal;
+	
 	@JoinColumn(name = "tarea", referencedColumnName = "id_tarea")
 	@ManyToOne
 	private Tarea tarea;
@@ -217,7 +220,14 @@ public class Sesion extends BaseEntity implements Serializable {
 		this.listaSesionConceptos = listaSesionConceptos;
 	}
 	
-	
+	public Boolean getTestFinal() {
+		return testFinal;
+	}
+
+	public void setTestFinal(Boolean testFinal) {
+		this.testFinal = testFinal;
+	}
+
 	public SesionConcepto traerSesionConcepto(Long idConcepto){
 		SesionConcepto sc = new SesionConcepto();
 		for (SesionConcepto sesionConcepto : getListaSesionConceptos()) 

@@ -6,6 +6,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
+import model.Alumno;
 import model.Camino;
 import model.Concepto;
 import seguridad.Usuario;
@@ -23,6 +24,8 @@ public class CaminoService extends BaseServiceImpl<Camino, CaminoDAO> {
 	AdministracionBase adm;
 	@Inject
 	private ConceptoService conceptoService;
+	@Inject
+	private AlumnoService alumnoService;
 
 
 	@Override
@@ -43,6 +46,12 @@ public class CaminoService extends BaseServiceImpl<Camino, CaminoDAO> {
 		Camino camino = dao.caminoAnterior(idAlumno, idTarea, idConcepto,
 				idAsig);
 		if (camino == null) {
+			
+			/**Traemos alumno*/
+			
+			Alumno alumno = alumnoService.obtener(idAlumno);
+			String estiloAsignado = alumno.getEstiloActual();
+			/**Creamos camino nuevo*/
 			Usuario user = getCurrentUser();
 			camino = new Camino();
 			System.out.println("camino nulo. Se crea un nuevo camino");
@@ -54,7 +63,8 @@ public class CaminoService extends BaseServiceImpl<Camino, CaminoDAO> {
 			camino.setIpCreacion(httpRequest.getRemoteAddr());
 			camino.setParar(false);
 			/**Aqui es estatico**/
-			camino.setEstilo("visual");
+			//camino.setEstilo("visual");
+			camino.setEstilo(estiloAsignado);
 			camino.setIdAlumno(idAlumno);
 			camino.setIdAsignatura(idAsig);
 			camino.setIdConcepto(idConcepto);

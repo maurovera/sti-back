@@ -53,6 +53,7 @@ public class SesionService extends BaseServiceImpl<Sesion, SesionDAO> {
 			sesion.setIpCreacion(httpRequest.getRemoteAddr());
 			sesion.setEntrada(new Date(System.currentTimeMillis()));
 			sesion.setEstadoTerminado(false);
+			sesion.setTestFinal(false);
 			sesion.setCantidadEjerciciosResueltos(0);
 			sesion.setCantidadIntentos(0);
 			Alumno alumno = alumnoService.obtener(idAlumno);
@@ -100,6 +101,39 @@ public class SesionService extends BaseServiceImpl<Sesion, SesionDAO> {
 			
 			return sesion;
 		
+	}
+	
+	/**
+	 * registrar la sesion final. donde varia en que se llama solo en un lugar 
+	 * y tambien que test final es true
+	 * **/
+	public Sesion registrarSesionFinal(Long idAlumno, Long idTarea, HttpServletRequest httpRequest)
+			throws AppException {
+		Sesion sesion = new Sesion();
+		try {
+			
+			Usuario user = getCurrentUser();
+			sesion.setFechaCreacion(new Date());
+			sesion.setUsuarioCreacion(user.getId());
+			sesion.setIpCreacion(httpRequest.getRemoteAddr());
+			sesion.setEntrada(new Date(System.currentTimeMillis()));
+			sesion.setEstadoTerminado(false);
+			sesion.setTestFinal(true);
+			sesion.setCantidadEjerciciosResueltos(0);
+			sesion.setCantidadIntentos(0);
+			Alumno alumno = alumnoService.obtener(idAlumno);
+			Tarea tarea = tareaService.obtener(idTarea);
+			sesion.setAlumno(alumno);
+			sesion.setTarea(tarea);
+			System.out.println("llegue aqui antes del validate");
+			validate(sesion);
+			dao.insert(sesion);
+			
+		} catch (Exception e) {
+			throw new AppException(500, e.getMessage());
+		}
+
+		return sesion;
 	}
 	
 

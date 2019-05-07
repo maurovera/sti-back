@@ -1,5 +1,6 @@
 package service;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -14,7 +15,6 @@ import model.Alumno;
 import model.Asignatura;
 import model.Camino;
 import model.Concepto;
-import model.Curso;
 import model.Ejercicio;
 import model.Evidencia;
 import model.Material;
@@ -24,7 +24,6 @@ import model.Sesion;
 import model.SesionConcepto;
 import model.Tarea;
 import utils.AppException;
-import utils.CursoView;
 import utils.EjercicioView;
 import utils.HerramientasDrools;
 import utils.Regla;
@@ -77,6 +76,11 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 
 	@Inject
 	private CaminoService caminoService;
+	
+	@Inject
+	private EstiloAprendizajeService estiloService;
+	
+	final String DIR = "/home/mauro/proyectos/tesis/sti-back/src/main/resources/redes/backup/";
 
 	// private SessionService session;
 	final private long userId = 1;
@@ -487,6 +491,42 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 			System.out.println("esEjercicio es: " + respuesta.getEsEjercicio());
 		}
 
+		
+		/**analizamos si en session le damos cierre y modificamos
+		 * Creamos una nueva sesion tambien pero con el dato de testfinal true*/
+		if(respuesta.isExitoso()){
+			Sesion sesionNuevo = sesionService.sesionAnterior(idAlumno, idTarea);
+			/**solo si la sesion no termino cambio */
+			if(!sesionNuevo.getEstadoTerminado()){
+				sesionNuevo.setEstadoTerminado(true);
+				sesionService.modificar(sesionNuevo.getId(), sesionNuevo, httpRequest);
+			}
+			
+			/**Aqui copiamos la red bayesiana si no existe
+			 * hacemos el backup
+			 * y por ultimo registramos la sesion nueva que seria el final
+			 **/
+			String nombreBackup  = "backup_red_alumno_"+
+			 idAlumno.toString()+
+			 "_asignatura_"+
+			 idAsignatura.toString()+
+			 ".xdsl";
+			File archivoOriginal = new File(DIR + nombreBackup);
+			if (!archivoOriginal.exists()) {
+				/**si no existe el archivo crear uno*/
+				System.out.println("adm.backupDelAlumno, se hace el bacup");
+				adm.backupDelAlumno(idAsignatura, idAlumno, idTarea);
+				System.out.println("admBase.crearRedAlumno, se reinicia su arbol");
+				adm.crearRedAlumno(idAsignatura, idAlumno);
+				System.out.println("Se registra la sesion final");
+				sesionService.registrarSesionFinal(idAlumno, idTarea, httpRequest);
+			}
+			else {
+				if (archivoOriginal.isFile()) System.out.println("El archivo existe");
+			}
+			
+		}
+			
 		return respuesta;
 
 	}
@@ -781,23 +821,57 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 			Double valorNodo = adm.getValorNodoRedDouble(nombreConcepto,
 					idAsignatura, idAlumno);
 			/** Si alcanzo el margen se setea resuelto **/
+			Boolean limiteMargen = false;
 			if (valorNodo >= sesionConcepto.getMargen()) {
 
 				System.out.println("alcanzo el margen: " + c.getNombre()
 						+ " valor: " + valorNodo);
 				sesionConcepto.setResuelto(true);
 				camino.setParar(true);
+				limiteMargen = true;
 				System.out
 						.println("este es tu ultimo ejercicio. Alcanzo el margen requerido: "
 								+ nombreConcepto);
 
 			}
 			/** Se setea parar en camino si alcanzo su cantidad de intentos **/
+			Boolean limiteIntentos = false;
 			if (intentosC >= sesionConcepto.getTotal()) {
 				camino.setParar(true);
+				limiteIntentos = true;
+				
 				System.out
 						.println("este es tu ultimo ejercicio. se acabaron las oportunidades"
 								+ "para este concepto: " + nombreConcepto);
+			}
+			
+			/**Se comprueba si tiene segundo estilo
+			 * si lleno al limite de margen no  hace falta hacer nada**/
+			if(limiteMargen){
+				System.out.println("ya se resolvio este tema. entre en limite margen ");
+			}else{
+				System.out.println("no se resolvio este tema. entre en comprobar limiteIntentos ");
+				//se trae el alumno
+				Alumno alumno = alumnoService.obtener(idAlumno);
+				// usado es si ya se uso el segundo estilo si tiene
+				Boolean usado = alumno.getEstilo().getUsado();
+				String segundo = alumno.getEstilo().getSegundoEstilo();
+				
+				System.out.println("usado: "+ usado);
+				System.out.println("segundo: "+ segundo);
+				// si lleno al limite de intentos y usado es null
+				if(limiteIntentos && usado == null && segundo != null){
+					System.out.println("tiene segundo estilo de aprendizaje");
+					String segundoEstilo = alumno.getEstilo().getSegundoEstilo();
+					alumno.setEstiloActual(segundoEstilo);
+					alumno.getEstilo().setUsado(true);
+					// reinicia el sessionConcepto asi nunca sale del concepto
+					sesionConcepto.setIntentos(1);
+					// aqui ya se modifica alumno. porque aqui se usa
+					alumnoService.modificar(idAlumno, alumno, httpRequest);
+				}else{
+					System.out.println("no tiene segundo estilo de aprendizaje");
+				}
 			}
 
 			/** Si respondio bien */
@@ -817,7 +891,6 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 				camino.setEsEjercicio(true);
 				System.out.println("ejercicio: " + idEjercicio.toString());
 				camino.setSecuenciaEjercicio(idEjercicio.toString());
-
 				/**
 				 * preguntamos si anterior es M, si es m se registra una
 				 * evidencia
@@ -842,7 +915,7 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 			sesionConceptoService.modificar(sesionConcepto.getId(),
 					sesionConcepto, httpRequest);
 			caminoService.modificar(camino.getId(), camino, httpRequest);
-
+		
 		}
 
 		return retorno;

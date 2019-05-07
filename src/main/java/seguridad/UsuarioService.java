@@ -120,6 +120,7 @@ public class UsuarioService extends BaseServiceImpl<Usuario, UsuarioDAO> {
 	}
 
 	public Usuario findByNombrePassword(Usuario user) {
+		
 		return getDao().findByNombrePassword(user);
 	}
 
