@@ -1,6 +1,10 @@
 package resource;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -28,6 +32,7 @@ import service.ResueltoService;
 import service.SesionService;
 import utils.AppException;
 import utils.EjercicioView;
+import utils.Regla;
 import utils.RespuestaCriterio;
 import utils.RespuestaEjercicio;
 import base.AdministracionBase;
@@ -54,7 +59,7 @@ public class EjercicioResource extends
 
 	@Inject
 	private AdministracionBase admService;
-	
+
 	@Inject
 	private SesionService sesionService;
 
@@ -155,6 +160,7 @@ public class EjercicioResource extends
 	/**
 	 * Recurso para traer el siguiente ejercicio. Tiene que ser query para ser
 	 * del front
+	 * @throws AppException 
 	 **/
 
 	/*
@@ -177,20 +183,21 @@ public class EjercicioResource extends
 	public Ejercicio siguienteEjercicioPrimerTest(
 			@QueryParam("idAsignatura") Long idAsignatura,
 			@QueryParam("idTarea") Long idTarea,
-			@QueryParam("idAlumno") Long idAlumno) {
+			@QueryParam("idAlumno") Long idAlumno){
 
 		Ejercicio dto = null;
-		try {
-			dto = getService().siguienteEjercicioPrimerTest(idTarea, idAlumno,
-					idAsignatura);
+		dto = getService().siguienteEjercicioPrimerTest(idTarea, idAlumno,
+				idAsignatura, httpRequest);
+		
+		if (dto != null) {
 			System.out.println("el siguiente ejercicio es: " + dto.toString());
-		} catch (Exception e) {
-			throw new WebApplicationException(e.getMessage(),
-					Response.Status.INTERNAL_SERVER_ERROR);
-		}
-		if (dto == null) {
-			throw new WebApplicationException(Response.Status.NOT_FOUND);
-		}
+		 //throw new WebApplicationException(Response.Status.NOT_FOUND);
+		 }else{
+			 System.out.println("ejercicio nulo resource");
+		 }
+		
+		
+
 		return dto;
 
 	}
@@ -209,16 +216,17 @@ public class EjercicioResource extends
 		Boolean retorno = null;
 
 		Resuelto resuelto = new Resuelto();
-		
-		/**Quitamos el nombre de la asignatura y tambien su nodo valor inicial**/
-		Asignatura asignaturaResuelto =  asignaturaService.obtener(respuestaEjercicio.getIdAsignatura());
+
+		/** Quitamos el nombre de la asignatura y tambien su nodo valor inicial **/
+		Asignatura asignaturaResuelto = asignaturaService
+				.obtener(respuestaEjercicio.getIdAsignatura());
 		String nombreAsignatura = asignaturaResuelto.getNombre();
-		Double valorInicialR = admService.getValorNodoRedDouble(nombreAsignatura, 
-				respuestaEjercicio.getIdAsignatura(), 
+		Double valorInicialR = admService.getValorNodoRedDouble(
+				nombreAsignatura, respuestaEjercicio.getIdAsignatura(),
 				respuestaEjercicio.getIdAlumno());
 		resuelto.setNivelInicial(valorInicialR);
-		
-		/**Aqui recien se responde */
+
+		/** Aqui recien se responde */
 		retorno = getService().responderEjercicio(
 				respuestaEjercicio.getIdTarea(),
 				respuestaEjercicio.getIdAlumno(),
@@ -245,8 +253,8 @@ public class EjercicioResource extends
 		/**
 		 * Una vez que responde el ejercicio se guarda el ejercicio resuelto
 		 **/
-		Double valorFinalR = admService.getValorNodoRedDouble(nombreAsignatura, 
-				respuestaEjercicio.getIdAsignatura(), 
+		Double valorFinalR = admService.getValorNodoRedDouble(nombreAsignatura,
+				respuestaEjercicio.getIdAsignatura(),
 				respuestaEjercicio.getIdAlumno());
 		resuelto.setNivelFinal(valorFinalR);
 		resuelto.setEsMaterial(false);
@@ -256,14 +264,15 @@ public class EjercicioResource extends
 		resuelto.setIdEjercicio(respuestaEjercicio.getIdEjercicio());
 		resuelto.setIdTarea(respuestaEjercicio.getIdTarea());
 		resuelto.setRespuesta(respuestaEjercicio.getRespuesta());
-		
-		Sesion seAnterior = sesionService.sesionAnterior(respuestaEjercicio.getIdAlumno(), respuestaEjercicio.getIdTarea()); 
-		if(seAnterior.getTestFinal())
+
+		Sesion seAnterior = sesionService.sesionAnterior(
+				respuestaEjercicio.getIdAlumno(),
+				respuestaEjercicio.getIdTarea());
+		if (seAnterior.getTestFinal())
 			resuelto.setTestFinal(true);
 		else
 			resuelto.setEsPrimerTest(true);
-		
-		
+
 		resueltoService.insertar(resuelto, httpRequest);
 
 		return retorno;
@@ -376,19 +385,18 @@ public class EjercicioResource extends
 	public Boolean responderEjercicioTutor(RespuestaEjercicio respuestaEjercicio)
 			throws AppException {
 
-		/**Quitamos el nombre de la asignatura y tambien su nodo valor inicial**/
+		/** Quitamos el nombre de la asignatura y tambien su nodo valor inicial **/
 		Resuelto resuelto = new Resuelto();
-		Asignatura asignaturaResuelto =  asignaturaService.obtener(respuestaEjercicio.getIdAsignatura());
+		Asignatura asignaturaResuelto = asignaturaService
+				.obtener(respuestaEjercicio.getIdAsignatura());
 		String nombreAsignatura = asignaturaResuelto.getNombre();
-		Double valorInicialR = admService.getValorNodoRedDouble(nombreAsignatura, 
-				respuestaEjercicio.getIdAsignatura(), 
+		Double valorInicialR = admService.getValorNodoRedDouble(
+				nombreAsignatura, respuestaEjercicio.getIdAsignatura(),
 				respuestaEjercicio.getIdAlumno());
 		resuelto.setNivelInicial(valorInicialR);
-		
-		
+
 		System.out.println("estoy en responderEjercicioTutor resource");
 		Boolean retorno = null;
-		
 
 		retorno = getService().responderEjercicioTutor(
 				respuestaEjercicio.getIdTarea(),
@@ -424,8 +432,8 @@ public class EjercicioResource extends
 		/**
 		 * Una vez que responde el ejercicio se guarda el ejercicio resuelto
 		 **/
-		Double valorFinalR = admService.getValorNodoRedDouble(nombreAsignatura, 
-				respuestaEjercicio.getIdAsignatura(), 
+		Double valorFinalR = admService.getValorNodoRedDouble(nombreAsignatura,
+				respuestaEjercicio.getIdAsignatura(),
 				respuestaEjercicio.getIdAlumno());
 		resuelto.setNivelFinal(valorFinalR);
 		resuelto.setEsMaterial(false);
@@ -490,14 +498,14 @@ public class EjercicioResource extends
 	@Produces(MediaType.APPLICATION_JSON)
 	public Boolean responderMaterial(RespuestaEjercicio respuestaEjercicio)
 			throws AppException {
-		
-		
-		/**Quitamos el nombre de la asignatura y tambien su nodo valor inicial**/
+
+		/** Quitamos el nombre de la asignatura y tambien su nodo valor inicial **/
 		Resuelto resuelto = new Resuelto();
-		Asignatura asignaturaResuelto =  asignaturaService.obtener(respuestaEjercicio.getIdAsignatura());
+		Asignatura asignaturaResuelto = asignaturaService
+				.obtener(respuestaEjercicio.getIdAsignatura());
 		String nombreAsignatura = asignaturaResuelto.getNombre();
-		Double valorInicialR = admService.getValorNodoRedDouble(nombreAsignatura, 
-				respuestaEjercicio.getIdAsignatura(), 
+		Double valorInicialR = admService.getValorNodoRedDouble(
+				nombreAsignatura, respuestaEjercicio.getIdAsignatura(),
 				respuestaEjercicio.getIdAlumno());
 		resuelto.setNivelInicial(valorInicialR);
 
@@ -532,8 +540,8 @@ public class EjercicioResource extends
 		/**
 		 * Una vez que responde el ejercicio se guarda el ejercicio resuelto
 		 **/
-		Double valorFinalR = admService.getValorNodoRedDouble(nombreAsignatura, 
-				respuestaEjercicio.getIdAsignatura(), 
+		Double valorFinalR = admService.getValorNodoRedDouble(nombreAsignatura,
+				respuestaEjercicio.getIdAsignatura(),
 				respuestaEjercicio.getIdAlumno());
 		resuelto.setNivelFinal(valorFinalR);
 		resuelto.setEsMaterial(true);
@@ -549,54 +557,64 @@ public class EjercicioResource extends
 		return retorno;
 
 	}
-	
-	//##########INFORMES####################################################
-	
-	/**Trae la lista de resuelto por un alumno de una tarea de una asignatura
-	 * en el primer test donde se quita el nivel**/
+
+	// ##########INFORMES####################################################
+
+	/**
+	 * Trae la lista de resuelto por un alumno de una tarea de una asignatura en
+	 * el primer test donde se quita el nivel
+	 **/
 	@GET
 	@Path("/listaResueltoInicial")
 	@Produces(MediaType.APPLICATION_JSON)
 	public ListaResponse<Resuelto> listarResueltoTestIncial(
 			@QueryParam("idAlumno") @DefaultValue("63") Long idAlumno,
-			@QueryParam("idTarea") @DefaultValue("1") Long idTarea
-			) throws NoSuchFieldException, AppException {
+			@QueryParam("idTarea") @DefaultValue("1") Long idTarea)
+			throws NoSuchFieldException, AppException {
 		System.out.println("Listar resultados de primer test resource");
-		
+
 		return getService().listarResueltoTestIncial(idAlumno, idTarea);
-	
+
 	}
-	
-	/**Trae la lista de resuelto por un alumno de una tarea de una asignatura
-	 * en el test tutor donde se quita el nivel**/
+
+	/**
+	 * Trae la lista de resuelto por un alumno de una tarea de una asignatura en
+	 * el test tutor donde se quita el nivel
+	 **/
 	@GET
 	@Path("/listaResueltoTestTutor")
 	@Produces(MediaType.APPLICATION_JSON)
 	public ListaResponse<Resuelto> listarResueltoTestTutor(
 			@QueryParam("idAlumno") @DefaultValue("63") Long idAlumno,
-			@QueryParam("idTarea") @DefaultValue("1") Long idTarea
-			) throws NoSuchFieldException, AppException {
+			@QueryParam("idTarea") @DefaultValue("1") Long idTarea)
+			throws NoSuchFieldException, AppException {
 		System.out.println("Listar resultados de test tutor resource");
-		
+
 		return getService().listarResueltoTesttutor(idAlumno, idTarea);
-	
+
 	}
-	
-	
-	/**Trae la lista de camino recorrido por el alumno en el test tutor
-	 * donde se trae su nivel inicial y final por concepto**/
+
+	/**
+	 * Trae la lista de camino recorrido por el alumno en el test tutor donde se
+	 * trae su nivel inicial y final por concepto
+	 **/
 	@GET
 	@Path("/listaCamino")
 	@Produces(MediaType.APPLICATION_JSON)
 	public ListaResponse<Camino> listarCamino(
 			@QueryParam("idAlumno") @DefaultValue("63") Long idAlumno,
-			@QueryParam("idTarea") @DefaultValue("1") Long idTarea
-			) throws NoSuchFieldException, AppException {
+			@QueryParam("idTarea") @DefaultValue("1") Long idTarea)
+			throws NoSuchFieldException, AppException {
 		System.out.println("Listar caminos de test tutor resource");
-		
+
 		return getService().listarCamino(idAlumno, idTarea);
-	
+
 	}
-	//############FIN DE INFORMES#####################################
+	// ############FIN DE INFORMES#####################################
+
+	// ejercicio disponible
+	/***
+	 * Lista de ejercicios disponibles. Ejemplo
+	 * **/
 
 }

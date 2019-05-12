@@ -76,10 +76,10 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 
 	@Inject
 	private CaminoService caminoService;
-	
+
 	@Inject
 	private EstiloAprendizajeService estiloService;
-	
+
 	final String DIR = "/home/mauro/proyectos/tesis/sti-back/src/main/resources/redes/backup/";
 
 	// private SessionService session;
@@ -330,9 +330,10 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 	 * @return Ejercicio
 	 **/
 	public Ejercicio siguienteEjercicioPrimerTest(Long idTarea, Long idAlumno,
-			Long idAsignatura) throws AppException {
+			Long idAsignatura, HttpServletRequest httpRequest) {
+		Ejercicio siguienteEjercicio = null;
 		try {
-			Ejercicio siguienteEjercicio = null;
+			
 
 			// datos tarea, alumno, asi
 			Tarea tarea = tareaService.obtener(idTarea);
@@ -341,16 +342,25 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 
 			/*** Se obtiene el siguiente ejercicio ***/
 			siguienteEjercicio = admAlumno.getSiguienteEjercicioPrimerTest(
-					tarea, alumno, idAsignatura, asig);
+					tarea, alumno, idAsignatura, asig, httpRequest);
 
-			System.out.println("\n#####################Ejercicio: "
-					+ siguienteEjercicio + " \n##############");
+			if (siguienteEjercicio == null) {
+				System.out.println("####Ejercicio nulo#####");
+				//siguienteEjercicio = admAlumno.getSiguienteEjercicioPrimerTest(
+						//tarea, alumno, idAsignatura, asig, httpRequest);
+
+			}
+			// System.out.println("\n#####################Ejercicio: "
+			// + siguienteEjercicio + " \n##############");
 
 			return siguienteEjercicio;
 
-		} catch (Exception e) {
-			throw new AppException(500, e.getMessage());
+		} catch (AppException e1) {
+
+			e1.printStackTrace();
 		}
+		return siguienteEjercicio;
+
 	}
 
 	/***
@@ -491,42 +501,44 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 			System.out.println("esEjercicio es: " + respuesta.getEsEjercicio());
 		}
 
-		
-		/**analizamos si en session le damos cierre y modificamos
-		 * Creamos una nueva sesion tambien pero con el dato de testfinal true*/
-		if(respuesta.isExitoso()){
-			Sesion sesionNuevo = sesionService.sesionAnterior(idAlumno, idTarea);
-			/**solo si la sesion no termino cambio */
-			if(!sesionNuevo.getEstadoTerminado()){
+		/**
+		 * analizamos si en session le damos cierre y modificamos Creamos una
+		 * nueva sesion tambien pero con el dato de testfinal true
+		 */
+		if (respuesta.isExitoso()) {
+			Sesion sesionNuevo = sesionService
+					.sesionAnterior(idAlumno, idTarea);
+			/** solo si la sesion no termino cambio */
+			if (!sesionNuevo.getEstadoTerminado()) {
 				sesionNuevo.setEstadoTerminado(true);
-				sesionService.modificar(sesionNuevo.getId(), sesionNuevo, httpRequest);
+				sesionService.modificar(sesionNuevo.getId(), sesionNuevo,
+						httpRequest);
 			}
-			
-			/**Aqui copiamos la red bayesiana si no existe
-			 * hacemos el backup
-			 * y por ultimo registramos la sesion nueva que seria el final
+
+			/**
+			 * Aqui copiamos la red bayesiana si no existe hacemos el backup y
+			 * por ultimo registramos la sesion nueva que seria el final
 			 **/
-			String nombreBackup  = "backup_red_alumno_"+
-			 idAlumno.toString()+
-			 "_asignatura_"+
-			 idAsignatura.toString()+
-			 ".xdsl";
+			String nombreBackup = "backup_red_alumno_" + idAlumno.toString()
+					+ "_asignatura_" + idAsignatura.toString() + ".xdsl";
 			File archivoOriginal = new File(DIR + nombreBackup);
 			if (!archivoOriginal.exists()) {
-				/**si no existe el archivo crear uno*/
+				/** si no existe el archivo crear uno */
 				System.out.println("adm.backupDelAlumno, se hace el bacup");
 				adm.backupDelAlumno(idAsignatura, idAlumno, idTarea);
-				System.out.println("admBase.crearRedAlumno, se reinicia su arbol");
+				System.out
+						.println("admBase.crearRedAlumno, se reinicia su arbol");
 				adm.crearRedAlumno(idAsignatura, idAlumno);
 				System.out.println("Se registra la sesion final");
-				sesionService.registrarSesionFinal(idAlumno, idTarea, httpRequest);
+				sesionService.registrarSesionFinal(idAlumno, idTarea,
+						httpRequest);
+			} else {
+				if (archivoOriginal.isFile())
+					System.out.println("El archivo existe");
 			}
-			else {
-				if (archivoOriginal.isFile()) System.out.println("El archivo existe");
-			}
-			
+
 		}
-			
+
 		return respuesta;
 
 	}
@@ -839,38 +851,44 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 			if (intentosC >= sesionConcepto.getTotal()) {
 				camino.setParar(true);
 				limiteIntentos = true;
-				
+
 				System.out
 						.println("este es tu ultimo ejercicio. se acabaron las oportunidades"
 								+ "para este concepto: " + nombreConcepto);
 			}
-			
-			/**Se comprueba si tiene segundo estilo
-			 * si lleno al limite de margen no  hace falta hacer nada**/
-			if(limiteMargen){
-				System.out.println("ya se resolvio este tema. entre en limite margen ");
-			}else{
-				System.out.println("no se resolvio este tema. entre en comprobar limiteIntentos ");
-				//se trae el alumno
+
+			/**
+			 * Se comprueba si tiene segundo estilo si lleno al limite de margen
+			 * no hace falta hacer nada
+			 **/
+			if (limiteMargen) {
+				System.out
+						.println("ya se resolvio este tema. entre en limite margen ");
+			} else {
+				System.out
+						.println("no se resolvio este tema. entre en comprobar limiteIntentos ");
+				// se trae el alumno
 				Alumno alumno = alumnoService.obtener(idAlumno);
 				// usado es si ya se uso el segundo estilo si tiene
 				Boolean usado = alumno.getEstilo().getUsado();
 				String segundo = alumno.getEstilo().getSegundoEstilo();
-				
-				System.out.println("usado: "+ usado);
-				System.out.println("segundo: "+ segundo);
+
+				System.out.println("usado: " + usado);
+				System.out.println("segundo: " + segundo);
 				// si lleno al limite de intentos y usado es null
-				if(limiteIntentos && usado == null && segundo != null){
+				if (limiteIntentos && usado == null && segundo != null) {
 					System.out.println("tiene segundo estilo de aprendizaje");
-					String segundoEstilo = alumno.getEstilo().getSegundoEstilo();
+					String segundoEstilo = alumno.getEstilo()
+							.getSegundoEstilo();
 					alumno.setEstiloActual(segundoEstilo);
 					alumno.getEstilo().setUsado(true);
 					// reinicia el sessionConcepto asi nunca sale del concepto
 					sesionConcepto.setIntentos(1);
 					// aqui ya se modifica alumno. porque aqui se usa
 					alumnoService.modificar(idAlumno, alumno, httpRequest);
-				}else{
-					System.out.println("no tiene segundo estilo de aprendizaje");
+				} else {
+					System.out
+							.println("no tiene segundo estilo de aprendizaje");
 				}
 			}
 
@@ -881,7 +899,7 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 				 * porque es un ejercicio que Acerto en cambio si falla no se
 				 * actualiza.
 				 */
-				//camino.setNivelInicial(valorNodo);
+				// camino.setNivelInicial(valorNodo);
 				camino.setNivelEvidencia(valorNodo);
 				/** seteamos los campos de camino si acierta el ejercicio **/
 				String anterior = camino.getAnterior();
@@ -915,7 +933,7 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 			sesionConceptoService.modificar(sesionConcepto.getId(),
 					sesionConcepto, httpRequest);
 			caminoService.modificar(camino.getId(), camino, httpRequest);
-		
+
 		}
 
 		return retorno;
@@ -1123,7 +1141,7 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 				idAsignatura, idAlumno);
 
 		/** Se actualiza su nivel */
-		//camino.setNivelInicial(valorNodo);
+		// camino.setNivelInicial(valorNodo);
 		camino.setNivelEvidencia(valorNodo);
 		camino.setAnterior(camino.getActual());
 		camino.setActual("E");
@@ -1142,62 +1160,60 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 	 * 
 	 * @throws AppException
 	 **/
-	public ListaResponse<Resuelto> listarResueltoTestIncial(Long idAlumno, Long idTarea) throws AppException {
+	public ListaResponse<Resuelto> listarResueltoTestIncial(Long idAlumno,
+			Long idTarea) throws AppException {
 		System.out.println("listar resueltos en el primer test service");
 		/** Lista de resuelto view a ser devueltos. */
-		
+
 		ListaResponse<Resuelto> respuesta = new ListaResponse<Resuelto>();
 
-		/***Trae todo los cursos sin distincion*/
+		/*** Trae todo los cursos sin distincion */
 		respuesta = getDao().listarResueltoPrimerTest(idAlumno, idTarea);
 
-				
 		return respuesta;
 	}
-	
-	//####################FIN DE RESULTADOS DEL PRIMER TEST#############
-	
+
+	// ####################FIN DE RESULTADOS DEL PRIMER TEST#############
+
 	// ################INICIO DE RESULTADOS DEL TEST TUTOR############
-		/**
-		 * Lista los resultados del test tutor
-		 * 
-		 * @throws AppException
-		 **/
-		public ListaResponse<Resuelto> listarResueltoTesttutor(Long idAlumno, Long idTarea) throws AppException {
-			System.out.println("listar resueltos en el  test tutor service");
-			/** Lista de resuelto view a ser devueltos. */
-			
-			ListaResponse<Resuelto> respuesta = new ListaResponse<Resuelto>();
+	/**
+	 * Lista los resultados del test tutor
+	 * 
+	 * @throws AppException
+	 **/
+	public ListaResponse<Resuelto> listarResueltoTesttutor(Long idAlumno,
+			Long idTarea) throws AppException {
+		System.out.println("listar resueltos en el  test tutor service");
+		/** Lista de resuelto view a ser devueltos. */
 
-			/***Trae todo los cursos sin distincion*/
-			respuesta = getDao().listarResueltoTestTutor(idAlumno, idTarea);
+		ListaResponse<Resuelto> respuesta = new ListaResponse<Resuelto>();
 
-					
-			return respuesta;
-		}
-		
-		//####################FIN DE RESULTADOS DEL TEST TUTOR#############
-		
-		
-		// ################INICIO DE RESULTADOS DEL CAMINO############
-		/**
-		 * Lista los resultados del CAMINO EN EL SEGUNDO TEST
-		 * 
-		 * @throws AppException
-		 **/
-		public ListaResponse<Camino> listarCamino(Long idAlumno, Long idTarea) throws AppException {
-			System.out.println("listar camino del segundo test service");
-			
-			
-			ListaResponse<Camino> respuesta = new ListaResponse<Camino>();
+		/*** Trae todo los cursos sin distincion */
+		respuesta = getDao().listarResueltoTestTutor(idAlumno, idTarea);
 
-			/***Trae todo los caminos sin distincion*/
-			respuesta = getDao().listarCamino(idAlumno, idTarea);
+		return respuesta;
+	}
 
-					
-			return respuesta;
-		}
-		
-		//####################FIN DE RESULTADOS DEL TEST TUTOR#############
+	// ####################FIN DE RESULTADOS DEL TEST TUTOR#############
+
+	// ################INICIO DE RESULTADOS DEL CAMINO############
+	/**
+	 * Lista los resultados del CAMINO EN EL SEGUNDO TEST
+	 * 
+	 * @throws AppException
+	 **/
+	public ListaResponse<Camino> listarCamino(Long idAlumno, Long idTarea)
+			throws AppException {
+		System.out.println("listar camino del segundo test service");
+
+		ListaResponse<Camino> respuesta = new ListaResponse<Camino>();
+
+		/*** Trae todo los caminos sin distincion */
+		respuesta = getDao().listarCamino(idAlumno, idTarea);
+
+		return respuesta;
+	}
+
+	// ####################FIN DE RESULTADOS DEL TEST TUTOR#############
 
 }
