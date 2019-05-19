@@ -182,9 +182,10 @@ public class SimulacionService extends
 	 * Simulacion de carga de alumnos y que hagan la primera prueba
 	 ***/
 	public String simulacionAlumnosPrueba(HttpServletRequest httpRequest,
-			Integer inicio, Integer fin) throws AppException {
+			Long idAsig, Integer inicio, Integer fin) throws AppException {
 
-		Long numero = new Long(1);
+		//Long numero = new Long(1);
+		Long numero = idAsig;
 		Asignatura asig = asignaturaService.obtener(numero);
 		Curso c = cursoService.obtener(numero);
 		// creacion de varios alumnos inscritos al curso C
@@ -273,8 +274,8 @@ public class SimulacionService extends
 			throws AppException {
 
 		Asignatura asig = new Asignatura();
-		asig.setNombre("matematica");
-		asig.setDescripcion("prueba de asignatua");
+		asig.setNombre("Asignatura_Materiales");
+		asig.setDescripcion("prueba de materiales");
 		asignaturaService.insertar(asig, httpRequest);
 
 		System.out.println("idAsignatura: " + asig.getId());
@@ -619,6 +620,8 @@ public class SimulacionService extends
 		Tarea tarea01 = new Tarea();
 		tarea01.setCantidadEjercicioParada(5);
 		tarea01.setCurso(c);
+		tarea01.setMargenConocimiento(new Double(0.6));
+		tarea01.setTotalIntentos(5);
 		tarea01.setDescripcion("Tarea01 de prueba");
 		tarea01.setEstadoTarea(false);
 		tarea01.setNombre("Tarea01");
@@ -629,6 +632,8 @@ public class SimulacionService extends
 		Tarea tarea02 = new Tarea();
 		tarea02.setCantidadEjercicioParada(5);
 		tarea02.setCurso(c);
+		tarea02.setMargenConocimiento(new Double(0.6));
+		tarea02.setTotalIntentos(5);
 		tarea02.setDescripcion("Tarea02 de prueba");
 		tarea02.setEstadoTarea(false);
 		tarea02.setNombre("Tarea02");
@@ -862,7 +867,7 @@ public class SimulacionService extends
 		}
 
 		// ws.terminarTarea(idSesion);
-		sesion.setEstadoTerminado(true);
+		//sesion.setEstadoTerminado(true);
 		sesionService.modificar(sesion.getId(), sesion, httpRequest);
 
 	}
@@ -957,7 +962,7 @@ public class SimulacionService extends
 		// Long idAsig = new Long(4);
 		// Long idAlu = new Long(37);
 
-		Double valorFijadoProfesor = new Double(0.70);
+		Double valorFijadoProfesor = new Double(0.6);
 		List<Concepto> conceptosAEvaluar = new ArrayList<Concepto>();
 
 		/**
@@ -1018,7 +1023,7 @@ public class SimulacionService extends
 		/** Concepto umbral definido aqui. **/
 		Double conceptoUmbral = new Double("0.70");
 		int x = 1; // bandera para controlar la cantidad de intentos.
-		int cantidadIntentos = 7; // esto deberia ser
+		int cantidadIntentos = 5; // esto deberia ser
 									// tarea.getCantidadIntentos.
 		boolean pasoPorMaterial = false;
 		String respuestaEjercicio = null;

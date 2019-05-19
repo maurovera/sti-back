@@ -79,11 +79,11 @@ public class SimulacionResource extends
 	 * crea alumnos con la asignatura 1 y curso 1 y hace el primer test
 	 * **/
 	@GET
-	@Path("/simulacion04/{inicio}/{fin}")
+	@Path("/simulacion04/{idAsig}/{inicio}/{fin}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String simulacion04(@PathParam("inicio") Integer inicio, @PathParam("fin") Integer fin) throws NoSuchFieldException, AppException {
+	public String simulacion04(@PathParam("idAsig") Long idAsig,@PathParam("inicio") Integer inicio, @PathParam("fin") Integer fin) throws NoSuchFieldException, AppException {
 		System.out.println("simulacion de carga de alumnos y primer test");
-		return service.simulacionAlumnosPrueba(httpRequest,inicio,fin);
+		return service.simulacionAlumnosPrueba(httpRequest,idAsig,inicio,fin);
 	}
 
 	/**

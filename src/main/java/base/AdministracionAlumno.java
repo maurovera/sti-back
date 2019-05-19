@@ -824,8 +824,12 @@ public class AdministracionAlumno {
 			try {
 				sesionAnterior = sesionService
 						.sesionAnterior(idAlumno, idTarea);
-				System.out.println("tamaño ejercicios: "
-						+ sesionAnterior.getListaEjercicio().size());
+				
+				if(sesionAnterior == null){
+					System.out.println("puta lista es nula");
+				}else{
+					System.out.println("que puta lo que pasa");
+				}
 			} catch (AppException e) {
 				System.out.println("No se pudo obtener la sesion");
 				e.printStackTrace();

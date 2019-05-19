@@ -175,7 +175,7 @@ public class Sesion extends BaseEntity implements Serializable {
 
 	// @JsonBackReference(value="ejercicios-sesion")
 	public List<Ejercicio> getListaEjercicio() {
-		return listaEjercicio;
+		return this.listaEjercicio;
 	}
 
 	public void setListaEjercicio(List<Ejercicio> listaEjercicio) {

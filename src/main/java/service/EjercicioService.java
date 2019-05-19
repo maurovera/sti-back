@@ -414,7 +414,7 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 
 		Integer resuelto = sesion.getcantidadEjerciciosResueltos();
 		// hacemos cantidadParada en menos 1 porque resuelto empieza en 0
-		cantidadParada -= 1;
+		//cantidadParada -= 1;
 		if (resuelto >= cantidadParada)
 			retorno = true;
 
@@ -982,7 +982,7 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 		// material a devolver
 		Material material = new Material();
 
-		material = aplicarReglaMaterial(camino, hd, idTarea, idAlu);
+		material = aplicarReglaMaterial(camino, hd, idTarea, idAlu, idAsig);
 		if (material == null)
 			System.out.println("salte porque no existe material disponible");
 
@@ -1001,7 +1001,7 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 	 * @Return {@link Class} Material
 	 ***/
 	private Material aplicarReglaMaterial(Camino camino, HerramientasDrools hd,
-			Long idTarea, Long idAlu) throws AppException {
+			Long idTarea, Long idAlu, Long idAsig) throws AppException {
 
 		Material material = new Material();
 
@@ -1070,6 +1070,7 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 			 * Atencion. Aqui suele fallar. y trae material nulo. Cuando trae
 			 * material nulo es cuando falla. OJOOOO REVISAR
 			 **/
+			r.setIdAsignatura(idAsig);
 			material = materialService.materialesDisponibles(materiales, r);
 			if (material == null) {
 				System.out.println("ya no tengo material disponible");

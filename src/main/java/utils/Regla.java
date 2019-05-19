@@ -14,6 +14,7 @@ public class Regla {
 	private String ejercioValido;
 	private Character prioridad;
 	private String resultado;
+	private Long idAsignatura;
 	private List<RespuestaRegla> listaRespuestaRegla = new ArrayList<RespuestaRegla>();
 
 	public Regla(String materialAMostrar, String concepto, String nivel,
@@ -123,5 +124,14 @@ public class Regla {
 		listaRespuestaRegla.add(r);
 
 	}
+
+	public Long getIdAsignatura() {
+		return idAsignatura;
+	}
+
+	public void setIdAsignatura(Long idAsignatura) {
+		this.idAsignatura = idAsignatura;
+	}
+	
 
 }

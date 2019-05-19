@@ -52,22 +52,26 @@ public class MaterialDAO extends BaseDAO<Material> {
 
 			q = em.createQuery("SELECT distinct m FROM Material m " + "WHERE"
 					+ " m.concepto =:concepto " + "AND m.nivel =:nivel "
+					+ "AND m.idAsignatura =:asignatura "
 					+ "AND m.estilo =:estilo");
 
 			q.setParameter("concepto", regla.getConcepto());
 			q.setParameter("nivel", regla.getNivel());
 			q.setParameter("estilo", regla.getEstilo());
+			q.setParameter("asignatura", regla.getIdAsignatura());
 			
 		} else {
 			q = em.createQuery("SELECT distinct m FROM Material m " + "WHERE"
 					+ " m not in :listaMateriales "
 					+ "AND m.concepto =:concepto " + "AND m.nivel =:nivel "
+					+ "AND m.idAsignatura =:asignatura "
 					+ "AND m.estilo =:estilo");
 
 			q.setParameter("listaMateriales", listaMateriales);
 			q.setParameter("concepto", regla.getConcepto());
 			q.setParameter("nivel", regla.getNivel());
 			q.setParameter("estilo", regla.getEstilo());
+			q.setParameter("asignatura", regla.getIdAsignatura());
 			
 		}
 		

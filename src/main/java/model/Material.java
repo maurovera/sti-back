@@ -54,6 +54,20 @@ public class Material extends BaseEntity implements Serializable {
 	@Column(name = "estrategia")
 	private String estrategia;
 	
+	@Column(name = "fuente")
+	private Boolean fuente;
+	
+	@Column(name = "tipo")
+	private String tipo;
+	
+	@Column(name = "nombre_enlace")
+	private String nombreEnlace;
+	
+	
+	@Column(columnDefinition = "text", name = "origen")
+	private String origen;
+	
+	
 	@Transient
 	private Boolean esRegla;
 
@@ -127,6 +141,38 @@ public class Material extends BaseEntity implements Serializable {
 
 	public void setEsRegla(Boolean esRegla) {
 		this.esRegla = esRegla;
+	}
+
+	public Boolean getFuente() {
+		return fuente;
+	}
+
+	public void setFuente(Boolean fuente) {
+		this.fuente = fuente;
+	}
+
+	public String getTipo() {
+		return tipo;
+	}
+
+	public void setTipo(String tipo) {
+		this.tipo = tipo;
+	}
+
+	public String getOrigen() {
+		return origen;
+	}
+
+	public void setOrigen(String origen) {
+		this.origen = origen;
+	}
+
+	public String getNombreEnlace() {
+		return nombreEnlace;
+	}
+
+	public void setNombreEnlace(String nombreEnlace) {
+		this.nombreEnlace = nombreEnlace;
 	}
 	
 	

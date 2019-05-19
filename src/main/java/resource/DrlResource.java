@@ -152,11 +152,11 @@ public class DrlResource  extends BaseResource<Drl, DrlService>{
 	 **/
 	
 	@GET
-	@Path("/generarReglasDrl")
+	@Path("/generarReglasDrl/{idAsig}/{idCurso}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response guardarReglasDrl(
-			@QueryParam("idAsig") @DefaultValue("1") Long idAsig,
-			@QueryParam("idCurso") @DefaultValue("1") Long idCurso) {
+			@PathParam("idAsig") @DefaultValue("1") Long idAsig,
+			@PathParam("idCurso") @DefaultValue("1") Long idCurso) {
 		try {
 			System.out.println("Resource insertar archivo drl");
 			getService().guardarReglasDrl(idAsig, idCurso, httpRequest);
