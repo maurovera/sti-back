@@ -101,6 +101,7 @@ public class DrlService extends BaseServiceImpl<Drl, DrlDAO> {
 		System.out.println(hw.getDrl());
 		String drl = hw.getDrl();
 		d.setArchivoDrl(drl);
+		d.setAsignatura(idAsig);
 		
 		// se inserta el archivo drl
 		d = insertarDrl(d, httpRequest);
@@ -125,4 +126,17 @@ public class DrlService extends BaseServiceImpl<Drl, DrlDAO> {
 		}
 	}
 	
+	
+	/**
+	 * Obtiene el ultimo archivo drl por asignatura
+	 **/
+	public Drl ultimoDrl(Long idAsignatura) throws AppException {
+		Drl drl = null;
+		try {
+			drl =  getDao().ultimoDrl(idAsignatura);
+			return drl;
+		} catch (Exception e) {
+			throw new AppException(500, e.getMessage());
+		}
+	}
 }

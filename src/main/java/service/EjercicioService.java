@@ -15,6 +15,7 @@ import model.Alumno;
 import model.Asignatura;
 import model.Camino;
 import model.Concepto;
+import model.Drl;
 import model.Ejercicio;
 import model.Evidencia;
 import model.Material;
@@ -971,7 +972,9 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 			throws AppException {
 
 		/** Aqui inicia el motor drools. Esto no deberia estar aqui. **/
-		String archivo = drlService.obtenerArchivo(idArchivo);
+		//String archivo = drlService.obtenerArchivo(idArchivo);
+		Drl drl = drlService.ultimoDrl(idAsig);
+		String archivo = drl.getArchivoDrl();
 		HerramientasDrools hd = drlService.iniciarDrools(archivo);
 		/**
 		 * Trae un camino anterior o un camino nuevo para busqueda de materiales
