@@ -19,8 +19,8 @@ import dao.LogDAO;
 public class LogService extends BaseServiceImpl<Log, LogDAO> {
 
 	
-	final String direccionArchivo = "/home/mauro/proyectos/tesis/sti-back/src/main/resources/archivoLog/";
-
+	//final String direccionArchivo = "/home/mauro/proyectos/tesis/sti-back/src/main/resources/archivoLog/";
+	final String direccionArchivo = "/home/catherine/tesis/sti-back/src/main/resources/archivoLog/";
 	@Inject
 	private LogDAO dao;
 

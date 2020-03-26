@@ -53,7 +53,7 @@ public class DrlResource extends BaseResource<Drl, DrlService> {
 			// d.setArchivoDrl("Hola mundo pude meterllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll todo esto en laklsdflasdknflkasdjnflkjndsflkjnadsflkadsnlkfnasdlkfjnasdlkjfnasdlknfladskjfnlkasdjnflkasdnflkasjndflkajndflkasdjnflkajdnsflkjnadflkjnds base de datos");
 
 			HerramientasWeka hw = new HerramientasWeka(
-					"/home/mauro/proyectos/tesis/sti-back/src/main/resources/archivoWeka/weka_1.csv");
+					"/home/catherine/tesis/sti-back/src/main/resources/archivoWeka/weka_1.csv");
 			hw.ejecutar();
 			System.out.println(hw.getDrl());
 			String drl = hw.getDrl();
@@ -87,10 +87,10 @@ public class DrlResource extends BaseResource<Drl, DrlService> {
 
 			hd.iniciarSession();
 			Regla r = new Regla();
-			r.setConcepto("division");
+			r.setConcepto("intranet");
 			r.setNivel("bajo");
-			r.setEstilo("visual");
-			r.setSecuenciaEjercicios("E105");
+			r.setEstilo("auditivo");
+			r.setSecuenciaEjercicios("E286");
 			r.setSecuenciaVideos("vacio");
 
 			hd.ejecutarRegla(r);
@@ -176,4 +176,19 @@ public class DrlResource extends BaseResource<Drl, DrlService> {
 		return getService().ultimoDrl(idAsignatura);
 	}
 
+	
+	/** Obtener el ultimo drl por asignatura */
+	@GET
+	@Path("/iguales")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String iguales()
+			throws NoSuchFieldException, AppException {
+		
+		System.out.println("son iguales");
+
+		return getService().iguales();
+	}
+
+	
+	
 }

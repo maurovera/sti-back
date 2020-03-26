@@ -40,16 +40,20 @@ public class Curso extends BaseEntity implements Serializable {
 	@Column(name = "nombre")
 	private String nombre;
 
-	@Column(name = "descripcion")
+	//@Column(name = "descripcion")
+	@Column(columnDefinition = "text", name = "descripcion")
 	private String descripcion;
 
-	@Column(name = "introduccion")
+	//@Column(name = "introduccion")
+	@Column(columnDefinition = "text", name = "introduccion")
 	private String introduccion;
 	
-	@Column(name = "acerca_de")
+	//@Column(name = "acerca_de")
+	@Column(columnDefinition = "text", name = "acerca_de")
 	private String acerca_de;
 	
-	@Column(name = "para_quienes")
+	//@Column(name = "para_quienes")
+	@Column(columnDefinition = "text", name = "para_quienes")
 	private String para_quienes;
 	
 	@Column(name = "calif_alumn")

@@ -41,15 +41,16 @@ public class MaterialResource extends BaseResource<Material, MaterialService> {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Material listarMaterialesDisponibles() throws NoSuchFieldException, AppException {
 		System.out.println("Listar materiales disponibles");
-		Material m = service.obtener(new Long(58));
-		Material m2 = service.obtener(new Long(55));
+		Material m = service.obtener(new Long(1));
+		
 		List<Material> materiales = new ArrayList<Material>();
 		materiales.add(m);
-		materiales.add(m2);
+		
 		Regla regla = new Regla();
-		regla.setConcepto("division");
+		regla.setConcepto("intranet");
 		regla.setNivel("bajo");
 		regla.setEstilo("visual");
+		regla.setIdAsignatura(new Long(1));
 		return getService().materialesDisponibles(materiales, regla);
 	}
 }

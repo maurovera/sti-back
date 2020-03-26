@@ -2,6 +2,7 @@ package dao;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import javax.ejb.Stateless;
 import javax.persistence.Query;
@@ -53,7 +54,7 @@ public class MaterialDAO extends BaseDAO<Material> {
 			q = em.createQuery("SELECT distinct m FROM Material m " + "WHERE"
 					+ " m.concepto =:concepto " + "AND m.nivel =:nivel "
 					+ "AND m.idAsignatura =:asignatura "
-					+ "AND m.estilo =:estilo");
+					+ "AND m.estilo =:estilo order By m.id");
 
 			q.setParameter("concepto", regla.getConcepto());
 			q.setParameter("nivel", regla.getNivel());
@@ -65,7 +66,7 @@ public class MaterialDAO extends BaseDAO<Material> {
 					+ " m not in :listaMateriales "
 					+ "AND m.concepto =:concepto " + "AND m.nivel =:nivel "
 					+ "AND m.idAsignatura =:asignatura "
-					+ "AND m.estilo =:estilo");
+					+ "AND m.estilo =:estilo order By m.id");
 
 			q.setParameter("listaMateriales", listaMateriales);
 			q.setParameter("concepto", regla.getConcepto());
@@ -83,7 +84,20 @@ public class MaterialDAO extends BaseDAO<Material> {
 			//throw new AppException(404, "Not Found lista materiales");
 		}else{
 			System.out.println("lista retorno no nula. ver que valor trae esa mierda: ");
-			materialR = listaRetorno.get(0);
+			//materialR = listaRetorno.get(0);
+			/**Fecha: 11/09/2019
+			 * Cambiamos que no se seleccione el primer elemento libre de la lista. 
+			 **
+			 */
+			Random aleatorio = new Random(System.currentTimeMillis());
+			int intAletorio = aleatorio.nextInt(listaRetorno.size());
+			materialR = listaRetorno.get(intAletorio);
+			//////////////////////////////////////////////////////////////////
+			
+			for (Material material : listaRetorno) {
+				System.out.println("material: "+ material.getId());
+				
+			}
 			System.out.println("material seleccionado: " + materialR.getId());
 		}
 

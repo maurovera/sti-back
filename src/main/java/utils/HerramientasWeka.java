@@ -199,8 +199,8 @@ public class HerramientasWeka {
 		r.append("ImprimirRegla.writeTODO('" + regla.getMaterialAMostrar() + "','"
 				+ regla.getEjercioValido() + "');\n");
 		r.append("regla.setResultado('"+regla.getMaterialAMostrar() + "');\n" );
-		r.append("regla.addRespuestaRegla('" + regla.getMaterialAMostrar() + "','"
-				+ regla.getPrioridad() + "');\n");
+		//r.append("regla.addRespuestaRegla('" + regla.getMaterialAMostrar() + "','"
+			//	+ regla.getPrioridad() + "');\n");
 		r.append("end\n\n");
 
 	}

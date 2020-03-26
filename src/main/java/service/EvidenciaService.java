@@ -17,8 +17,8 @@ import dao.EvidenciaDAO;
 @Stateless
 public class EvidenciaService extends BaseServiceImpl<Evidencia, EvidenciaDAO> {
 
-	final String direccionArchivo = "/home/mauro/proyectos/tesis/sti-back/src/main/resources/archivoWeka/";
-
+	//final String direccionArchivo = "/home/mauro/proyectos/tesis/sti-back/src/main/resources/archivoWeka/";
+	final String direccionArchivo = "/home/catherine/tesis/sti-back/src/main/resources/archivoWeka/";
 	
 	@Inject
 	private EvidenciaDAO dao;

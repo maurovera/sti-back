@@ -1,5 +1,6 @@
 package base;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,7 +16,8 @@ import utils.Separador;
 @Stateless
 public class AdministracionBase {
 
-	final String dir = "/home/mauro/proyectos/tesis/sti-back/src/main/resources/redes/";
+	//final String dir = "/home/mauro/proyectos/tesis/sti-back/src/main/resources/redes/";
+	final String dir = "/home/catherine/tesis/sti-back/src/main/resources/redes/";
 	Separador sp = new Separador();
 
 	public AdministracionBase() {
@@ -545,6 +547,28 @@ public class AdministracionBase {
 		net.writeFile(dir +  "backup/"+ nombreRedAlumno);
 	}
 
+	
+	
+	/**Genera un backup del archivo alumno con su asignatura.
+	 * Este contiene su resultado en test 1 y test 2 */
+	public void backupDelPrimerTestAlumno(Long idAsignatura, Long idAlumno, Long idTarea) {
+		// TODO Auto-generated method stub
+		/** Llama a la red de asignatura para crear el backup**/
+		String nombreRed = "red_alumno_" + idAlumno + 
+				"_asignatura_"+ idAsignatura+".xdsl";
+		Network net = new Network();
+		net.readFile(dir + nombreRed);
+
+		
+		/**Se crea la red del alumno backupeado*/
+		String nombreRedAlumno = "backup_PrimerTest_red_alumno_" + idAlumno 
+				+ "_asignatura_" + idAsignatura  
+				+ "_tarea_"+ idTarea +".xdsl";
+		net.writeFile(dir +  "backupPrimerTest/"+ nombreRedAlumno);
+	}
+
+	
+	
 	/** Metodo para el log **/
 	public List<Object> registrarEjercicio(Asignatura asignatura,
 			Long idAlumno, Ejercicio ejercicio, Boolean respuesta,
@@ -645,6 +669,107 @@ public class AdministracionBase {
 		return conoce;
 
 	}
+	
+	
+	
+	/** Utilizado para saber valor de red**/
+	public String getValorNodoRedError(String nombre, Long idAsignatura,
+			Long idAlumno) {
+		// TODO Auto-generated method stub
+		String nombreRed = "red_alumno_" + idAlumno + "_asignatura_"
+				+ idAsignatura + ".xdsl";
+
+		Network net = new Network();
+		net.readFile(dir+"errores/" + nombreRed);
+
+		net.updateBeliefs();
+		String titulo = sp.convertirEspacioToGuion(nombre);
+		// System.out.println(titulo);
+		double[] valor = net.getNodeValue(titulo);
+		double[] va = net.getNodeValue("tenondera");
+		
+		double conoce = valor[1];
+		
+		String retorno1 = "primer valor sin nada: "+ Double.toString(conoce)+"/N";
+		
+		return retorno1;
+
+	}
+	/** Utilizado para saber valor de red 2**/
+	public String getValorNodoRedErrorEvidencia(String nombre, Long idAsignatura,
+			Long idAlumno) {
+		// TODO Auto-generated method stub
+		
+		String nombreRed = "red_alumno_" + idAlumno + "_asignatura_"
+				+ idAsignatura + ".xdsl";
+
+		Network net = new Network();
+		net.readFile(dir+"errores/" + nombreRed);
+		//double[] values = net.getNodeValue("tenondera");
+		//String retorno1 = "primer valor sin evidencia: "+ String.valueOf(values[1])+"/n";
+		
+		net.setEvidence("tenondera", "Conoce");
+		
+		net.updateBeliefs();
+		double[] values = net.getNodeValue("tenondera");
+		double conoce = values[1];
+		double nconoce = values[0];
+		String retorno2 = "conoce con evidencia: "+ String.valueOf(conoce)+"/n";
+		String retorno1 = "No conoce con evidencia: "+ String.valueOf(nconoce)+"/n";
+		net.clearEvidence("tenondera");
+		net.updateBeliefs();
+
+		String r = retorno2+retorno1;
+		
+		return r;
+		
+	}
+
+	
+	/** Utilizado para el log **/
+	public String getValorNodoRedFinal(String nombre, Long idAsignatura,
+			Long idAlumno) {
+		// TODO Auto-generated method stub
+		String nombreRed = "red_alumno_" + idAlumno + "_asignatura_"
+				+ idAsignatura + "_tarea_1.xdsl";
+
+		Network net = new Network();
+		net.readFile("/home/catherine/tesis/sti-back/src/main/resources/redes/pruebasRedesTest/backup_PrimerTest_" + nombreRed);
+		net.updateBeliefs();
+		String titulo = sp.convertirEspacioToGuion(nombre);
+		// System.out.println(titulo);
+		double[] valor = net.getNodeValue(titulo);
+
+		double conoce = valor[1];
+
+		return Double.toString(conoce);
+
+	}
+	
+	/**Retorna el double resultados finales*/
+	public Double getValorNodoRedDoubleFinales(String nombre, Long idAsignatura,
+			Long idAlumno) {
+		// TODO Auto-generated method stub
+		String nombreRed = "red_alumno_" + idAlumno + "_asignatura_"
+				+ idAsignatura + "_tarea_1.xdsl";
+
+		Network net = new Network();
+		net.readFile("/home/catherine/tesis/sti-back/src/main/resources/redes/pruebasRedesTest/backup_PrimerTest_" + nombreRed);
+
+		net.updateBeliefs();
+		String titulo = sp.convertirEspacioToGuion(nombre);
+		// System.out.println(titulo);
+		double[] valor = net.getNodeValue(titulo);
+
+		double conoce = valor[1];
+
+		return conoce;
+
+	}
+	
+	
+	
+	
 
 	
 	

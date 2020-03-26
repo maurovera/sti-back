@@ -37,7 +37,8 @@ public class Respuesta extends BaseEntity implements Serializable {
 	@Column(name = "id_respuesta")
 	private Long id;
 
-	@Column(name = "descripcion")
+	//@Column(name = "descripcion")
+	@Column(columnDefinition = "text", name = "descripcion")
 	private String descripcion;
 
 	@JsonIgnore

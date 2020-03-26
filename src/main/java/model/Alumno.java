@@ -44,10 +44,12 @@ public class Alumno extends BaseEntity implements Serializable {
 	@Column(name = "nivel_actual")
 	private String nivelActual;
 
-	@Column(name = "nombres")
+	//@Column(name = "nombres")
+	@Column(columnDefinition = "text", name = "nombres")
 	private String nombres;
 
-	@Column(name = "apellidos")
+	//@Column(name = "apellidos")
+	@Column(columnDefinition = "text", name = "apellidos")
 	private String apellidos;
 
 	@Size(max = 1)

@@ -34,7 +34,8 @@ public class Asignatura extends BaseEntity implements Serializable {
 	@Column(name = "nombre")
 	private String nombre;
 
-	@Column(name = "descripcion")
+	//@Column(name = "descripcion")
+	@Column(columnDefinition = "text", name = "descripcion")
 	private String descripcion;
 
     @org.codehaus.jackson.annotate.JsonIgnore

@@ -2,9 +2,9 @@ package resource;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -23,16 +23,20 @@ import model.Camino;
 import model.Ejercicio;
 import model.Log;
 import model.Material;
+import model.Respuesta;
 import model.Resuelto;
 import model.Sesion;
+import seguridad.SessionController;
 import service.AsignaturaService;
+import service.DrlService;
 import service.EjercicioService;
 import service.LogService;
 import service.ResueltoService;
 import service.SesionService;
+import service.SimulacionService;
+import shiro.Credenciales;
 import utils.AppException;
 import utils.EjercicioView;
-import utils.Regla;
 import utils.RespuestaCriterio;
 import utils.RespuestaEjercicio;
 import base.AdministracionBase;
@@ -49,6 +53,9 @@ public class EjercicioResource extends
 	private EjercicioService service;
 
 	@Inject
+	private SessionController controladorService;
+
+	@Inject
 	private LogService logService;
 
 	@Inject
@@ -63,6 +70,17 @@ public class EjercicioResource extends
 	@Inject
 	private SesionService sesionService;
 
+	@Inject
+	private EjercicioService ejercicioService;
+	
+	@Inject
+	private DrlService drlService;
+	
+
+	@Inject
+	private SimulacionService simulacionService;
+	
+	
 	@Override
 	public EjercicioService getService() {
 		// TODO Auto-generated method stub
@@ -160,7 +178,8 @@ public class EjercicioResource extends
 	/**
 	 * Recurso para traer el siguiente ejercicio. Tiene que ser query para ser
 	 * del front
-	 * @throws AppException 
+	 * 
+	 * @throws AppException
 	 **/
 
 	/*
@@ -183,20 +202,18 @@ public class EjercicioResource extends
 	public Ejercicio siguienteEjercicioPrimerTest(
 			@QueryParam("idAsignatura") Long idAsignatura,
 			@QueryParam("idTarea") Long idTarea,
-			@QueryParam("idAlumno") Long idAlumno){
+			@QueryParam("idAlumno") Long idAlumno) {
 
 		Ejercicio dto = null;
 		dto = getService().siguienteEjercicioPrimerTest(idTarea, idAlumno,
 				idAsignatura, httpRequest);
-		
+
 		if (dto != null) {
 			System.out.println("el siguiente ejercicio es: " + dto.toString());
-		 //throw new WebApplicationException(Response.Status.NOT_FOUND);
-		 }else{
-			 System.out.println("ejercicio nulo resource");
-		 }
-		
-		
+			// throw new WebApplicationException(Response.Status.NOT_FOUND);
+		} else {
+			System.out.println("ejercicio nulo resource");
+		}
 
 		return dto;
 
@@ -489,7 +506,7 @@ public class EjercicioResource extends
 
 	/**
 	 * Recurso para responder el material visto. para guardar el camino
-	 * correspondiente
+	 * correspondiente. Aqui ver como guardar si es regla o no.
 	 * 
 	 * @throws AppException
 	 **/
@@ -501,6 +518,10 @@ public class EjercicioResource extends
 
 		/** Quitamos el nombre de la asignatura y tambien su nodo valor inicial **/
 		Resuelto resuelto = new Resuelto();
+		if (respuestaEjercicio.getEsRegla() != null) {
+			resuelto.setEsRegla(respuestaEjercicio.getEsRegla());
+		}
+
 		Asignatura asignaturaResuelto = asignaturaService
 				.obtener(respuestaEjercicio.getIdAsignatura());
 		String nombreAsignatura = asignaturaResuelto.getNombre();
@@ -610,11 +631,408 @@ public class EjercicioResource extends
 		return getService().listarCamino(idAlumno, idTarea);
 
 	}
-	// ############FIN DE INFORMES#####################################
 
+	// ############FIN DE INFORMES#####################################
+	
+	// ##############Simulacion mas tutor ##############################
+	/** simulacion 11. Esta simulacion une, las pruebas con el generador de reglas. hace las pruebas y luego las genera. y asi cada
+	* 10 pasos 
+	*/
+	@GET
+	@Path("/simulacion2/{inicio}/{fin}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String simulacionConReglas(@PathParam("inicio") Integer inicio,
+		@PathParam("fin") Integer fin) throws NoSuchFieldException,
+		AppException {
+
+		System.out.println("Simulacion Con reglas: ");
+		Long idAsig = new Long(2);
+		Long idCurso = new Long(2);
+		Integer cantidadDeAlumnos = (fin - inicio) + 1;
+		Integer cantidadGrupo = cantidadDeAlumnos / 10;
+		Integer inicialWhile = 1;
+		
+		Integer inicialAlumno = inicio;
+		Integer finAlumno = inicio + 9;
+		
+		String simula = new String();
+		String drl = new String();
+		String respuesta = "ResultadoFinal";
+		Long iniAl = new Long(inicialAlumno);
+		Long finAl = new Long(finAlumno);
+		while (inicialWhile <= cantidadGrupo) {
+			
+			// simulacion y carga de drl
+			simula = simulaTest(inicialAlumno, finAlumno);
+			drl = drlService.guardarReglasDrl(idAsig, idCurso, httpRequest);
+	
+			
+			// generacion de resumenes
+			simulacionService.longitudCaminoMateriales(iniAl, finAl, httpRequest);
+			
+			
+			finAlumno= finAlumno + 10;
+			inicialAlumno= inicialAlumno + 10;
+			
+			finAl = new Long(finAlumno);
+			iniAl = new Long(inicialAlumno);
+			
+			inicialWhile++;
+			
+		}
+		
+		return respuesta;
+
+	}
+	
+	
+	
+	
+	
+	// #####################SIMULACION#################################
 	// ejercicio disponible
 	/***
 	 * Lista de ejercicios disponibles. Ejemplo
 	 * **/
 
+	/**
+	 * simulacion test inicial, tutor y final
+	 **/
+
+	@GET
+	@Path("/simulacion/{inicio}/{fin}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String simulaTest(@PathParam("inicio") Integer inicio,
+			@PathParam("fin") Integer fin) throws NoSuchFieldException,
+			AppException {
+		System.out.println("simula test");
+		/** for de alumnos para hacer por tandas. */
+		for (int i = inicio; i <= fin; i++) {
+
+			Integer aluInteger = new Integer(i);
+			Credenciales credenciales = new Credenciales();
+			credenciales.setPassword("marzo");
+			credenciales.setUsername("4250090" + aluInteger.toString());
+			controladorService.session(credenciales);
+
+			Long idAsignatura = new Long(2);
+			Long idTarea = new Long(2);
+			Long idAlumno = new Long(i);
+
+			/** Primer Test **/
+			// criterio primer test
+			while (!criterioParada(idAlumno, idTarea)) {
+				Boolean respuestaPrimerTest = false;
+				RespuestaEjercicio respuesta = new RespuestaEjercicio();
+				// siguiente Ejercicio
+				Ejercicio ejercicio = siguienteEjercicioPrimerTest(
+						idAsignatura, idTarea, idAlumno);
+				// respuesta
+				respuesta = respuestaInicialPrimerTest(ejercicio);
+				respuesta.setIdAlumno(idAlumno);
+				respuestaPrimerTest = responderEjercicioPrimerTest(respuesta);
+			}
+
+			/** Segundo test **/
+			RespuestaCriterio respuestaCriterio = criterioParadaTutor(
+					idAsignatura, idTarea, idAlumno);
+
+			Long idConcepto = new Long(0);
+			Ejercicio ejercicioSegundo = new Ejercicio();
+			Sesion sesion = sesionService.sesionAnterior(idAlumno, idTarea);
+			List<Material> ma = new ArrayList<Material>();
+			Boolean respuestaSegundoTest = false;
+			String respuestaSegundoString = new String();
+			Long respuestaSegundoLong = new Long(0);
+			Boolean respuestaSegundoBoolean = false;
+			RespuestaEjercicio respuestaEjercicioSegundo = null;
+			RespuestaEjercicio respuestaMaterialSegundo = null;
+			Boolean respuestaFinalSegundo = false;
+			Material materialAMostrar = new Material();
+			while (!respuestaCriterio.isExitoso()) {
+				respuestaEjercicioSegundo = new RespuestaEjercicio();
+				respuestaSegundoString = new String();
+				respuestaSegundoBoolean = false;
+				respuestaSegundoTest = false;
+				/** si es ejercicio */
+				if (respuestaCriterio.getEsEjercicio()) {
+					idConcepto = respuestaCriterio.getConcepto();
+					ejercicioSegundo = siguienteEjercicioSegundoTutor(
+							idAsignatura, idTarea, idAlumno, idConcepto);
+					/** Criterio de profesor respuesta */
+					ma = sesion.getListaMaterial();
+					/** Si ya vio algun material util */
+					respuestaSegundoTest = tieneUnMaterialGeneral(
+							ejercicioSegundo, ma);
+
+					/** Si tiene un material util visto responder bien **/
+					if (respuestaSegundoTest) {
+						respuestaSegundoString = ejercicioSegundo
+								.getRespuesta().getDescripcion();
+						respuestaSegundoLong = ejercicioSegundo.getRespuesta()
+								.getId();
+						respuestaSegundoBoolean = true;
+					} else {
+						// si es menor a 40 responda bien y si no responde mal.
+						/*
+						 * Random aleatorioM = new Random(
+						 * System.currentTimeMillis()); int intAletorioM =
+						 * aleatorioM.nextInt(100); if (intAletorioM < 20) {
+						 * respuestaSegundoString = ejercicioSegundo
+						 * .getRespuesta().getDescripcion();
+						 * respuestaSegundoLong = ejercicioSegundo
+						 * .getRespuesta().getId(); respuestaSegundoBoolean =
+						 * true;
+						 */
+						/**
+						 * Si decision es mayor al tipo del alumno. Es false la
+						 * respuesta
+						 **/
+
+						/*
+						 * respuestaSegundoLong =
+						 * ejercicioSegundo.getRespuesta().getId(); for
+						 * (Respuesta r :ejercicioSegundo.getListaRespuesta()) {
+						 * if } (respuestaSegundoLong != r.getId()) {
+						 * respuestaSegundoString = r.getDescripcion(); }
+						 * 
+						 * respuestaSegundoBoolean = false;
+						 * 
+						 * aleatorioM.setSeed(System.currentTimeMillis());
+						 */
+
+						//
+						// si es menor a 40 responda bien y si no responde mal.
+
+						Random aleatorioM = new Random(
+								System.currentTimeMillis());
+						int intAletorioM = aleatorioM.nextInt(100);
+						// respuesta correcta. 
+						if (intAletorioM < 11) {
+							respuestaSegundoString = ejercicioSegundo
+									.getRespuesta().getDescripcion();
+							respuestaSegundoLong = ejercicioSegundo
+									.getRespuesta().getId();
+							respuestaSegundoBoolean = true;
+						//respuesta incorrecta	
+						} else {
+
+							respuestaSegundoLong = ejercicioSegundo
+									.getRespuesta().getId();
+							for (Respuesta r : ejercicioSegundo
+									.getListaRespuesta()) {
+								if (respuestaSegundoLong != r.getId()) {
+									respuestaSegundoString = "respuestaMala";
+								}
+
+							}
+							respuestaSegundoBoolean = false;
+						}
+					}
+
+					/******************************************************/
+					respuestaEjercicioSegundo.setIdAlumno(idAlumno);
+					respuestaEjercicioSegundo.setIdAsignatura(idAsignatura);
+					respuestaEjercicioSegundo.setIdConcepto(idConcepto);
+					respuestaEjercicioSegundo.setIdEjercicio(ejercicioSegundo
+							.getId());
+					respuestaEjercicioSegundo.setIdTarea(idTarea);
+					respuestaEjercicioSegundo
+							.setRespuesta(respuestaSegundoString);
+					respuestaEjercicioSegundo
+							.setRespuestaLogica(respuestaSegundoBoolean);
+					respuestaFinalSegundo = responderEjercicioTutor(respuestaEjercicioSegundo);
+
+					/** si es material */
+				} else if (respuestaCriterio.getEsEjercicio() == false) {
+					respuestaMaterialSegundo = new RespuestaEjercicio();
+					idConcepto = respuestaCriterio.getConcepto();
+					materialAMostrar = siguienteMaterial(idAsignatura, idTarea,
+							idAlumno, idConcepto, new Long(1));
+					respuestaMaterialSegundo.setEsRegla(materialAMostrar
+							.getEsRegla());
+					respuestaMaterialSegundo.setIdAlumno(idAlumno);
+					respuestaMaterialSegundo.setIdAsignatura(idAsignatura);
+					respuestaMaterialSegundo.setIdConcepto(idConcepto);
+					respuestaMaterialSegundo.setIdMaterial(materialAMostrar
+							.getId());
+					respuestaMaterialSegundo.setIdTarea(idTarea);
+					respuestaMaterialSegundo.setRespuestaLogica(false);
+					System.out.println("es una regla##########: "
+							+ respuestaMaterialSegundo.getEsRegla());
+					// respuestaMaterialSegundo.setRespuesta("nada");
+					respuestaFinalSegundo = responderMaterial(respuestaMaterialSegundo);
+				}
+
+				/** se quita de nuevo la sesion */
+				sesion = sesionService.sesionAnterior(idAlumno, idTarea);
+				/** se pregunta por el criterio */
+				respuestaCriterio = criterioParadaTutor(idAsignatura, idTarea,
+						idAlumno);
+
+			}
+
+			/** Ultimo Test **/
+			// criterio primer test
+			while (!criterioParada(idAlumno, idTarea)) {
+				// siguiente Ejercicio
+				RespuestaEjercicio respuestaUlti = new RespuestaEjercicio();
+				Ejercicio ejercicio = siguienteEjercicioPrimerTest(
+						idAsignatura, idTarea, idAlumno);
+				// respuesta
+				respuestaUlti = respuestaInicialPrimerTest(ejercicio);
+				respuestaUlti.setIdAlumno(idAlumno);
+				Boolean respuestaUltiTest = responderEjercicioPrimerTest(respuestaUlti);
+			}
+
+			controladorService.cerrarSesion();
+
+		}
+		return "Simulacion finalizada";
+
+	}
+
+	private RespuestaEjercicio respuestaInicialPrimerTest(Ejercicio ejercicio) {
+
+		/** Variables para decidir respuesta **/
+		RespuestaEjercicio re = new RespuestaEjercicio();
+		re.setIdAsignatura(new Long(1));
+		re.setIdEjercicio(ejercicio.getId());
+		re.setIdTarea(new Long(1));
+
+		// Random rnd = new Random();
+		Random aleatorio = new Random(System.currentTimeMillis());
+		// int decision = rnd.nextInt(100);
+		// int tipoAlu = 50;
+		String respuesta = null;
+		Long idRespuesta = null;
+		Boolean respuestaCorrecta = false;
+
+		/**
+		 * Si decision es menor o igual al tipo del alumno. Es TRUE la respuesta
+		 **/
+		int intAletorio = aleatorio.nextInt(2);
+		if (intAletorio == 1) {
+			respuesta = ejercicio.getRespuesta().getDescripcion();
+			idRespuesta = ejercicio.getRespuesta().getId();
+			respuestaCorrecta = true;
+
+			/**
+			 * Si decision es mayor al tipo del alumno. Es false la respuesta
+			 **/
+		} else {
+			idRespuesta = ejercicio.getRespuesta().getId();
+			for (Respuesta r : ejercicio.getListaRespuesta()) {
+				if (idRespuesta != r.getId()) {
+					respuesta = r.getDescripcion();
+				}
+			}
+			respuestaCorrecta = false;
+
+		}
+
+		aleatorio.setSeed(System.currentTimeMillis());
+
+		/*
+		 * if (decision <= tipoAlu) { respuesta =
+		 * ejercicio.getRespuesta().getDescripcion(); idRespuesta =
+		 * ejercicio.getRespuesta().getId(); respuestaCorrecta = true;
+		 * 
+		 * /** Si decision es mayor al tipo del alumno. Es false la respuesta
+		 * 
+		 * } else {
+		 * 
+		 * idRespuesta = ejercicio.getRespuesta().getId(); for (Respuesta r :
+		 * ejercicio.getListaRespuesta()) { if (idRespuesta != r.getId()) {
+		 * respuesta = r.getDescripcion(); } break; } respuestaCorrecta = false;
+		 * 
+		 * }
+		 */
+
+		re.setRespuestaLogica(respuestaCorrecta);
+		re.setRespuesta(respuesta);
+
+		return re;
+	}
+
+	/** Sirve para saber si tiene un material util ya visto */
+	private Boolean tieneUnMaterialGeneral(Ejercicio ejercicioConMaterial,
+			List<Material> materialesM) {
+
+		// materiales visto. Se cambiaria por la sesion del momento.
+		List<Long> materialesVistos = new ArrayList<Long>();
+		if (materialesM != null) {
+			for (Material m : materialesM) {
+				materialesVistos.add(m.getId());
+			}
+		}
+
+		Boolean tieneMas = false;
+		// serian los id de los materiales utiles para la asignatura bigdata
+		Long m1 = new Long(729);
+		//727,728,721##############Se agrega mas materiales buenos para que sea equilibrado.
+		//Long mb1 = new Long(727);
+		//Long mb2 = new Long(728);
+		//Long mb3 = new Long(721);
+		//########################
+		Long m2 = new Long(738);
+		Long m3 = new Long(747);
+		// verificamos si tiene un material visto.
+		if (materialesVistos.isEmpty()) {
+			System.out.println("no tiene materiales vistos.");
+		} else {
+			if (materialesVistos.contains(m1) || materialesVistos.contains(m2)
+					|| materialesVistos.contains(m3) ) {
+				tieneMas = true;
+			}
+		}
+
+		/*
+		 * // materiales si tiene List<Long> listaDeMateriales = new
+		 * ArrayList<Long>(); // Tiene Boolean tieneMas = false;
+		 * 
+		 * if (ejercicioConMaterial.getMaterialUtil() == null) {
+		 * System.out.println("No tiene materiales útiles");
+		 * 
+		 * } else {
+		 * 
+		 * if(lista.contains(numero1)){
+		 * System.out.println("contiene el numero 1: "+numero1); }
+		 * 
+		 * /* System.out.println("Tiene Materiales útiles"); // cambiamos a
+		 * array de long String[] materiales =
+		 * ejercicioConMaterial.getMaterialUtil().split( ","); for (String
+		 * material : materiales) { if (!material.isEmpty())
+		 * listaDeMateriales.add(Long.valueOf(material)); }
+		 * System.out.println("lista de materiales: " + listaDeMateriales); //
+		 * vemos si tiene algun material tieneMas =
+		 * tieneUnMaterial(materialesVistos, listaDeMateriales);
+		 * System.out.println("tieneMas es antes : " + tieneMas);
+		 */
+		// }
+		// System.out.println("tieneMas es despues : " + tieneMas);
+		// */
+		return tieneMas;
+	}
+
+	/**
+	 * Metodo para saber si tiene un material visto de sus lista de materiales
+	 * utiles
+	 **/
+	private Boolean tieneUnMaterial(List<Long> materialesVistos,
+			List<Long> listaDeMateriales) {
+		Boolean tiene = false;
+		Long m = new Long(0);
+		for (Long mateVisto : materialesVistos) {
+			if (listaDeMateriales.contains(mateVisto)) {
+				System.out.println("tengo este material: " + mateVisto);
+				tiene = true;
+				m = mateVisto;
+				break;
+			} else {
+				System.out.println("no tengo este material: " + mateVisto);
+			}
+		}
+		return tiene;
+	}
 }

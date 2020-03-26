@@ -81,8 +81,10 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 	@Inject
 	private EstiloAprendizajeService estiloService;
 
-	final String DIR = "/home/mauro/proyectos/tesis/sti-back/src/main/resources/redes/backup/";
-
+	// final String DIR =
+	// "/home/mauro/proyectos/tesis/sti-back/src/main/resources/redes/backup/";
+	final String DIR = "/home/catherine/tesis/sti-back/src/main/resources/redes/backup/";
+	final String DIRPRIMERTEST = "/home/catherine/tesis/sti-back/src/main/resources/redes/backup/";
 	// private SessionService session;
 	final private long userId = 1;
 
@@ -334,7 +336,6 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 			Long idAsignatura, HttpServletRequest httpRequest) {
 		Ejercicio siguienteEjercicio = null;
 		try {
-			
 
 			// datos tarea, alumno, asi
 			Tarea tarea = tareaService.obtener(idTarea);
@@ -347,8 +348,9 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 
 			if (siguienteEjercicio == null) {
 				System.out.println("####Ejercicio nulo#####");
-				//siguienteEjercicio = admAlumno.getSiguienteEjercicioPrimerTest(
-						//tarea, alumno, idAsignatura, asig, httpRequest);
+				// siguienteEjercicio =
+				// admAlumno.getSiguienteEjercicioPrimerTest(
+				// tarea, alumno, idAsignatura, asig, httpRequest);
 
 			}
 			// System.out.println("\n#####################Ejercicio: "
@@ -415,13 +417,33 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 
 		Integer resuelto = sesion.getcantidadEjerciciosResueltos();
 		// hacemos cantidadParada en menos 1 porque resuelto empieza en 0
-		//cantidadParada -= 1;
+		// cantidadParada -= 1;
 		if (resuelto >= cantidadParada)
 			retorno = true;
 
 		if (retorno == null)
 			System.out
 					.println("respondio mal y no se que paso. error interno en responder ejercicio servicio");
+
+		// si el retorno es true. en algun momento esto se debe cambiar. solo
+		// funcionara para la asignatura numero 1
+		Long idAsignatura = new Long(2);
+		if (retorno && !sesion.getTestFinal()) {
+
+			String nombreBackup = "backup_PrimerTest_red_alumno_"
+					+ idAlumno.toString() + "_asignatura_"
+					+ idAsignatura.toString() + ".xdsl";
+			File archivoOriginal = new File(DIRPRIMERTEST + nombreBackup);
+			if (!archivoOriginal.exists()) {
+
+				System.out.println("Se realiza el backup del primer test");
+				adm.backupDelPrimerTestAlumno(idAsignatura, idAlumno, idTarea);
+			} else {
+				if (archivoOriginal.isFile())
+					System.out.println("El archivo existe");
+			}
+
+		}
 
 		return retorno;
 
@@ -917,6 +939,7 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 				String mate = "M";
 				if (anterior.equals(mate)) {
 					System.out.println("registramos evidencia");
+					
 					registrarEvidencia(camino, httpRequest);
 				}
 
@@ -955,6 +978,8 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 		c.cargarMaterialYEjercicio();
 		Evidencia e01 = new Evidencia(c);
 		e01.formatearEvidencia();
+		//e01.setEjercicioValido("nulo");
+		//e01.setSecuenciaEjercicio("nulo");
 		evidenciaService.insertar(e01, httpRequest);
 
 	}
@@ -972,7 +997,7 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 			throws AppException {
 
 		/** Aqui inicia el motor drools. Esto no deberia estar aqui. **/
-		//String archivo = drlService.obtenerArchivo(idArchivo);
+		// String archivo = drlService.obtenerArchivo(idArchivo);
 		Drl drl = drlService.ultimoDrl(idAsig);
 		String archivo = drl.getArchivoDrl();
 		HerramientasDrools hd = drlService.iniciarDrools(archivo);
@@ -981,7 +1006,8 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 		 **/
 		Camino camino = caminoService.caminoAnterior(idAlu, idTarea,
 				idConcepto, idAsig, httpRequest);
-
+		
+		
 		// material a devolver
 		Material material = new Material();
 
@@ -1024,6 +1050,9 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 		r.setEstilo(evide.getEstilo());
 		r.setSecuenciaEjercicios(evide.getSecuenciaEjercicio());
 		r.setSecuenciaVideos(evide.getSecuenciaMaterial());
+		// cambio para anular el campo de secuencia_ejercicio
+		//r.setSecuenciaEjercicios("nulo");
+		//r.setEjercioValido("nulo");
 
 		System.out.println("######################### Concepto: "
 				+ evide.getConcepto());
@@ -1219,5 +1248,75 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 	}
 
 	// ####################FIN DE RESULTADOS DEL TEST TUTOR#############
+
+	/**
+	 * trae true o false si consumio una regla
+	 ***/
+	public String aplicarReglaFinalTutor(Camino camino, Long idArchivo)
+			throws AppException {
+
+		Boolean retornar = false;
+		String archivo = drlService.obtenerArchivo(idArchivo);
+		HerramientasDrools hd = drlService.iniciarDrools(archivo);
+
+		/**
+		 * Copiamos la evidencia en otro y formateamos Le paso un uno para que
+		 * copie tambien los array de la clase
+		 **/
+		camino.getSecEje().clear();
+		camino.getSecMaterial().clear();
+		camino.cargarMaterialYEjercicio();
+		// System.out.println("camino evidencia: "+ camino.getSecEje());
+		Evidencia evide = new Evidencia(camino);
+		evide.formatearEvidenciaParaRegla();
+
+		// iniciamos sesion y le tiramos el material
+		hd.iniciarSession();
+		Regla r = new Regla();
+		r.setConcepto(evide.getConcepto());
+		r.setNivel(evide.getNivel());
+		r.setEstilo(evide.getEstilo());
+		// System.out.println("evide.getSecuenciaEje: "+
+		// evide.getSecuenciaEjercicio());
+		r.setSecuenciaEjercicios(evide.getSecuenciaEjercicio());
+		r.setSecuenciaVideos(evide.getSecuenciaMaterial());
+
+		System.out.println("######################### Concepto: "
+				+ evide.getConcepto());
+		System.out.println("######################### nivel: "
+				+ evide.getNivel());
+		System.out.println("######################### estilo: "
+				+ evide.getEstilo());
+		System.out.println("######################### secuenciaEjercicio: "
+				+ evide.getSecuenciaEjercicio());
+		System.out.println("######################### secuenciaMaterial: "
+				+ evide.getSecuenciaMaterial());
+
+		hd.ejecutarRegla(r);
+		hd.terminarSession();
+		System.out.println("######################### material a mostrar: "
+				+ r.getResultado());
+
+		if (r.getResultado() != null) {
+			String[] parts = r.getResultado().split("M");
+			String part2 = parts[1]; // 654321
+			Long idMaterial = new Long(part2);
+
+			System.out.println("#####################################");
+			System.out.println("Material de la regla: M" + idMaterial);
+			System.out.println("#####################################\n");
+			// es regla.
+			retornar = true;
+		}
+
+		String retornoString = retornar.toString()
+				+ ", Concepto: " + evide.getConcepto() + " Nivel: "
+				+ evide.getNivel() + " Estilo: " + evide.getEstilo()
+				+ " SecuenciaEjercicio: " + evide.getSecuenciaEjercicio()
+				+ " SecuenciaMaterial: " + evide.getSecuenciaMaterial()
+				+ " Material a mostrar: " + r.getResultado();
+
+		return retornoString;
+	}
 
 }

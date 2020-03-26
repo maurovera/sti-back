@@ -21,7 +21,7 @@ public class DrlDAO extends BaseDAO<Drl> {
 		return Drl.class;
 	}
 
-	/**Trae el ultimo drl por asignatura*/
+	/** Trae el ultimo drl por asignatura */
 	public Drl ultimoDrl(Long idAsignatura) {
 
 		/** Lista de retorno **/
@@ -39,9 +39,40 @@ public class DrlDAO extends BaseDAO<Drl> {
 		if (!listaRetorno.isEmpty()) {
 
 			drl = (Drl) listaRetorno.get(0);
-			System.out.println("drl numero: "+ drl.getId());
+			System.out.println("drl numero: " + drl.getId());
 		}
 
+		return drl;
+
+	}
+
+	/** iguales */
+	public String iguales() {
+
+		/** Lista de retorno **/
+		List<Drl> listaRetorno = new ArrayList<Drl>();
+		String drl = "iguales";
+		Query q;
+
+		q = em.createQuery("SELECT d FROM Drl d " + " order by d.id desc");
+
+		listaRetorno = q.getResultList();
+
+		if (!listaRetorno.isEmpty()) {
+
+			for (int i = 0; i < 7; i++) {
+				Drl drl1 = listaRetorno.get(i);
+				for (int j = 0; j < 8; j++) {
+					Drl drl2 = listaRetorno.get(j);
+					if(drl1.getArchivoDrl()==drl2.getArchivoDrl()){
+						System.out.println("son iguales "+ i + " y "+ j);
+					}else{
+						System.out.println("son distintos: "+i + " y "+ j);
+					}
+						
+				}
+			}
+		}
 
 		return drl;
 

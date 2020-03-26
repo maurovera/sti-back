@@ -35,6 +35,7 @@ public class Resuelto extends BaseEntity implements Serializable {
 	
 	private Boolean esMaterial;
 	
+	@Column(columnDefinition = "text", name = "respuesta")
 	private String respuesta;
 	
 	private Boolean esCorrecto;
@@ -51,6 +52,10 @@ public class Resuelto extends BaseEntity implements Serializable {
 	
 	@Column(name = "nivel_final")
 	private Double nivelFinal;
+	
+	@Column(name = "es_regla")
+	private Boolean esRegla;
+	
 
 	public Long getId() {
 		return id;
@@ -162,6 +167,14 @@ public class Resuelto extends BaseEntity implements Serializable {
 
 	public void setTestFinal(Boolean testFinal) {
 		this.testFinal = testFinal;
+	}
+
+	public Boolean getEsRegla() {
+		return esRegla;
+	}
+
+	public void setEsRegla(Boolean esRegla) {
+		this.esRegla = esRegla;
 	}
 	
 	

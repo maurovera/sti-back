@@ -42,7 +42,8 @@ public class Tarea extends BaseEntity implements Serializable {
 	@Column(name = "nombre")
 	private String nombre;
 
-	@Column(name = "descripcion")
+	//@Column(name = "descripcion")
+	@Column(columnDefinition = "text", name = "descripcion")
 	private String descripcion;
 
 	/** Lista de temas separados por coma */

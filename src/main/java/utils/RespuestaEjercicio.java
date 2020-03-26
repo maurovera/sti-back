@@ -10,6 +10,8 @@ public class RespuestaEjercicio {
 	private Long idTarea;
 	private Long idConcepto;
 	private Long idMaterial;
+	private Boolean respuestaLogica;
+	private Boolean esRegla;
 	
 	public Long getIdEjercicio() {
 		return idEjercicio;
@@ -57,6 +59,23 @@ public class RespuestaEjercicio {
 	public void setIdMaterial(Long idMaterial) {
 		this.idMaterial = idMaterial;
 	}
+	public Boolean getRespuestaLogica() {
+		return respuestaLogica;
+	}
+	
+	public void setRespuestaLogica(Boolean respuestaLogica) {
+		this.respuestaLogica = respuestaLogica;
+	}
+	
+	public Boolean getEsRegla() {
+		return esRegla;
+	}
+	
+	public void setEsRegla(Boolean esRegla) {
+		this.esRegla = esRegla;
+	}
+	
+	
 	
 
 }

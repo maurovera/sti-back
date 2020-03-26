@@ -37,14 +37,6 @@ public class Drl extends BaseEntity implements Serializable {
 	
 	private Long tarea;
 	
-	
-	// oid
-	//@Lob
-	//private byte[] campo02;
-
-	// bytea
-	//private byte[] campo03;
-
 	// bytea
 	private String campo04;
 

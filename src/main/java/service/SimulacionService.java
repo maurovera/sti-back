@@ -1,5 +1,6 @@
 package service;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -16,17 +17,25 @@ import javax.servlet.http.HttpServletRequest;
 
 import model.Alumno;
 import model.Asignatura;
+import model.Camino;
 import model.Concepto;
 import model.Curso;
 import model.Ejercicio;
+import model.EstiloAprendizaje;
 import model.Evidencia;
 import model.Log;
 import model.Material;
 import model.Respuesta;
+import model.Resuelto;
 import model.Sesion;
 import model.Simulacion;
 import model.Tarea;
 import model.Tema;
+
+import org.apache.shiro.crypto.hash.Md5Hash;
+
+import seguridad.Usuario;
+import seguridad.UsuarioController;
 import utils.AppException;
 import utils.HerramientasDrools;
 import utils.Regla;
@@ -39,7 +48,9 @@ import dao.SimulacionDAO;
 public class SimulacionService extends
 		BaseServiceImpl<Simulacion, SimulacionDAO> {
 
-	final String direccionArchivo = "/home/mauro/proyectos/tesis/sti-back/src/main/resources/archivos/";
+	// final String direccionArchivo =
+	// "/home/mauro/proyectos/tesis/sti-back/src/main/resources/archivos/";
+	final String direccionArchivo = "/home/catherine/tesis/sti-back/src/main/resources/archivos/";
 
 	@Inject
 	private SimulacionDAO dao;
@@ -76,6 +87,9 @@ public class SimulacionService extends
 	private AlumnoService alumnoService;
 
 	@Inject
+	private UsuarioController usuarioService;
+
+	@Inject
 	private EvidenciaService evidenciaService;
 
 	@Inject
@@ -86,6 +100,9 @@ public class SimulacionService extends
 
 	@Inject
 	private MaterialService materialService;
+
+	@Inject
+	private EstiloAprendizajeService estiloService;
 
 	// private SessionService session;
 	final private long userId = 1;
@@ -141,13 +158,14 @@ public class SimulacionService extends
 	/**
 	 * Simulacion de carga de alumnos y sin que hagan la primera prueba carga el
 	 * rango de alumno todos al curso uno pero sin hacer la prueba uno y tambien
-	 * se inscriben a la tarea 1
+	 * se inscriben a la tarea 1 Modificacion de fecha 11/09/2019 Aqui se cambia
+	 * la asignatura y tambien el curso y tambien la tarea.
 	 * 
 	 ***/
 	public String simulacionAlumnosSinTest(HttpServletRequest httpRequest,
 			Integer inicio, Integer fin) throws AppException {
 
-		Long numero = new Long(1);
+		Long numero = new Long(2);
 		Asignatura asig = asignaturaService.obtener(numero);
 		Curso c = cursoService.obtener(numero);
 		// creacion de varios alumnos inscritos al curso C
@@ -159,21 +177,6 @@ public class SimulacionService extends
 		String retorno = "##########alumnos creados######\n" + "Desde: "
 				+ inicio + " Hasta: " + fin;
 
-		/*
-		 * La tarea a hacerse aqui es donde vos le pasas la tarea para que haga.
-		 * List<Tarea> listaTareas = cursoService.listaTarea(c.getId()); Tarea
-		 * tareaAResolver = listaTareas.get(0);
-		 * System.out.println("Tarea A Resolver : " +
-		 * tareaAResolver.getNombre());
-		 * 
-		 * int cont = inicio;
-		 * 
-		 * for (Alumno alumno : listaAlumnos) { simularAlumno(alumno,
-		 * tareaAResolver, asig, httpRequest); ++cont;
-		 * System.out.println("---------------alumno simulado nro: " + cont +
-		 * ".....Nombre: " + alumno.getNombres() + "----------------------"); }
-		 */
-
 		return retorno;
 
 	}
@@ -184,7 +187,7 @@ public class SimulacionService extends
 	public String simulacionAlumnosPrueba(HttpServletRequest httpRequest,
 			Long idAsig, Integer inicio, Integer fin) throws AppException {
 
-		//Long numero = new Long(1);
+		// Long numero = new Long(1);
 		Long numero = idAsig;
 		Asignatura asig = asignaturaService.obtener(numero);
 		Curso c = cursoService.obtener(numero);
@@ -650,6 +653,48 @@ public class SimulacionService extends
 	}
 
 	/**
+	 * crea alumno con estilo
+	 **/
+	private Alumno crearAlumnoConEstilo(HttpServletRequest httpRequest,
+			Asignatura asig, Curso c, Integer secuencia, Double tipo,
+			List<String> estilos) throws AppException {
+
+		// creacion del alumno
+		Alumno alu = new Alumno();
+		alu.setApellidos("apellidos_" + secuencia.toString());
+		alu.setEdad(secuencia);
+		alu.setFechaNacimiento(new Date());
+		alu.setGenero("m");
+		alu.setNombres("nombres_" + secuencia.toString());
+		alu.setTipo(tipo);
+		alu.setEdad(secuencia);
+		alu.setEmail("correo" + secuencia.toString() + "@gmail.com");
+		alu.setRecibirNotificacion(true);
+		alu.setCedula("4250090" + secuencia.toString());
+		alu.setUsername("marzouser" + secuencia.toString());
+		alu.setPassword("marzo");
+		alu.setInterno(true);
+		alu.setPublico(false);
+
+		alumnoService.insertar(alu, httpRequest);
+		Long idAlu = alu.getId();
+		// insertamos su estilo de aprendizaje
+		EstiloAprendizaje ea = crearEstiloAprendizaje(estilos, httpRequest,
+				idAlu);
+
+		// Inscripcion al curso por parte del alumno
+		c.agregarAlumno(alu);
+		cursoService.modificar(c.getId(), c, httpRequest);
+
+		// Creacion de la red bayesiana para el alumno
+		System.out.println("alumno:" + alu.getId());
+		adm.crearRedAlumno(asig.getId(), alu.getId());
+
+		return alu;
+
+	}
+
+	/**
 	 * Se crea un alumno, se inscribe al curso y se crea su red bayesiana
 	 **/
 	private Alumno crearAlumno(HttpServletRequest httpRequest, Asignatura asig,
@@ -716,7 +761,9 @@ public class SimulacionService extends
 		return alumnos;
 	}
 
-	/** Generador de alumnos para un curso x **/
+	/**
+	 * Generador de alumnos para un curso x Cambiamos. por estilo solo lector.
+	 **/
 	public List<Alumno> generadorAlumnosPrueba(HttpServletRequest httpRequest,
 			Asignatura asignatura, Curso curso, Integer inicio, Integer fin)
 			throws AppException {
@@ -725,22 +772,39 @@ public class SimulacionService extends
 		Integer cantidadAlumnos = inicio + fin;
 		Double tipo;
 		List<Alumno> alumnos = new ArrayList<Alumno>();
+		List<String> estilos = new ArrayList<String>();
+		for (int i = inicio; i <= fin; i++) {
 
-		for (int i = inicio; i < cantidadAlumnos; i++) {
+			estilos.add("lector");
 
-			if (i <= inicio + 10) {
-				tipo = TipoAlumno.NIVEL_CONOCIMIENTO_BAJO;
-			} else if (i > inicio + 10 && i <= inicio + 19) {
-				tipo = TipoAlumno.NIVEL_CONOCIMIENTO_MEDIO;
-			} else {
-				tipo = TipoAlumno.NIVEL_CONOCIMIENTO_ALTO;
-			}
-			Alumno alumno = crearAlumno(httpRequest, asignatura, curso, i, tipo);
-
+			tipo = TipoAlumno.NIVEL_CONOCIMIENTO_BAJO;
+			Alumno alumno = crearAlumnoConEstilo(httpRequest, asignatura,
+					curso, i, tipo, estilos);
+			estilos.clear();
 			alumnos.add(alumno);
 		}
 		System.out.println("generador de alumnos");
 		return alumnos;
+	}
+
+	private EstiloAprendizaje crearEstiloAprendizaje(List<String> lista,
+			HttpServletRequest httpRequest, Long idAlu) throws AppException {
+		EstiloAprendizaje ea = new EstiloAprendizaje();
+		ea.setFechaCreacion(new Date());
+		ea.setPrimerEstilo(lista.get(0));
+		if (lista.size() > 1)
+			ea.setSegundoEstilo(lista.get(1));
+
+		ea.setResultadoA(1);
+		ea.setResultadoK(2);
+		ea.setResultadoR(3);
+		ea.setResultadoV(4);
+		ea.setUsado(false);
+		ea.setUsuarioCreacion(new Long(1));
+		ea.setIpCreacion("127.0.0.1");
+		ea.setIdAlumno(idAlu);
+		estiloService.insertar(ea, httpRequest);
+		return ea;
 	}
 
 	/***
@@ -867,7 +931,7 @@ public class SimulacionService extends
 		}
 
 		// ws.terminarTarea(idSesion);
-		//sesion.setEstadoTerminado(true);
+		// sesion.setEstadoTerminado(true);
 		sesionService.modificar(sesion.getId(), sesion, httpRequest);
 
 	}
@@ -1161,17 +1225,16 @@ public class SimulacionService extends
 					// e.formatearEvidencia();
 
 					material = aplicarReglaMaterial(e, hd, idTarea, idAlu);
-					if(material == null){
-						System.out.println("salte porque no existe material disponible");
+					if (material == null) {
+						System.out
+								.println("salte porque no existe material disponible");
 						break;
-					}else{
+					} else {
 						mostrarMaterial(material);
 						e.addMaterial(material.getId());
 						pasoPorMaterial = true;
 					}
-						
-					
-					
+
 				}
 
 				// se recalcula el valor del nodo pase o no por un material.
@@ -1368,7 +1431,7 @@ public class SimulacionService extends
 			}
 
 		}
-		/**Solo si el material es no nulo se inserta**/
+		/** Solo si el material es no nulo se inserta **/
 		if (material != null) {
 			/**
 			 * Una vez mostrado el material por la regla o al azar se guarda en
@@ -1464,6 +1527,641 @@ public class SimulacionService extends
 
 		return d;
 
+	}
+
+	/** Generador de arboles bayesianos de asignatura y alumnos. */
+	public void simulacionGeneracionDeArbolesBayesianos(
+			HttpServletRequest httpRequest) throws AppException {
+
+		// Vamos a generar primero la red bayesiana de asignatura
+		System.out.println("agregamos asignatura");
+		Long idAsignatura = new Long(1);
+		Asignatura asignatura = asignaturaService.obtener(idAsignatura);
+		adm.agregarAsignaturaRed(asignatura);
+
+		System.out.println("agregamos tema01");
+		Long idTema01 = new Long(1);
+		Tema tema01 = temaService.obtener(idTema01);
+		adm.agregarTemaRed(tema01);
+
+		System.out.println("agregamos tema02");
+		Long idTema02 = new Long(2);
+		Tema tema02 = temaService.obtener(idTema02);
+		adm.agregarTemaRed(tema02);
+
+		System.out.println("agregamos concepto01");
+		Long idConcepto01 = new Long(1);
+		Concepto concepto01 = conceptoService.obtener(idConcepto01);
+		adm.agregarConceptoRed(concepto01, idAsignatura);
+
+		System.out.println("agregamos concepto02");
+		Long idConcepto02 = new Long(2);
+		Concepto concepto02 = conceptoService.obtener(idConcepto02);
+		adm.agregarConceptoRed(concepto02, idAsignatura);
+
+		System.out.println("agregamos concepto03");
+		Long idConcepto03 = new Long(3);
+		Concepto concepto03 = conceptoService.obtener(idConcepto03);
+		adm.agregarConceptoRed(concepto03, idAsignatura);
+
+		System.out.println("agregamos concepto04");
+		Long idConcepto04 = new Long(4);
+		Concepto concepto04 = conceptoService.obtener(idConcepto04);
+		adm.agregarConceptoRed(concepto04, idAsignatura);
+
+		System.out.println("agregamos concepto05");
+		Long idConcepto05 = new Long(5);
+		Concepto concepto05 = conceptoService.obtener(idConcepto05);
+		adm.agregarConceptoRed(concepto05, idAsignatura);
+
+		// ejercicio
+		for (int i = 1; i < 352; i++) {
+			System.out.println("ejercicio numero " + i);
+			Long idEjercicio = new Long(i);
+			Ejercicio ejercicio = ejercicioService.obtener(idEjercicio);
+			adm.agregarEjercicioRed(ejercicio, idAsignatura);
+
+		}
+
+		// inscribir al alumno
+		for (int a = 1; a < 230; a++) {
+			Long idAlumno = new Long(a);
+			System.out.println("ejercicio numero " + a);
+			adm.calcularProbabilidades(asignatura);
+			adm.crearRedAlumno(idAsignatura, idAlumno);
+		}
+
+	}
+
+	/** Cambio de pass en usuario */
+	public String simulacionGeneracionpass(HttpServletRequest httpRequest)
+			throws AppException {
+		String retorno = "Final";
+
+		for (int i = 1; i < 228; i++) {
+			Long idUsu = new Long(i);
+			Usuario usu = usuarioService.obtener(idUsu);
+			String encryptedToken = new Md5Hash(usu.getPassword(),
+					usu.getCedula()).toString();
+			usu.setUsername(usu.getCedula());
+			usu.setPassword(encryptedToken);
+			usuarioService.modificar(idUsu, usu);
+
+		}
+		return retorno;
+	}
+
+	// valor de asignatura
+	public String simulacionValoresAsignatura(Long idAsig, Long idAlu,
+			HttpServletRequest httpRequest) {
+
+		String r1 = adm.getValorNodoRedError("tenondera", idAsig, idAlu);
+		String r2 = adm.getValorNodoRedErrorEvidencia("tenondera", idAsig,
+				idAlu);
+		String r = r1 + r2;
+
+		return r;
+	}
+
+	/** Longitud de los caminos */
+	public String longitudCaminoMateriales(Long usuarioInicial,
+			Long usuarioFinal, HttpServletRequest httpRequest) {
+
+		List<Camino> caminos = getDao().consultaTamanoCamino(usuarioInicial,
+				usuarioFinal);
+		float promedio = 0;
+		Integer suma = 0;
+		Integer maximo = 0;
+		for (Camino camino : caminos) {
+
+			int contador = 0;
+		
+			for (int i = 0; i < camino.getSecuenciaMaterial().length(); i++) {
+				if ((camino.getSecuenciaMaterial().charAt(i) == '-')) {
+					contador++;
+				}
+			}
+			// se quita la suma
+			suma += contador;
+			// se quita el maximo
+			if(maximo < contador)
+				maximo = contador;
+				
+			System.out.println("Usuario : " + camino.getUsuarioCreacion()
+					+ " tiene longitud: " + contador);
+
+		}
+		// se quita el promedio
+		promedio = (float)suma/caminos.size();
+		System.out.println("Suma : "+ suma + " Promedio: "+ promedio + " Maximo: " + maximo);
+		String valorParaArchivo = usuarioInicial.toString() + "-"+usuarioFinal.toString()+ ", " +suma.toString()
+				+ ", " + maximo.toString() 
+				+ ", " + promedio; 
+		List<String> vector = new ArrayList<String>();
+		vector.add(valorParaArchivo);
+		String ruta = "/home/catherine/ArchivosResultados/resultadosLongitudSept.csv";		
+		escribirEnElArchivo(vector, ruta);
+		return "fin de longitudCamino";
+
+	}
+
+	// comparacion de test tutor entre resultado final e inicial
+	public String comparacionTutor(HttpServletRequest httpRequest,
+			Long aluInicial, Long aluFinal) {
+
+		Integer testTutor = 2;
+		String gano;
+		String mayorA50;
+		Long aluActual = new Long(0);
+		List<String> vector = new ArrayList<String>();
+		while (aluInicial <= aluFinal) {
+			// quita el nivel inicial y final
+			List<Double> niveles = getDao().comparar(aluInicial, testTutor);
+			// aumentamos esto para que salga del while
+			aluActual = aluInicial;
+			aluInicial++;
+			// comparamos si supero su valor inicial, en este caso si gano
+			if (niveles.get(0) > niveles.get(1)) {
+				gano = "No";
+			} else {
+				gano = "Si";
+			}
+			// vemos si supero el 50%
+			if (niveles.get(1) > new Double(0.5)) {
+				mayorA50 = "Si";
+			} else {
+				mayorA50 = "No";
+			}
+
+			// imprimos los resultados Alumno, nivel inicial, final, gano y es
+			// mayor a 60
+			System.out.println(aluActual + ", " + niveles.get(0).toString()
+					+ ", " + niveles.get(1).toString() + ", " + gano + ", "
+					+ mayorA50);
+
+			String text = aluActual + ", " + niveles.get(0).toString() + ", "
+					+ niveles.get(1).toString() + ", " + gano + ", " + mayorA50;
+
+			vector.add(text);
+
+		}
+		String ruta = "/home/catherine/ArchivosResultados/resultadosNivelesBIGDATA.csv";
+		escribirEnElArchivo(vector, ruta);
+		return "fin de comparacion";
+
+	}
+
+	// comparacion de test incial con test final
+	public String comparacion(HttpServletRequest httpRequest)
+			throws AppException {
+
+		String r = "mauro";
+		// (105,58,112,79,180,201,41,176,169,181)
+		// primera tanda
+		List<Long> alumnosPrimeraTanda = new ArrayList<Long>();
+		alumnosPrimeraTanda.add(new Long(105));
+		alumnosPrimeraTanda.add(new Long(58));
+		alumnosPrimeraTanda.add(new Long(112));
+		alumnosPrimeraTanda.add(new Long(79));
+		alumnosPrimeraTanda.add(new Long(180));
+		alumnosPrimeraTanda.add(new Long(201));
+		alumnosPrimeraTanda.add(new Long(41));
+		alumnosPrimeraTanda.add(new Long(176));
+		alumnosPrimeraTanda.add(new Long(169));
+		alumnosPrimeraTanda.add(new Long(181));
+		// segunda tanda
+		List<Long> alumnosSegundaTanda = new ArrayList<Long>();
+		alumnosSegundaTanda.add(new Long(106));
+		alumnosSegundaTanda.add(new Long(36));
+		alumnosSegundaTanda.add(new Long(57));
+		alumnosSegundaTanda.add(new Long(103));
+		alumnosSegundaTanda.add(new Long(164));
+		alumnosSegundaTanda.add(new Long(65));
+		alumnosSegundaTanda.add(new Long(96));
+		alumnosSegundaTanda.add(new Long(202));
+		alumnosSegundaTanda.add(new Long(44));
+		alumnosSegundaTanda.add(new Long(13));
+		alumnosSegundaTanda.add(new Long(73));
+
+		// tercera tanda
+		List<Long> alumnosTerceraTanda = new ArrayList<Long>();
+		alumnosTerceraTanda.add(new Long(129));
+		alumnosTerceraTanda.add(new Long(133));
+		alumnosTerceraTanda.add(new Long(50));
+		alumnosTerceraTanda.add(new Long(32));
+		alumnosTerceraTanda.add(new Long(320));
+		alumnosTerceraTanda.add(new Long(174));
+		alumnosTerceraTanda.add(new Long(319));
+		// alumnosTerceraTanda.add(new Long(243) );
+		// alumnosTerceraTanda.add(new Long(245) );
+		alumnosTerceraTanda.add(new Long(92));
+		alumnosTerceraTanda.add(new Long(321));
+		alumnosTerceraTanda.add(new Long(52));
+		alumnosTerceraTanda.add(new Long(207));
+
+		Integer testInicial = 1;
+		Integer testFinal = 3;
+		Integer testTutor = 2;
+		String gano;
+		String mayorA60;
+		// List<Double> niveles = getDao().comparar(new Long(105), testFinal);
+		// System.out.println("Primer test.");
+		// System.out.println("Nivel Inicial: "+ niveles.get(0));
+		// System.out.println("Nivel Final: "+ niveles.get(1));
+
+		System.out.println("Primera Tanda de alumnos");
+		System.out
+				.println("id alumno,nivelInicialPrimerTest,nivelFinalPrimerTest,nivelInicialTercerTest,  nivelFinalTercerTest, superoSuNivelIncial, Supero60 ");
+		for (Long alumno01 : alumnosPrimeraTanda) {
+
+			List<Double> nivelesInciales = getDao().comparar(alumno01,
+					testInicial);
+			List<Double> nivelesFinales = getDao()
+					.comparar(alumno01, testFinal);
+			if (nivelesInciales.get(1) > nivelesFinales.get(1)) {
+				gano = "Si";
+			} else {
+				gano = "No";
+			}
+
+			if (nivelesFinales.get(1) > new Double(0.6)) {
+				mayorA60 = "Si";
+			} else {
+				mayorA60 = "No";
+			}
+
+			System.out.println(alumno01 + ", "
+					+ nivelesInciales.get(0).toString() + ", "
+					+ nivelesInciales.get(1).toString() + ", "
+					+ nivelesFinales.get(0).toString() + ", "
+					+ nivelesFinales.get(1).toString() + ", " + gano + ", "
+					+ mayorA60);
+
+		}
+
+		System.out.println("Segunda Tanda de alumnos");
+		System.out
+				.println("id alumno,nivelInicialPrimerTest,nivelFinalPrimerTest,nivelInicialTercerTest,  nivelFinalTercerTest, superoSuNivelIncial, Supero60 ");
+		for (Long alumno02 : alumnosSegundaTanda) {
+
+			List<Double> nivelesInciales = getDao().comparar(alumno02,
+					testInicial);
+			List<Double> nivelesFinales = getDao()
+					.comparar(alumno02, testFinal);
+			if (nivelesInciales.get(1) > nivelesFinales.get(1)) {
+				gano = "Si";
+			} else {
+				gano = "No";
+			}
+
+			if (nivelesFinales.get(1) >= new Double(0.6)) {
+				mayorA60 = "Si";
+			} else {
+				mayorA60 = "No";
+			}
+
+			System.out.println(alumno02 + ", "
+					+ nivelesInciales.get(0).toString() + ", "
+					+ nivelesInciales.get(1).toString() + ", "
+					+ nivelesFinales.get(0).toString() + ", "
+					+ nivelesFinales.get(1).toString() + ", " + gano + ", "
+					+ mayorA60);
+
+		}
+
+		System.out.println("Tercera Tanda de alumnos");
+		System.out
+				.println("id alumno,nivelInicialPrimerTest,nivelFinalPrimerTest,nivelInicialTercerTest,  nivelFinalTercerTest, superoSuNivelIncial, Supero60 ");
+		for (Long alumno03 : alumnosTerceraTanda) {
+
+			List<Double> nivelesInciales = getDao().comparar(alumno03,
+					testInicial);
+			List<Double> nivelesFinales = getDao()
+					.comparar(alumno03, testFinal);
+			if (nivelesInciales.get(1) > nivelesFinales.get(1)) {
+				gano = "Si";
+			} else {
+				gano = "No";
+			}
+
+			if (nivelesFinales.get(1) > new Double(0.6)) {
+				mayorA60 = "Si";
+			} else {
+				mayorA60 = "No";
+			}
+
+			System.out.println(alumno03 + ", "
+					+ nivelesInciales.get(0).toString() + ", "
+					+ nivelesInciales.get(1).toString() + ", "
+					+ nivelesFinales.get(0).toString() + ", "
+					+ nivelesFinales.get(1).toString() + ", " + gano + ", "
+					+ mayorA60);
+
+		}
+
+		// lista de nombre de conceptos
+
+		// lista de test tutor del alumno 106,96
+		// Long alu106 = new Long(96);
+
+		/** Aca se resuelve el tema de si consumio regla tanda 2. **/
+		List<String> vectorReglas = new ArrayList<String>();
+		Long idArchivo = new Long(6);
+		// Long alu106 = new Long(13);
+		for (Long alu106 : alumnosSegundaTanda) {
+
+			Long idAsignatura = new Long(1);
+			// obtenemos su estilo de aprendizaje
+			Alumno alumno = alumnoService.obtener(alu106);
+			String primerEstilo = alumno.getEstilo().getPrimerEstilo();
+			String segundoEstilo = "no tiene";
+			Boolean tieneDosEstilo = false;
+
+			// estilo de aprendizaje
+			if (alumno.getEstilo().getSegundoEstilo() != null) {
+				segundoEstilo = alumno.getEstilo().getSegundoEstilo();
+				System.out.println("estilos " + primerEstilo + ", "
+						+ segundoEstilo);
+				tieneDosEstilo = true;
+			} else {
+				System.out.println("estilos " + primerEstilo);
+			}
+			// resueltos de un alumno
+			List<Resuelto> resueltosTutor = getDao().comparar2TestTutor(alu106,
+					testTutor);
+			if (resueltosTutor == null || resueltosTutor.isEmpty()) {
+				System.out.println("alumno" + " , " + alu106 + ", "
+						+ "no tiene resueltos." + ", " + "nada" + ", " + "nada"
+						+ ", " + "nada" + ", " + "nada" + ", " + "nada" + ", "
+						+ "nada" + ", " + "nada" + " ##");
+			} else {
+
+				Resuelto resueltoInicial = resueltosTutor.get(0);
+				Long idConceptoActual = resueltoInicial.getIdConcepto();
+				Integer contadorIntentos = 1;
+				String estiloActual = primerEstilo;
+
+				Concepto concepto01 = conceptoService.obtener(resueltoInicial
+						.getIdConcepto());
+				String nombreConcepto01 = concepto01.getNombre();
+
+				/** Creacion de un camino nuevo */
+				Camino camino = crearCaminoNuevo(primerEstilo, alu106,
+						idConceptoActual);
+				String esRegla = new String();
+				Double nivelConceptoFinalDouble = adm
+						.getValorNodoRedDoubleFinales(nombreConcepto01,
+								idAsignatura, alu106);
+				Double nivelConceptoInicialDouble = nivelConceptoFinalDouble;
+				Boolean yaCambie = false;
+				for (Resuelto resuelto01 : resueltosTutor) {
+					// obtengo el nombre del concepto.
+					Concepto concepto = conceptoService.obtener(resuelto01
+							.getIdConcepto());
+					String nombreConcepto = concepto.getNombre();
+
+					if (idConceptoActual == resuelto01.getIdConcepto()) {
+
+						if (tieneDosEstilo) {
+							if (contadorIntentos == 5 && !yaCambie) {
+								// System.out.println("cambio de estilo inicial: "
+								// + camino.getSecuenciaEjercicio());
+
+								estiloActual = segundoEstilo;
+								camino = crearCaminoNuevo(estiloActual, alu106,
+										resuelto01.getIdConcepto());
+								// System.out.println("cambio de estilo final: "
+								// + camino.getSecuenciaEjercicio());
+								contadorIntentos = 1;
+								yaCambie = true;
+
+							}
+							if (!resuelto01.getEsMaterial()) {
+								contadorIntentos++;
+							}
+
+						}
+
+					} else {
+
+						// System.out.println("camino eje antes de cambiar: "
+						// + camino.getSecuenciaEjercicio());
+						camino = crearCaminoNuevo(estiloActual, alu106,
+								resuelto01.getIdConcepto());
+						idConceptoActual = resuelto01.getIdConcepto();
+						contadorIntentos = 1;
+						// System.out.println("camino eje despues de cambiar: "
+						// + camino.getSecuenciaEjercicio());
+					}
+
+					// si no es material
+					Boolean resp = false;
+					if (!resuelto01.getEsMaterial()) {
+						resp = admAlumno.responderFinalPrueba(
+								resuelto01.getIdEjercicio(),
+								resuelto01.getEsCorrecto(),
+								resuelto01.getIdAlumno(), idAsignatura,
+								idAsignatura, httpRequest);
+
+						// nivel inicial
+						nivelConceptoFinalDouble = adm
+								.getValorNodoRedDoubleFinales(nombreConcepto,
+										idAsignatura, alu106);
+
+						if (resp == true) {
+							camino.setNivelEvidencia(nivelConceptoFinalDouble);
+							camino.setAnterior(camino.getActual());
+							camino.setActual("E");
+							camino.setEsEjercicio(true);
+							// System.out.println("agrege el ejercicio: "
+							// + resuelto01.getIdEjercicio().toString());
+							camino.setSecuenciaEjercicio(resuelto01
+									.getIdEjercicio().toString());
+							// System.out.println("camino ejercicio es: "
+							// + camino.getSecuenciaEjercicio());
+						} else {
+							camino.setAnterior(camino.getActual());
+							camino.setActual("M");
+							camino.setEsEjercicio(false);
+							// System.out.println("agrege el ejercicio: "
+							// + resuelto01.getIdEjercicio().toString());
+							camino.setSecuenciaEjercicio(resuelto01
+									.getIdEjercicio().toString());
+							// System.out.println("camino ejercicio es: "
+							// + camino.getSecuenciaEjercicio());
+						}
+
+						// si es material vemos si es regla.
+					} else {
+
+						esRegla = ejercicioService.aplicarReglaFinalTutor(
+								camino, idArchivo);
+
+						// nivel inicial
+						nivelConceptoInicialDouble = adm
+								.getValorNodoRedDoubleFinales(nombreConcepto,
+										idAsignatura, alu106);
+						nivelConceptoFinalDouble = nivelConceptoInicialDouble;
+						/** Se actualiza su nivel */
+						camino.setNivelEvidencia(nivelConceptoInicialDouble);
+						camino.setAnterior(camino.getActual());
+						camino.setActual("E");
+						camino.setEsEjercicio(true);
+						camino.setSecuenciaMaterial(resuelto01.getIdMaterial()
+								.toString());
+
+					}
+
+					// String nivelConceptoFinal =
+					// adm.getValorNodoRedFinal(nombreConcepto, idAsignatura,
+					// alu106);
+					// System.out.println(df.format(number));
+					// idResuelto, idAlumno,nombreConcepto,
+					// estilo,ejercicio,material,esCorrecto,esRegla,
+					// nivelInicial,nivelFinal
+
+					System.out.println(resuelto01.getId() + " , "
+							+ resuelto01.getIdAlumno() + ", " + nombreConcepto
+							+ ", " + estiloActual + ", "
+							+ resuelto01.getIdEjercicio() + ", "
+							+ resuelto01.getIdMaterial() + ", "
+							+ resuelto01.getEsCorrecto() + ", " + esRegla
+							+ ", " + nivelConceptoInicialDouble + ", "
+							+ nivelConceptoFinalDouble + " ##");
+					String nuevo = resuelto01.getId() + " , "
+							+ resuelto01.getIdAlumno() + ", " + nombreConcepto
+							+ ", " + estiloActual + ", "
+							+ resuelto01.getIdEjercicio() + ", "
+							+ resuelto01.getIdMaterial() + ", "
+							+ resuelto01.getEsCorrecto() + ", "
+							+ nivelConceptoInicialDouble + ", "
+							+ nivelConceptoFinalDouble + ", " + esRegla;
+
+					vectorReglas.add(nuevo);
+					esRegla = new String();
+
+				}
+			}
+		}
+		String ruta = "/home/catherine/ArchivosResultados/resultadosNivelesBIGDATA.csv";
+		escribirEnElArchivo(vectorReglas, ruta);
+
+		return r;
+	}
+
+	private Camino crearCaminoNuevo(String primerEstilo, Long idAlumno,
+			Long idConcepto) throws AppException {
+		Camino camino = new Camino();
+		camino.setActual("E");
+		camino.setAnterior("N");
+		camino.setEsEjercicio(true);
+		camino.setFechaCreacion(new Date());
+		camino.setUsuarioCreacion(new Long(1));
+		camino.setIpCreacion("127.0.0.1");
+		camino.setParar(false);
+
+		camino.setEstilo(primerEstilo);
+		camino.setIdAlumno(idAlumno);
+		camino.setIdAsignatura(new Long(1));
+		camino.setIdConcepto(idConcepto);
+		Concepto c = conceptoService.obtener(idConcepto);
+
+		camino.setNombreConcepto(c.getNombre());
+		Double valorNodo = adm.getValorNodoRedDoubleFinales(c.getNombre(),
+				new Long(1), idAlumno);
+		camino.setNivelEvidencia(valorNodo);
+		camino.setNivelInicial(valorNodo);
+		return camino;
+	}
+
+	private void escribirEnElArchivo(List<String> reglas,String ruta) {
+		
+		try {
+			// String ruta = "/home/catherine/reglasDiseño.";
+			
+			String contenido = "Contenido de ejemplo";
+			
+			
+			
+			File file = new File(ruta);
+			// Si el archivo no existe es creado
+			if (!file.exists()) {
+				file.createNewFile();
+			}
+			
+			FileWriter fw = new FileWriter(file, true);
+			BufferedWriter bw = new BufferedWriter(fw);
+			for (String re : reglas) {
+				bw.write(re + "\n");
+			}
+
+			bw.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public String materialesUtilesEjercicios(HttpServletRequest httpRequest)
+			throws AppException {
+
+		Ejercicio ejercicioConMaterial = ejercicioService
+				.obtener(new Long(115));
+		Boolean tieneM = tieneUnMaterialGeneral(ejercicioConMaterial);
+
+		System.out.println("tiene un material con funcion: " + tieneM);
+
+		return "final";
+
+	}
+
+	private Boolean tieneUnMaterialGeneral(Ejercicio ejercicioConMaterial) {
+
+		// materiales visto. Se cambiaria por la sesion del momento.
+		List<Long> materialesVistos = new ArrayList<Long>();
+		materialesVistos.add(new Long(10)); // material que no esta
+		// materialesVistos.add(new Long(35)); // material que si esta
+		materialesVistos.add(new Long(18)); // material que no esta
+
+		// materiales si tiene
+		List<Long> listaDeMateriales = new ArrayList<Long>();
+		// Tiene
+		Boolean tieneMas = false;
+
+		if (ejercicioConMaterial.getMaterialUtil() == null) {
+			System.out.println("No tiene materiales útiles");
+
+		} else {
+			System.out.println("Tiene Materiales útiles");
+			// cambiamos a array de long
+			String[] materiales = ejercicioConMaterial.getMaterialUtil().split(
+					",");
+			for (String material : materiales) {
+				if (!material.isEmpty())
+					listaDeMateriales.add(Long.valueOf(material));
+			}
+			System.out.println("lista de materiales: " + listaDeMateriales);
+			// vemos si tiene algun material
+			tieneMas = tieneUnMaterial(materialesVistos, listaDeMateriales);
+		}
+
+		return tieneMas;
+	}
+
+	private Boolean tieneUnMaterial(List<Long> materialesVistos,
+			List<Long> listaDeMateriales) {
+		Boolean tiene = false;
+		Long m = new Long(0);
+		for (Long mateVisto : materialesVistos) {
+			if (listaDeMateriales.contains(mateVisto)) {
+				System.out.println("tengo este material: " + mateVisto);
+				tiene = true;
+				m = mateVisto;
+				break;
+			} else {
+				System.out.println("no tengo este material: " + mateVisto);
+			}
+		}
+		return tiene;
 	}
 
 }

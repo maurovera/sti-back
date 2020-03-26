@@ -139,4 +139,17 @@ public class DrlService extends BaseServiceImpl<Drl, DrlDAO> {
 			throw new AppException(500, e.getMessage());
 		}
 	}
+	
+	/**
+	 * iguales
+	 **/
+	public String iguales() throws AppException {
+		String drl = "resultados";
+		try {
+			drl =  getDao().iguales();
+			return drl;
+		} catch (Exception e) {
+			throw new AppException(500, e.getMessage());
+		}
+	}
 }

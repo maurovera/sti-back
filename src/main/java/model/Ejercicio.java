@@ -45,7 +45,8 @@ public class Ejercicio extends BaseEntity implements Serializable {
 	@Column(name = "respCorrecta")
 	private Integer respCorrecta;
 
-	@Column(name = "enunciado")
+	// @Column(name = "enunciado")
+	@Column(columnDefinition = "text", name = "enunciado")
 	private String enunciado;
 
 	// nivel de dificultad
@@ -65,8 +66,8 @@ public class Ejercicio extends BaseEntity implements Serializable {
 	private List<Concepto> listaConceptos = new ArrayList<Concepto>();
 
 	@JoinTable(name = "ejercicio_respuesta", joinColumns = { @JoinColumn(name = "id_ejercicio", referencedColumnName = "id_ejercicio") }, inverseJoinColumns = { @JoinColumn(name = "id_respuesta", referencedColumnName = "id_respuesta") })
-	@ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE,
-			CascadeType.DETACH, CascadeType.REFRESH })
+	@ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST,
+			CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH })
 	private List<Respuesta> listaRespuesta = new ArrayList<Respuesta>();
 
 	@JoinColumn(name = "respuesta", referencedColumnName = "id_respuesta")
@@ -74,25 +75,22 @@ public class Ejercicio extends BaseEntity implements Serializable {
 	private Respuesta respuesta;
 
 	// Dato que trae desde el front
-	
+
 	private String respuestaCorrecta;
+
+	// @Column(name = "enunciado")
+	@Column(columnDefinition = "text", name = "material_util")
+	private String materialUtil;
 
 	@Transient
 	private Long idAsignatura;
-	
-	
-	
+
 	@Transient
 	private String dificultad;
-	
-	@Transient 
+
+	@Transient
 	private String nivelAdivinanza;
-	
-	
-	
-	
-	
-	
+
 	public Long getIdAsignatura() {
 		return idAsignatura;
 	}
@@ -104,12 +102,11 @@ public class Ejercicio extends BaseEntity implements Serializable {
 	public String getDificultad() {
 		return String.valueOf(nivelDificultad);
 	}
-	
-	public String getNivelAdivinanza(){
+
+	public String getNivelAdivinanza() {
 		return String.valueOf(adivinanza);
 	}
-	
-	
+
 	public String getRespuestaCorrecta() {
 		return respuestaCorrecta;
 	}
@@ -202,8 +199,7 @@ public class Ejercicio extends BaseEntity implements Serializable {
 	public void addConceptos(Concepto c) {
 		this.listaConceptos.add(c);
 	}
-	
-	
+
 	public void addRespuesta(Respuesta r) {
 		this.listaRespuesta.add(r);
 	}
@@ -237,38 +233,46 @@ public class Ejercicio extends BaseEntity implements Serializable {
 		return listaRespuesta;
 	}
 
-	
 	public void setListaRespuesta(List<Respuesta> listaRespuesta) {
 		this.listaRespuesta = listaRespuesta;
 	}
-	
-    @Override
-    public int hashCode() {
-        int hash = 0;
-        hash += (id != null ? id.hashCode() : 0);
-        return hash;
-    }
 
-    @Override
-    public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof Ejercicio)) {
-            return false;
-        }
-        Ejercicio other = (Ejercicio) object;
-        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
-            return false;
-        }
-        return true;
-    }
-	
-	
-	
 	@Override
-	public String toString() {
-		return "model.Ejercicio[ Enunciado=" + enunciado + " id: "+id+" ]";
+	public int hashCode() {
+		int hash = 0;
+		hash += (id != null ? id.hashCode() : 0);
+		return hash;
 	}
 	
 	
+	
+
+	public String getMaterialUtil() {
+		return materialUtil;
+	}
+
+	public void setMaterialUtil(String materialUtil) {
+		this.materialUtil = materialUtil;
+	}
+
+	@Override
+	public boolean equals(Object object) {
+		// TODO: Warning - this method won't work in the case the id fields are
+		// not set
+		if (!(object instanceof Ejercicio)) {
+			return false;
+		}
+		Ejercicio other = (Ejercicio) object;
+		if ((this.id == null && other.id != null)
+				|| (this.id != null && !this.id.equals(other.id))) {
+			return false;
+		}
+		return true;
+	}
+
+	@Override
+	public String toString() {
+		return id.toString();
+	}
 
 }

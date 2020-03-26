@@ -238,10 +238,18 @@ public class Camino extends BaseEntity implements Serializable {
 
 	public void cargarMaterialYEjercicio() {
 		String[] ejercicios = this.secuenciaEjercicio.split("-");
+		//System.out.println("ejercicios dentro de cargarMaterialYEjercicio");
+		//System.out.println("Antes puto sec Ejercicio: "+ this.getSecEje());
 		for (String string : ejercicios) {
-			if ( !string.isEmpty() )
+			
+			if ( !string.isEmpty() ){
+				
+				System.out.println("->"+string);
 				addEjercicio(Long.valueOf(string));
+			}
 		}
+		//System.out.println("sec Ejercicio: "+ this.getSecEje());
+		
 
 		String[] materiales = this.secuenciaMaterial.split("-");
 		for (String material : materiales) {
