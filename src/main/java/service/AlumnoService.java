@@ -33,7 +33,28 @@ public class AlumnoService extends BaseServiceImpl<Alumno, AlumnoDAO> {
 	public Alumno insertar(Alumno entity, HttpServletRequest httpRequest)
 			throws AppException {
 		try {
-			System.out.println("implements de servicio de insert de alumno");
+			Usuario usuario = new Usuario();
+			usuario.setApellido(entity.getApellidos());
+			usuario.setNombre(entity.getNombres());
+			usuario.setEmail(entity.getEmail());
+			usuario.setCedula(entity.getCedula());
+			usuario.setEdad(entity.getEdad());
+			usuario.setGenero(entity.getGenero());
+			
+			usuario.setUsername("alumnoCambiar123");
+			usuario.setPassword("cambiar123");
+			usuario.setInterno(true);
+			usuario.setPublico(false);
+			usuario.setEsAlumno(true);
+			usuario.setRecibirNotificacion(false);
+			
+			
+			
+			
+			usuarioService.insertar(usuario, httpRequest);
+			
+			
+			/*System.out.println("implements de servicio de insert de alumno");
 			Usuario user = getCurrentUser();
 			entity.setFechaCreacion(new Date());
 			entity.setUsuarioCreacion(user.getId());
@@ -43,12 +64,10 @@ public class AlumnoService extends BaseServiceImpl<Alumno, AlumnoDAO> {
 
 			/**
 			 * Insert de usuario*
-			 */
+			 
 			Usuario u = usuarioService.insertarAlumno(entity, httpRequest);
 			System.out.println("inserte usuario: "+ u.getId());
-			
-			entity.setUsuario(u.getId());
-			getDao().modify(entity.getId(), entity);
+			*/
 			
 			return entity;
 		} catch (Exception e) {

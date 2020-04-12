@@ -93,8 +93,18 @@ public class Usuario extends BaseEntity implements Serializable {
     @Column(name = "id_alumno")
     private Long idAlumno;
     
+    @Column(name = "edad")
+	private Integer edad;
     
-    public Usuario() {
+    @Size(max = 1)
+	@Column(name = "genero")
+	private String genero;
+    
+    
+    
+   
+
+	public Usuario() {
     }
 
   /* public Usuario(RegistroOnLine datos, String username, String password) {
@@ -248,7 +258,24 @@ public class Usuario extends BaseEntity implements Serializable {
 	public void setIdAlumno(Long idAlumno) {
 		this.idAlumno = idAlumno;
 	}
+	
+	public Integer getEdad() {
+		return edad;
+	}
 
+	public void setEdad(Integer edad) {
+		this.edad = edad;
+	}
+
+	public String getGenero() {
+		return genero;
+	}
+
+	public void setGenero(String genero) {
+		this.genero = genero;
+	}
+	
+	
 	@Override
     public int hashCode() {
         int hash = 0;

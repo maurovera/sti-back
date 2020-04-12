@@ -33,19 +33,45 @@ public class Profesor extends BaseEntity implements Serializable {
 	@Column(name = "apellido")
 	private String apellido;
 	
-	@Column(name = "cedula")
-    private int cedula;
+    @Size(max = 20)
+    @Column(name = "cedula")
+    private String cedula;
 	
 	@Column(name = "direccion")
     private String direccion;
 	
 	@Column(name = "email")
     private String email;
-	
+
 	@Size(max = 1)
 	@Column(name = "genero")
     private String genero;
 	
+	@Column(name = "edad")
+    private Integer edad;
+	
+	/*campos agregados para user**/
+    
+
+    @Column(name = "recibir_notificacion")
+    private Boolean recibirNotificacion;
+
+
+    @Column(name = "username")
+    private String username;
+
+    @Column(name = "password")
+    private String password;
+    
+    @Column(name = "interno")
+    private Boolean interno;
+    
+    @Column(name = "publico")
+    private Boolean publico;
+
+	
+	
+
 	@Column(name = "usuario")
     private Long usuario;
 
@@ -73,11 +99,11 @@ public class Profesor extends BaseEntity implements Serializable {
 		this.apellido = apellido;
 	}
 
-	public int getCedula() {
+	public String getCedula() {
 		return cedula;
 	}
 
-	public void setCedula(int cedula) {
+	public void setCedula(String cedula) {
 		this.cedula = cedula;
 	}
 
@@ -113,6 +139,56 @@ public class Profesor extends BaseEntity implements Serializable {
 		this.usuario = usuario;
 	}
 	
+	public Integer getEdad() {
+		return edad;
+	}
+
+	public void setEdad(Integer edad) {
+		this.edad = edad;
+	}
+	
+	
+	
+	public Boolean getRecibirNotificacion() {
+		return recibirNotificacion;
+	}
+
+	public void setRecibirNotificacion(Boolean recibirNotificacion) {
+		this.recibirNotificacion = recibirNotificacion;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public Boolean getInterno() {
+		return interno;
+	}
+
+	public void setInterno(Boolean interno) {
+		this.interno = interno;
+	}
+
+	public Boolean getPublico() {
+		return publico;
+	}
+
+	public void setPublico(Boolean publico) {
+		this.publico = publico;
+	}
+
 	
 	
 }

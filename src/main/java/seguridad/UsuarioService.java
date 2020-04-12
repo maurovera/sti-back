@@ -50,6 +50,7 @@ public class UsuarioService extends BaseServiceImpl<Usuario, UsuarioDAO> {
 			System.out.println("llegue al insert de usuario");
 			String encryptedToken = new Md5Hash(entity.getPassword(),
 					entity.getCedula()).toString();
+			String nick = entity.getUsername();
 			entity.setUsername(entity.getCedula());
 			entity.setPassword(encryptedToken);
 			entity.setFechaCreacion(new Date());
@@ -80,12 +81,19 @@ public class UsuarioService extends BaseServiceImpl<Usuario, UsuarioDAO> {
 				Alumno alu = new Alumno();
 				alu.setApellidos(entity.getApellido());
 				alu.setNombres(entity.getNombre());
-				// alu.setEdad();
+				alu.setEdad(entity.getEdad());
 				alu.setFechaCreacion(entity.getFechaCreacion());
 				alu.setUsuarioCreacion(entity.getUsuarioCreacion());
 				alu.setIpCreacion(entity.getIpCreacion());
 				// alu.setFechaNacimiento(fechaNacimiento);
-				// alu.setGenero();
+				alu.setCedula(entity.getCedula());
+				alu.setEmail(entity.getEmail());
+				alu.setInterno(true);
+				alu.setPublico(false);
+				alu.setPassword(entity.getPassword());
+				alu.setTipo(new Double(0.5));
+				alu.setUsername(nick);
+				alu.setGenero(entity.getGenero());
 				alu.setUsuario(entity.getId());
 				alumnoDao.insert(alu);
 				entity.setIdAlumno(alu.getId());
@@ -94,12 +102,12 @@ public class UsuarioService extends BaseServiceImpl<Usuario, UsuarioDAO> {
 				Profesor pro = new Profesor();
 				pro.setApellido(entity.getApellido());
 				pro.setNombre(entity.getNombre());
-				// alu.setEdad();
+				pro.setEdad(entity.getEdad());
 				pro.setFechaCreacion(entity.getFechaCreacion());
 				pro.setUsuarioCreacion(entity.getUsuarioCreacion());
 				pro.setIpCreacion(entity.getIpCreacion());
 				// alu.setFechaNacimiento(fechaNacimiento);
-				// alu.setGenero();
+			    pro.setGenero(entity.getGenero());
 				pro.setUsuarioCreacion(entity.getId());
 				pro.setUsuario(entity.getId());
 				profesorDao.insert(pro);
