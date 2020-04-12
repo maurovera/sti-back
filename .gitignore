@@ -29,6 +29,7 @@ src/main/resources/redes/*.*
 src/main/resources/archivos/*.*
 src/main/resources/archivoLog/*.*
 src/main/resources/archivoWeka/*.*
+src/main/resources/redes/*
 *~
 .tern-project
 
