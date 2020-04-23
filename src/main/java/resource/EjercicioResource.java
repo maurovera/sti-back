@@ -597,6 +597,27 @@ public class EjercicioResource extends
 		return getService().listarResueltoTestIncial(idAlumno, idTarea);
 
 	}
+	
+	
+	/**
+	 * Trae la lista de resuelto por un alumno de una tarea de una asignatura en
+	 * el test final donde se quita el nivel
+	 **/
+	@GET
+	@Path("/listaResueltoTestFinal")
+	@Produces(MediaType.APPLICATION_JSON)
+	public ListaResponse<Resuelto> listarResueltoTestFinal(
+			@QueryParam("idAlumno") @DefaultValue("63") Long idAlumno,
+			@QueryParam("idTarea") @DefaultValue("1") Long idTarea)
+			throws NoSuchFieldException, AppException {
+		System.out.println("Listar resultados de test final resource");
+
+		return getService().listarResueltoTestFinal(idAlumno, idTarea);
+
+	}
+	
+	
+	
 
 	/**
 	 * Trae la lista de resuelto por un alumno de una tarea de una asignatura en

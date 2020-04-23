@@ -129,6 +129,53 @@ public class EjercicioDAO extends BaseDAO<Ejercicio>{
 	
 	
 	/**
+	 * Lista de resueltos del test Final por idAlumno, idTarea y es primer test.
+	 * 
+	 ***/
+	public ListaResponse<Resuelto> listarResueltoTestFinal(Long idAlumno, Long idTarea) {
+		System.out.println("Lista de resueltos en el test final");
+		List<Resuelto> res1 = new ArrayList<Resuelto>();
+		ListaResponse<Resuelto> res = new ListaResponse<Resuelto>();
+		// Query para traer la lista de curso
+		Query query = em
+				.createQuery("SELECT r FROM Resuelto r "
+						+ " where"
+						+ " r.idAlumno =:idAlumno and "
+						+ " r.idTarea =:idTarea and "
+						+ " r.testFinal =:final "
+						+ " order by r.id"
+						);
+
+		query.setParameter("idAlumno", idAlumno);
+		query.setParameter("idTarea", idTarea);
+		query.setParameter("final", true);
+		
+		List<Resuelto> resultado = query.getResultList();
+
+		for (Resuelto resuelto : resultado) {
+			res1.add(resuelto);
+		}
+		
+
+		int total = 0;
+		if (resultado != null)
+			total = resultado.size();
+
+		res.setRows(res1);
+		res.setCount(total);
+		return res;
+
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	/**
 	 * Lista de resueltos del test tutor por idAlumno, idTarea y es primer test.
 	 * 
 	 ***/

@@ -401,7 +401,7 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 	/** Retorna el criterio de parada que es la cantidad de ejercicios resueltos **/
 	public Boolean criterio(Long idTarea, Long idAlumno,
 			HttpServletRequest httpRequest) throws AppException {
-
+		
 		Boolean retorno = false;
 		/**
 		 * Obtenemos la cantidad de ejercicios por tarea
@@ -427,7 +427,8 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 
 		// si el retorno es true. en algun momento esto se debe cambiar. solo
 		// funcionara para la asignatura numero 1
-		Long idAsignatura = new Long(2);
+		Long idAsignatura = new Long(sesion.getTarea().getCurso().getAsignatura().getId());
+		
 		if (retorno && !sesion.getTestFinal()) {
 
 			String nombreBackup = "backup_PrimerTest_red_alumno_"
@@ -1208,6 +1209,33 @@ public class EjercicioService extends BaseServiceImpl<Ejercicio, EjercicioDAO> {
 
 	// ####################FIN DE RESULTADOS DEL PRIMER TEST#############
 
+	// ################INICIO DE RESULTADOS DEL Test Final############
+	/**
+	 * Lista los resultados del test final
+	 * 
+	 * @throws AppException
+	 **/
+	public ListaResponse<Resuelto> listarResueltoTestFinal(Long idAlumno,
+			Long idTarea) throws AppException {
+		System.out.println("listar resueltos en el test final service");
+		/** Lista de resuelto view a ser devueltos. */
+
+		ListaResponse<Resuelto> respuesta = new ListaResponse<Resuelto>();
+
+		/*** Trae todo los cursos sin distincion */
+		respuesta = getDao().listarResueltoTestFinal(idAlumno, idTarea);
+
+		return respuesta;
+	}
+
+	// ####################FIN DE RESULTADOS DEL test final#############
+	
+	
+	
+	
+	
+	
+	
 	// ################INICIO DE RESULTADOS DEL TEST TUTOR############
 	/**
 	 * Lista los resultados del test tutor
